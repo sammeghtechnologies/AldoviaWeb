@@ -8,78 +8,92 @@ interface PanelProps {
 
 const RoomDetailsPanel = ({ activeId, content, onClose }: PanelProps) => {
   return (
-    <div 
-      /* ✅ LIFTED TOP & SLIDE FROM RIGHT: 60% Width, No Blur */
-      className={`fixed top-[5px] right-0 h-[calc(100vh-10px)] w-full md:w-[60%] bg-[#f5f5dc] z-[99999999] 
-      transform transition-transform duration-700 ease-[0.22, 1, 0.36, 1] 
-      flex flex-col border-l border-t border-[#49261c]/10 rounded-tl-[1rem]
-      ${activeId ? 'translate-x-0' : 'translate-x-full'} 
-      overflow-hidden shadow-[-20px_0_50px_rgba(0,0,0,0)]`}
-    >
-      {content && (
-        <div className="relative w-full h-full flex flex-col p-10 md:p-14 justify-between">
-          
-          {/* --- TOP SECTION --- */}
-          <div className="flex flex-col items-start w-full relative">
-            <h2 className="text-[#49261c] text-3xl md:text-4xl font-light tracking-[3px] uppercase mb-8 ml-10">
-              {content.title}
-            </h2>
-            
-            <div className="flex items-center gap-10 w-full">
-              <div className="w-[300px] md:w-[440px] aspect-[16/10] overflow-hidden border border-[#49261c]/10 ml-10">
-                <img src={content.img1} alt="" className="w-full h-full object-cover" />
-              </div>
-              
-              <div className="flex flex-col gap-4">
-                <button className="px-8 py-2 border border-[#49261c]/30 rounded-full text-[#49261c] text-[10px] tracking-[0.3em] uppercase hover:bg-[#49261c] hover:text-[#f5f5dc] transition-all">
-                  Book Now
-                </button>
-                <div className="text-[10px] tracking-[0.2em] text-[#49261c]/40 uppercase">
-                  Starting at <span className="text-[#49261c] ml-1">{content.price}</span>
-                </div>
-              </div>
+    <div
+    className={`fixed top-[90px] pt-5 right-0 h-[calc(100vh-90px)] w-full md:w-[50%] bg-[#f5f5dc] border-l border-white/5
+transform transition-transform duration-700 ease-[0.22,1,0.36,1]
+z-[9999] flex flex-col pointer-events-none
+${activeId ? "translate-x-0 pointer-events-auto" : "translate-x-full"}`}
+  >
+
+    {content && (
+      <div className="font-sans text-[#49261c] h-full relative flex flex-col justify-between px-8 md:px-12 pt-24 pb-10">
+
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-6 left-6 text-xs text-gray-500 hover:text-white transition-colors tracking-widest uppercase"
+        >
+          [ CLOSE ]
+        </button>
+
+        {/* Header */}
+        <div className="mb-10 text-right pt-12">
+          <h2 className="text-4xl md:text-5xl font-light uppercase tracking-widest text-[#49261c] mb-2 leading-tight">
+            {content.title}
+          </h2>
+          <p className="text-xs tracking-[0.3em] text-[#49261c]-400 uppercase border-b border-white/20 pb-4 inline-block">
+            {content.subtitle}
+          </p>
+        </div>
+
+        {/* Content Section */}
+        <div className="flex flex-col gap-10">
+
+          {/* Row 1: Left Image | Right Text */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div className="w-full h-[220px] md:h-[260px] overflow-hidden rounded-xl shadow-2xl border border-white/10">
+              <img
+                src={content.img1}
+                alt="Room View 1"
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+              />
+            </div>
+
+            <div className="text-[#49261c]-300 text-sm md:text-base leading-relaxed font-light">
+              {content.desc}
             </div>
           </div>
 
-          {/* --- BOTTOM SECTION --- */}
-          <div className="flex flex-col items-end w-full relative mb-6">
-            <h2 className="text-[#49261c] text-3xl md:text-4xl font-light tracking-[3px] uppercase mb-8 mr-10 text-right">
-              {content.subtitle}
-            </h2>
-            
-            <div className="flex items-end justify-end w-full gap-10">
-              <div className="hidden lg:flex flex-col items-end gap-6 max-w-[280px] mb-4">
-                <p className="text-[#49261c]/60 text-[10px] leading-relaxed tracking-[0.2em] uppercase italic text-right">
-                  {content.desc}
-                </p>
-                <button className="px-8 py-2 border border-[#49261c]/30 rounded-full text-[#49261c] text-[10px] tracking-[0.3em] uppercase hover:bg-[#49261c] hover:text-[#f5f5dc] transition-all">
-                  Book Now
-                </button>
-              </div>
-
-              <div className="w-[300px] md:w-[440px] aspect-[16/10] overflow-hidden border border-[#49261c]/10 mr-4">
-                <img src={content.img2} alt="" className="w-full h-full object-cover" />
-              </div>
+          {/* Row 2: Left Text | Right Image */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div className="text-[#49261c]-300 text-sm md:text-base leading-relaxed font-light">
+              {content.desc}
             </div>
-          </div>
 
-          {/* --- FOOTER (CLOSE BUTTON) --- */}
-          <div className="w-full flex justify-between items-center text-[10px] tracking-[5px] uppercase text-[#49261c]/30 pt-6 border-t border-[#49261c]/10">
-            <button 
-              onClick={onClose} 
-              className="hover:text-[#49261c] transition-colors cursor-pointer"
-            >
-              [ ← Back to Rooms ]
-            </button>
-            <div className="flex items-center gap-3">
-              <span>Scroll</span>
-              <span className="animate-bounce">↓</span>
+            <div className="w-full h-[220px] md:h-[260px] overflow-hidden rounded-xl shadow-2xl border border-white/10">
+              <img
+                src={content.img2}
+                alt="Room View 2"
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+              />
             </div>
           </div>
 
         </div>
-      )}
-    </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between border-t border-white/10 pt-8 mt-10">
+          <div>
+            <span className="block text-xs text-[#49261c]-500 uppercase tracking-wider mb-1 mr-5">
+              Nightly Rate
+            </span>
+            <span className="text-3xl font-light text-[#49261c]">
+              {content.price}
+            </span>
+          </div>
+          
+          <button className="border border-white/80 rounded-full px-14 py-6 text-sm font-small tracking-[0.15em]  hover:bg-white hover:text-black transition-all duration-300">
+          Book Now
+        </button>
+
+
+
+
+        </div>
+
+      </div>
+    )}
+  </div>
   );
 };
 
