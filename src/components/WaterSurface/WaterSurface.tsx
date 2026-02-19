@@ -11,9 +11,11 @@ const RING_COUNT = 8;
 
 const WaterSurface = ({
   fallProgress,
+  swanProgress,
   id3Ref,
 }: {
   fallProgress: number;
+  swanProgress: number;
   id3Ref: any;
 }) => {
   const meshRef = useRef<THREE.Mesh>(null!);
@@ -23,38 +25,50 @@ const WaterSurface = ({
 
   const { scene: swanScene, animations } = useGLTF("/models/swan.glb") as any;
 
-  // ✅ Real Concentric Ripple Shader (Stone Drop Effect)
+  // random seeds for each ripple ring
+  const ringSeeds = useMemo(
+    () => Array.from({ length: RING_COUNT }).map(() => Math.random() * 10),
+    []
+  );
+
+  // ✅ Ripple Shader with dark tint + randomness
   const rippleMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
       transparent: true,
       depthTest: false,
       depthWrite: false,
-      blending: THREE.AdditiveBlending,
+      blending: THREE.NormalBlending,
       side: THREE.DoubleSide,
       uniforms: {
         uTime: { value: 0 },
         uOpacity: { value: 1 },
         uColor: { value: new THREE.Color("#ffffff") },
+        uDarkColor: { value: new THREE.Color("#000000") },
       },
       vertexShader: `
         uniform float uTime;
         varying vec2 vUv;
+        varying float vWave;
 
         void main() {
           vUv = uv;
 
           vec3 pos = position;
 
-          // radial distance from center
           float dist = length(pos.xy);
 
-          // outward moving wave
-          float wave = sin(dist * 30.0 - uTime * 8.0) * 0.12;
+          // slower and smoother wave
+          float wave = sin(dist * 22.0 - uTime * 2.0) * 0.1;
 
-          // fade wave with distance
-          wave *= smoothstep(1.5, 0.0, dist);
+          // secondary ripple randomness
+          float wave2 = cos(dist * 12.0 - uTime * 1.2) * 0.1;
 
-          pos.z += wave;
+          // fade outward
+          float fade = smoothstep(1.6, 0.0, dist);
+
+          pos.z += (wave + wave2) * fade;
+
+          vWave = wave;
 
           gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
         }
@@ -62,21 +76,30 @@ const WaterSurface = ({
       fragmentShader: `
         uniform float uOpacity;
         uniform vec3 uColor;
+        uniform vec3 uDarkColor;
+
         varying vec2 vUv;
+        varying float vWave;
 
         void main() {
           float dist = distance(vUv, vec2(0.5));
 
-          // ring band glow
-          float ring = smoothstep(0.50, 0.46, dist) - smoothstep(0.46, 0.43, dist);
+          // ring thickness
+          float ring = smoothstep(0.50, 0.47, dist) - smoothstep(0.47, 0.44, dist);
 
-          gl_FragColor = vec4(uColor, ring * uOpacity);
+          // fade outer edge
+          float fade = smoothstep(0.9, 0.2, dist);
+
+          // mix white + dark tint for realistic ripple
+          vec3 finalColor = mix(uDarkColor, uColor, ring);
+
+          gl_FragColor = vec4(finalColor, ring * fade * uOpacity);
         }
       `,
     });
   }, []);
 
-  // Swan clone (your original logic kept)
+  // Swan clone
   const swanModel = useMemo(() => {
     const clone = SkeletonUtils.clone(swanScene);
 
@@ -95,129 +118,135 @@ const WaterSurface = ({
   const mixer = useMemo(() => new THREE.AnimationMixer(swanModel), [swanModel]);
   const hasStartedAnim = useRef(false);
 
-  // ✅ Higher Segments for smooth 3D ripples
   const ringGeo = useMemo(() => new THREE.RingGeometry(0.47, 0.53, 128, 4), []);
 
   useFrame((state, delta) => {
     mixer.update(delta);
 
-    // Animate shader time
     rippleMaterial.uniforms.uTime.value = state.clock.elapsedTime;
 
-    if (materialRef.current && meshRef.current) {
-      const targetY = THREE.MathUtils.lerp(
-        WATER_LEVEL - START_OFFSET,
-        WATER_LEVEL,
-        fallProgress
-      );
+    if (!materialRef.current || !meshRef.current) return;
 
-      meshRef.current.position.y = THREE.MathUtils.lerp(
-        meshRef.current.position.y,
-        targetY,
-        0.1
-      );
+    const targetY = THREE.MathUtils.lerp(
+      WATER_LEVEL - START_OFFSET,
+      WATER_LEVEL,
+      fallProgress
+    );
 
-      if (id3Ref?.current) {
-        id3Ref.current.updateMatrixWorld();
+    meshRef.current.position.y = THREE.MathUtils.lerp(
+      meshRef.current.position.y,
+      targetY,
+      0.1
+    );
 
-        const worldPos = new THREE.Vector3();
-        id3Ref.current.getWorldPosition(worldPos);
+    if (!id3Ref?.current) return;
 
-        const currentWaterY = meshRef.current.position.y;
-        const verticalDist = worldPos.y - currentWaterY;
+    id3Ref.current.updateMatrixWorld();
 
-        const reflectionCutoff = 0.45;
-        const isTouching = verticalDist < 0.4;
+    const worldPos = new THREE.Vector3();
+    id3Ref.current.getWorldPosition(worldPos);
 
-        materialRef.current.mixStrength =
-          verticalDist < reflectionCutoff ? 0 : 5.0;
+    const currentWaterY = meshRef.current.position.y;
+    const verticalDist = worldPos.y - currentWaterY;
 
-        const swanFadeProgress =
-          1 - THREE.MathUtils.smoothstep(verticalDist, -0.1, 0.7);
+   // const reflectionCutoff = 0.45;
+    const isTouching = verticalDist < 0.4;
 
-        // Swan show/hide
-        if (verticalDist < 0.8) {
-          if (animations.length > 0 && !hasStartedAnim.current) {
-            const action = mixer.clipAction(animations[0]);
-            action.reset().play();
-            action.paused = true;
-            hasStartedAnim.current = true;
-          }
+   materialRef.current.mixStrength = THREE.MathUtils.lerp(5.0, 0.0, swanProgress);
 
-          if (swanGroupRef.current) {
-            swanGroupRef.current.visible = true;
+   // const swanFadeProgress = 1 - THREE.MathUtils.smoothstep(verticalDist, -0.1, 0.7);
 
-            swanGroupRef.current.position.set(
-              worldPos.x - 1,
-              currentWaterY - 1.1,
-              worldPos.z
-            );
+    // Swan show/hide
+   // Remove the old swanFadeProgress line entirely.
+    // Replace the "if (verticalDist < 0.8)" block with this:
 
-            swanGroupRef.current.scale.setScalar(2.1);
+    // ✅ Swan show/fade based strictly on the new scroll step (swanProgress)
+    if (swanProgress > 0) {
+      if (animations.length > 0 && !hasStartedAnim.current) {
+        const action = mixer.clipAction(animations[0]);
+        action.reset().play();
+        action.paused = true; // ✅ Changed to false so the swan actually animates!
+        hasStartedAnim.current = true;
+      }
 
-            swanGroupRef.current.traverse((child: any) => {
-              if (child.isMesh) {
-                child.material.transparent = true;
-                child.material.opacity = THREE.MathUtils.lerp(
-                  0,
-                  0.25,
-                  swanFadeProgress
-                );
-                child.material.depthTest = false;
-              }
-            });
-          }
-        } else {
-          if (hasStartedAnim.current) {
-            mixer.stopAllAction();
-            hasStartedAnim.current = false;
-          }
-          if (swanGroupRef.current) swanGroupRef.current.visible = false;
-        }
+      if (swanGroupRef.current) {
+        swanGroupRef.current.visible = true;
 
-        materialRef.current.opacity = 0.15;
+        const baseX = worldPos.x - 0.2;
+        const baseY = currentWaterY - 1.1;
+        const baseZ = worldPos.z;
 
-        // ✅ Concentric Ripple Rings Animation
-        ringRefs.current.forEach((ring, i) => {
-          if (!ring) return;
+        const time = state.clock.getElapsedTime();
 
-          const mat = ring.material as any;
+        const bobbing = isTouching ? Math.sin(time * 1.6) * 0.02 : 0;
+        const sway = isTouching ? Math.sin(time * 1.1) * 0.015 : 0;
+        const tiltX = isTouching ? Math.sin(time * 1.4) * 0.04 : 0; 
+        const tiltZ = isTouching ? Math.cos(time * 1.1) * 0.05 : 0; 
 
-          ring.position.set(worldPos.x, currentWaterY + 0.05, worldPos.z);
+        swanGroupRef.current.rotation.x = tiltX;
+        swanGroupRef.current.rotation.z = tiltZ;
 
-          if (isTouching) {
-            ring.visible = true;
+        swanGroupRef.current.position.set(baseX + sway, baseY + bobbing, baseZ);
+        swanGroupRef.current.scale.setScalar(2.1);
 
-            const time = state.clock.getElapsedTime();
-            const speed = 0.15;
-
-            const t = ((time * speed) + (i * 0.18)) % 1;
-
-            // ripple expansion
-            const scale = THREE.MathUtils.lerp(0.2, 15, t);
-            ring.scale.set(scale, scale, 1);
-
-            // fade out naturally
-            const fade = 1.0 - t;
-
-            // stronger when object is near water
-            const proximityFactor =
-              1 - THREE.MathUtils.smoothstep(verticalDist, -0.1, 0.5);
-
-            mat.uniforms.uOpacity.value = fade * proximityFactor * 0.9;
-          } else {
-            ring.visible = false;
+        swanGroupRef.current.traverse((child: any) => {
+          if (child.isMesh) {
+            child.material.transparent = true;
+            // ✅ Fades the swan in perfectly from 0 to 0.25 based on the scroll
+            child.material.opacity = THREE.MathUtils.lerp(0, 0.25, swanProgress);
+            child.material.depthTest = false;
           }
         });
-
-        materialRef.current.distortion = THREE.MathUtils.lerp(
-          0.5,
-          2.5,
-          swanFadeProgress
-        );
       }
+    } else {
+      if (hasStartedAnim.current) {
+        mixer.stopAllAction();
+        hasStartedAnim.current = false;
+      }
+      if (swanGroupRef.current) swanGroupRef.current.visible = false;
     }
-  });
+
+    materialRef.current.opacity = 0.15;
+
+    // ✅ Random Ripples Animation
+    ringRefs.current.forEach((ring, i) => {
+      if (!ring) return;
+
+      const mat = ring.material as any;
+
+      ring.position.set(worldPos.x, currentWaterY + 0.05, worldPos.z);
+
+      if (isTouching) {
+        ring.visible = true;
+
+        const time = state.clock.getElapsedTime();
+        const speed = 0.10;
+
+        const randomOffset = ringSeeds[i];
+
+        const t = ((time * speed) + i * 0.22 + randomOffset) % 1;
+
+        // random ripple scaling
+        const scale = THREE.MathUtils.lerp(0.3, 15, t);
+
+        // slight random stretch
+        const stretch = 1 + Math.sin(time * 0.8 + randomOffset) * 0.15;
+
+        ring.scale.set(scale * stretch, scale, 1);
+
+        // fade out
+        const fade = 1.0 - t;
+
+        const proximityFactor =
+          1 - THREE.MathUtils.smoothstep(verticalDist, -0.1, 0.5);
+
+        mat.uniforms.uOpacity.value = fade * proximityFactor * 0.55;
+      } else {
+        ring.visible = false;
+      }
+    });
+
+materialRef.current.distortion = 0;  });
 
   return (
     <>
@@ -260,7 +289,6 @@ const WaterSurface = ({
           geometry={ringGeo}
           visible={false}
         >
-          {/* IMPORTANT: clone material so each ring has its own uniform */}
           <primitive object={rippleMaterial.clone()} attach="material" />
         </mesh>
       ))}

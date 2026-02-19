@@ -12,7 +12,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 const NaturalFeather = forwardRef(({ 
   id, startPos, targetPos, started, variant, activeId, onBubbleClick,
-  allBubblesReady, burstAll 
+  allBubblesReady
 }: any, ref: any) => {
   
   const { nodes, materials } = useGLTF("/models/feather_2.glb") as any;
@@ -80,27 +80,37 @@ const NaturalFeather = forwardRef(({
     previousPointer.current = { x: e.clientX, y: e.clientY };
   };
 
-  useEffect(() => {
-    let timer: any;
-    if (isBurst) {
-      wasClicked.current = true;
-      setShowBurst(true);
-      if (bubbleGroupRef.current) bubbleGroupRef.current.visible = false;
-    } else if (!burstAll) {
-      setShowBurst(false);
-      if (wasClicked.current) {
-        timer = setTimeout(() => {
-          if (bubbleGroupRef.current) {
-            bubbleGroupRef.current.visible = true;
-            gsap.set(bubbleGroupRef.current.scale, { x: 0, y: 0, z: 0 });
-            gsap.to(bubbleGroupRef.current.scale, { x: 1, y: 1, z: 1, duration: 0.8, ease: "back.out(1.7)" });
-          }
-          wasClicked.current = false;
-        }, 500); 
-      }
+ useEffect(() => {
+  let timer: any;
+  
+  if (isBurst) {
+    // 1. When the bubble is clicked/zoomed in
+    wasClicked.current = true;
+    setShowBurst(true);
+    if (bubbleGroupRef.current) bubbleGroupRef.current.visible = false;
+  } else {
+    // 2. When the bubble is closed (Resetting)
+    // ✅ FIX: We removed "!burstAll" so this ALWAYS runs when you close the panel
+    setShowBurst(false);
+    
+    if (wasClicked.current) {
+      timer = setTimeout(() => {
+        if (bubbleGroupRef.current) {
+          bubbleGroupRef.current.visible = true;
+          // Reset scale to 0 and pop it back in
+          gsap.set(bubbleGroupRef.current.scale, { x: 0, y: 0, z: 0 });
+          gsap.to(bubbleGroupRef.current.scale, { 
+            x: 1, y: 1, z: 1, 
+            duration: 0.8, 
+            ease: "back.out(1.7)" 
+          });
+        }
+        wasClicked.current = false;
+      }, 100); // 100ms is snappier for your slow-motion scroll
     }
-    return () => clearTimeout(timer);
-  }, [isBurst, burstAll]);
+  }
+  return () => clearTimeout(timer);
+}, [isBurst]); // ✅ FIX: Only depend on isBurst so scroll position doesn't block it
 
   useLayoutEffect(() => {
     Object.values(materials).forEach((mat: any) => {
@@ -195,7 +205,7 @@ const NaturalFeather = forwardRef(({
     if (id === 3) {
       const scrubTl = gsap.timeline({
           scrollTrigger: {
-              trigger: document.body, start: `${fallStart}px top`, end: "+=800", scrub: 2.5, 
+              trigger: document.body, start: `${fallStart}px top`, end: "+=700", scrub: 2.5, 
               onEnter: () => { 
                   setShowBurst(true); 
                   if (bubbleGroupRef.current) bubbleGroupRef.current.visible = false; 
@@ -219,7 +229,13 @@ const NaturalFeather = forwardRef(({
       scrubTl.to(groupRef.current.position, { x: "-=4.0", y: THREE.MathUtils.lerp(peakY, landingY, 0.6), duration: 11 / 3, ease: "sine.inOut" }, 1 + (11 / 3))
              .to(rotateRef.current.rotation, { z: targetRot.z + 0.2, duration: 11 / 3, ease: "sine.inOut" }, 1 + (11 / 3));
       scrubTl.to(groupRef.current.position, { x: targetPos[0], y: landingY, duration: 11 / 3, ease: "power1.inOut" }, 1 + (22 / 3))
-             .to(rotateRef.current.rotation, { z: targetRot.z, duration: 11 / 3, ease: "sine.inOut" }, 1 + (22 / 3));
+             .to(rotateRef.current.rotation, {
+        x: Math.PI/6,
+        y: 0,
+        z: Math.PI/2,
+        duration: 11 / 3,
+        ease: "power2.inOut"
+      }, 1 + (22 / 3));
     } else {
       const recoilX = (id % 2 === 0 ? 1.5 : -1.5) * (1 + (id % 3) * 0.2); 
       const recoilY = -1.5 - (id % 2); 
