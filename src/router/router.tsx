@@ -1,0 +1,28 @@
+import { BrowserRouter as Router, Route, Routes } from "react-router";
+// We import ProjectRoot instead of the deleted TestPage
+import ProjectRoot from "../ProjectRoot"; 
+import Error404 from "../404"; 
+
+const AppRoutes = () => {
+  return (
+    <Router>
+      <Routes>
+        {/* The main path "/" now loads your actual App */}
+        <Route path="/" element={<ProjectRoot />} />
+
+        {/* You can keep these if you want alternate links to the same app, 
+            or delete them if they were just for testing */}
+        <Route path="/bubble" element={<ProjectRoot />} />
+        
+        {/* 404 Page for unknown routes */}
+        <Route path="*" element={<Error404 />} />
+      </Routes>
+    </Router>
+  );
+};
+
+const AppRouter = () => {
+  return <AppRoutes />;
+};
+
+export default AppRouter;

@@ -1,0 +1,52 @@
+GSAP Animations
+    ☐ ScrollTrigger
+    ☐ Utility
+    ☐ timeline
+    ☐ Observer
+    ☐ Text
+    ☐ SplitText
+    ☐ MotionPath
+    ☐ useGSAP
+    ☐ Flip
+
+
+    GSAP Basic
+        ✔ GSAP To  0 to x @done (12/25/2025, 8:57:12 AM)
+        ✔ From  x to 0 @done (12/25/2025, 8:57:18 AM)
+        ✔ FromTo  x to y @done (12/26/2025, 5:01:22 PM)
+        ☐ 
+
+
+# Tasks to do
+    ☐ Setup Aldovia theme
+    ☐ Typography
+    ☐ Color Palette
+    ☐ Button
+    ☐ Forms
+    ☐ Spacing System
+
+ npx gltfjsx public/models/Bubble_feather.glb -o src/models/Bubblefeather.jsx
+
+ npx gltfjsx public/models/Bubble_only.glb -o src/models/Bubbleonly.jsx
+
+
+
+# Tasks Pending
+✔ Video Import in Main swarn.webm @done (2/5/2026, 12:54:02 PM)
+✔ Create Sections folder in src @done (2/5/2026, 12:55:36 PM)
+☐ Scene 7 created 
+    ☐ loadmetadata Loader must be created 
+    ✔ Project Alignment setup @done (2/6/2026, 7:12:34 PM)
+    ☐ 
+
+☐ 
+
+
+
+
+
+☐ 1. Organize Bubble Logic and Animation with component distribution 
+https://chatgpt.com/share/6984451f-a5e8-8007-83aa-8e221f69e3fb
+
+
+

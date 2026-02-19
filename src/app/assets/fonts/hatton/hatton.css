@@ -1,0 +1,14 @@
+/* Recommended: remove spaces from filenames on the server (pp-hatton-medium.woff2),
+   or make sure to URL-encode spaces as %20 in the url() if you keep them. */
+
+@font-face {
+  font-family: "PP Hatton";
+  /* src: url("/fonts/PP Hatton Medium.woff2") format("woff2"),
+       url("/fonts/PP Hatton Medium.woff")  format("woff"); */
+  src: url("./PP\ Hatton\ Medium.woff2") format("woff2"),
+    url("./PP\ Hatton\ Medium.woff") format("woff");
+  font-weight: 500; /* medium weight — change to 600 if you prefer */
+  font-style: normal;
+  font-display: swap; /* good for performance / avoids FOIT */
+  unicode-range: U+000-5FF; /* basic Latin + Latin-1 Supplement (optional) */
+}

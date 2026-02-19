@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+/* All root Styles occurs */
+
+/* Define Font */
+
+@font-face {
+  font-family: lust-text-medium;
+  src: url("../public/fonts/fonnts.com-Lust-Text-Medium.otf");
+}
+
+@font-face {
+  font-family: lust-text-light;
+  src: url("../public/fonts/fonnts.com-Lust-Text-Light.otf");
+}
+
+@font-face {
+  font-family: area-normal-regular;
+  src: url("../public/fonts/fonnts.com-Area_Normal_Regular.otf");
+}
+
+@font-face {
+  font-family: area-normal-semibold;
+  src: url("../public/fonts/fonnts.com-Area_Normal_SemiBold.otf");
+}
+
+@font-face {
+  font-family: area-normal-bold;
+  src: url("../public/fonts/fonnts.com-Area_Normal_Bold.otf");
+}
+
+:root {
+  background-color: #0e0e0e;
+  color: #eeeeee;
+}
+
+#root {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.pad {
+  padding: 2rem;
+}
