@@ -109,7 +109,7 @@ const LogoRevealNew = ({ onComplete }: { onComplete: () => void }) => {
     const totalScroll = 6000;
     const blurPeak = 0.08; 
     const blurHoldEnd = 0.10;
-    const logoClearPoint = 0.16;
+    //const logoClearPoint = 0.16;
     const framePhaseStart = 0.25;
 
     const masterTl = gsap.timeline({
