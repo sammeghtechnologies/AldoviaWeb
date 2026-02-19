@@ -12,13 +12,13 @@ const Main = () => {
 
   return (
     <div className="relative w-full min-h-screen bg-[#49261c] overflow-x-hidden">
+      {/* ✅ PERSISTENT NAVBAR: Stays mounted globally */}
       <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
-        <MenuFrame masterTl={masterTl} />
+        <MenuFrame masterTl={masterTl} introFinished={introFinished} />
       </div>
 
       <div id="landing-page" className="relative w-full h-full">
-        
-        {/* ✅ NEW: Manual Scroller Section replaces the old Auto-Logo */}
+        {/* PHASE 1: LOGO REVEAL */}
         {!introFinished && (
           <LogoRevealNew 
             key="logo-phase-new"
@@ -26,7 +26,7 @@ const Main = () => {
           />
         )}
 
-        {/* PHASE 2: SWAN (Triggered after manual scroll) */}
+        {/* PHASE 2: SWAN INTERACTION */}
         {introFinished && !showBubbles && (
           <div className="relative z-40">
             <SwanInteraction 
@@ -36,7 +36,7 @@ const Main = () => {
           </div>
         )}
 
-        {/* PHASE 3: BUBBLES */}
+        {/* PHASE 3: BUBBLES INTERACTION */}
         {showBubbles && (
           <div className="fixed inset-0 z-30">
             <BubbleFeather_Interaction key="bubble-phase" />
@@ -52,12 +52,9 @@ const LandingPage = () => {
 
   return (
     <>
-      {/* INITIAL SCROLL COVER */}
       {!isScrollComplete && (
         <ScrollLandingPage onComplete={() => setIsScrollComplete(true)} />
       )}
-
-      {/* MAIN CINEMATIC FLOW */}
       {isScrollComplete && <Main />}
     </>
   );

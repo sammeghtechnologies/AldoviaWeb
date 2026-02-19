@@ -1,7 +1,7 @@
 import { Canvas, useThree } from "@react-three/fiber";
-import { PerspectiveCamera, Environment } from "@react-three/drei";
-import { Suspense, useRef, useEffect, useState, useLayoutEffect } from "react";
-import { useGSAP } from "@gsap/react";
+import { PerspectiveCamera, Environment, useTexture } from "@react-three/drei";
+import { Suspense, useRef, useEffect, useState } from "react";
+import { useGSAP } from "@gsap/react"; 
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import * as THREE from "three";
@@ -39,45 +39,38 @@ const FrameScroller = ({ frameIndex, visible }: { frameIndex: number; visible: b
     }
   }, []);
 
-  if (!loaded) return null;
+  if (!loaded || !visible) return null;
 
   return (
-    <mesh position={[0, 0, 0]} visible={visible}>
+    <mesh position={[0, 0, 0]}>
       <planeGeometry args={[viewport.width * 1.1, viewport.height * 1.1]} />
-      <meshBasicMaterial map={textures[frameIndex - 1]} transparent toneMapped={false} />
+      <meshBasicMaterial map={textures[frameIndex - 1] || textures[0]} transparent toneMapped={false} />
     </mesh>
   );
 };
 
 const IntroImage = ({ imageRef, materialRef, onLoad }: any) => {
   const { viewport } = useThree();
-  
+  const tex = useTexture("/assets/swarn_60/frame_0500.jpg");
+
   useEffect(() => {
-    const loader = new THREE.TextureLoader();
-    loader.load("/assets/swarn_60/frame_0500.jpg", (tex) => {
-      if (imageRef.current && materialRef.current) {
-        materialRef.current.map = tex;
-        // Ensure the texture is marked for update
-        materialRef.current.needsUpdate = true;
-        onLoad();
-      }
-    });
-  }, [onLoad]);
+    if (tex) {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      onLoad(); 
+    }
+  }, [tex, onLoad]);
 
   return (
-    <group>
-      <mesh position={[0, 0, -2]}>
-        <planeGeometry args={[10000, 10000]} />
-        <meshBasicMaterial color="#49261c" />
-      </mesh>
-      <mesh ref={imageRef} position={[0, 0, 0]}>
+    <group renderOrder={999}>
+      <mesh ref={imageRef} position={[0, 0, 10]}>
         <planeGeometry args={[viewport.width, viewport.height]} />
         <meshBasicMaterial 
           ref={materialRef} 
+          map={tex} 
           transparent 
           opacity={1} 
           toneMapped={false} 
-          premultipliedAlpha={true} 
+          depthTest={false} 
         />
       </mesh>
     </group>
@@ -94,29 +87,18 @@ const LogoRevealNew = ({ onComplete }: { onComplete: () => void }) => {
   
   const [isReady, setIsReady] = useState(false);
   const [currentFrame, setCurrentFrame] = useState(1);
-  const [showFrames, setShowFrames] = useState(false);
-
-  const sceneBgRef = useRef<THREE.Color>(null!);
-  const fogRef = useRef<THREE.Fog>(null!);
-
-  // Force initial state on mount before GSAP even touches it
-  useLayoutEffect(() => {
-    if (canvasWrapperRef.current) {
-      canvasWrapperRef.current.style.filter = "blur(0px)";
-    }
-  }, []);
+  const [showFrames] = useState(true);
 
   useGSAP(() => {
-    if (!isReady || !logoRef.current || !cameraRef.current || !imageMatRef.current) return;
+    if (!isReady || !logoRef.current || !cameraRef.current) return;
     
-    const totalScroll = 6000;
-    const blurPeak = 0.08; 
-    const framePhaseStart = 0.25;
+    const totalScroll = 8000; 
+    const blurPeak = 0.15; 
+    const logoMoveStart = 0.35;
+    const framePlayStart = 0.65; 
 
-    // Reset everything to "Start" state immediately
-    gsap.set(canvasWrapperRef.current, { filter: "blur(0px)" });
-    gsap.set(imageMatRef.current, { opacity: 1 });
-    gsap.set(logoRef.current, { autoAlpha: 0 });
+    // ✅ PHASE 1: Fade from Black to the Loaded Scene
+    gsap.to(canvasWrapperRef.current, { opacity: 1, duration: 0.8, ease: "power2.inOut" });
 
     const masterTl = gsap.timeline({
       scrollTrigger: {
@@ -125,82 +107,64 @@ const LogoRevealNew = ({ onComplete }: { onComplete: () => void }) => {
         end: `+=${totalScroll}`,
         pin: true,
         scrub: 2.5,
-        onLeave: () => { if (onComplete) onComplete(); }
+        onLeave: () => onComplete?.()
       }
     });
 
-    const themeColor = { value: "#000000" };
+    masterTl.set(canvasWrapperRef.current, { filter: "blur(0px)" }, 0);
+    masterTl.set(imageMatRef.current, { opacity: 1 }, 0);
+    masterTl.set(logoRef.current, { 
+        autoAlpha: 0, 
+        filter: "blur(20px)", 
+        scale: 0.9,
+        left: "50%", 
+        xPercent: -50, 
+        yPercent: -50 
+    }, 0);
 
-    // 1. Smoothly increase blur as you scroll
-    masterTl.to(canvasWrapperRef.current, { 
-      filter: "blur(120px)", 
-      duration: 0.12,
-      ease: "none" 
-    }, 0.01);
+    masterTl.to(canvasWrapperRef.current, { filter: "blur(100px)", duration: 0.15 }, 0.05);
+    masterTl.to(logoRef.current, { autoAlpha: 1, filter: "blur(0px)", scale: 1, duration: 0.1 }, blurPeak);
+    masterTl.to(imageMatRef.current, { opacity: 0, duration: 0.15 }, blurPeak);
+    masterTl.to(canvasWrapperRef.current, { filter: "blur(0px)", duration: 0.10 }, 0.3);
 
-    // 2. Background Transition
-    masterTl.to(themeColor, {
-      value: "#49261c",
-      duration: 0.12,
-      onUpdate: () => {
-        if (containerRef.current) containerRef.current.style.backgroundColor = themeColor.value;
-        if (sceneBgRef.current) sceneBgRef.current.set(themeColor.value);
-        if (fogRef.current) fogRef.current.color.set(themeColor.value);
-      }
-    }, 0.04);
-
-    // 3. Logo Reveal and Image Fade-out
-    masterTl.fromTo(logoRef.current, 
-      { autoAlpha: 0, filter: "blur(15px)" }, 
-      { autoAlpha: 1, filter: "blur(0px)", duration: 0.06 }, 
-      blurPeak
-    );
-
-    masterTl.to(imageMatRef.current, { 
-        opacity: 0, 
-        duration: 0.10,
-        onUpdate: function() {
-            if (imageMatRef.current && imageMatRef.current.opacity < 0.9) {
-                imageMatRef.current.blending = THREE.MultiplyBlending;
-                imageMatRef.current.needsUpdate = true;
-            }
-        }
-    }, blurPeak);
-
-    // 4. Move Logo & Start Turn
-    masterTl.to(canvasWrapperRef.current, { filter: "blur(0px)", duration: 0.10 }, 0.15);
-    masterTl.to(logoRef.current, { top: "37px", left: "48px", width: "56px", duration: 0.35 }, framePhaseStart);
+    masterTl.to(logoRef.current, { 
+        top: "37px", 
+        left: "48px", 
+        xPercent: 0, 
+        yPercent: 0, 
+        width: "56px", 
+        duration: 0.25 
+    }, logoMoveStart);
 
     masterTl.to({}, {
-      duration: 0.6,
-      onStart: () => setShowFrames(true),
-      onReverseComplete: () => setShowFrames(false),
+      duration: 0.35,
       onUpdate: function() {
-        const frame = Math.max(1, Math.min(TOTAL_FRAMES, Math.ceil(this.progress() * TOTAL_FRAMES)));
+        const progress = this.progress();
+        const frame = Math.max(2, Math.min(TOTAL_FRAMES, Math.ceil(progress * (TOTAL_FRAMES - 1)) + 1));
         setCurrentFrame(frame);
       }
-    }, framePhaseStart);
+    }, framePlayStart);
 
   }, { dependencies: [isReady], scope: containerRef });
 
   return (
+    // ✅ FIX 1: Set section background to black
     <section ref={containerRef} className="relative w-full h-screen overflow-hidden bg-black">
-      {/* Absolute fallback: If something breaks, show the image background color */}
-      <div className="absolute inset-0 bg-[#000000]" style={{ zIndex: -1 }} />
-
-      <div ref={logoRef} className="fixed -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none" style={{ top: "50%", left: "45%", width: "530px", visibility: "hidden" }}>
+      <div ref={logoRef} className="fixed z-50 pointer-events-none" style={{ top: "50%", left: "50%", width: "530px", visibility: "hidden" }}>
         <img src="assets/logo/aldovialogo.svg" alt="Logo" className="w-full h-auto brightness-0 invert" />
       </div>
 
-      <div ref={canvasWrapperRef} className="fixed inset-0 z-10" style={{ filter: "blur(0px)" }}>
+      <div ref={canvasWrapperRef} className="fixed inset-0 z-10 opacity-0 transition-opacity duration-700">
         <Canvas gl={{ antialias: true, toneMapping: THREE.NoToneMapping }}>
-          <fog ref={fogRef} attach="fog" args={["#000000", 10, 150]} />
           <PerspectiveCamera makeDefault ref={cameraRef} position={[0, 0, 85]} fov={45} />
-          <color ref={sceneBgRef} attach="background" args={["#000000"]} />
+          
+          {/* ✅ FIX 2: Only show brown color once ready */}
+          <color attach="background" args={[isReady ? "#49261c" : "#000000"]} /> 
+          
           <ambientLight intensity={2} />
           <Suspense fallback={null}>
-            <IntroImage imageRef={imageRef} materialRef={imageMatRef} onLoad={() => setIsReady(true)} />
             <FrameScroller frameIndex={currentFrame} visible={showFrames} />
+            <IntroImage imageRef={imageRef} materialRef={imageMatRef} onLoad={() => setIsReady(true)} />
             <Environment preset="city" />
           </Suspense>
         </Canvas>
