@@ -14,7 +14,7 @@ const HeroContent: React.FC = () => {
         <h1 className="
           mx-auto
           max-w-[18ch]
-          font-serif 
+          font-lust
           text-4xl 
           sm:text-5xl 
           md:text-6xl 

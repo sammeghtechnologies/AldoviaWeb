@@ -90,14 +90,14 @@ const AnimatedImageHero: React.FC<AnimatedImageHeroProps> = ({
             initial={false}
             animate={{
               opacity: isActive ? 1 : 0,
-              scale: isActive ? 1.04 : 1.1,
+              scale: isActive ? 1.01 : 1.04,
             }}
-            transition={{ opacity: { duration: 0.9 }, scale: { duration: 6, ease: "easeOut" } }}
+            transition={{ opacity: { duration: 0.6 }, scale: { duration: 5.2, ease: "easeOut" } }}
           />
         );
       })}
 
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(28,25,23,0.62)_0%,rgba(28,25,23,0.72)_50%,rgba(28,25,23,0.62)_100%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(28,25,23,0.46)_0%,rgba(28,25,23,0.56)_50%,rgba(28,25,23,0.46)_100%)]" />
 
       {(topLeftContent || topRightContent) && (
         <div className="relative z-20 mx-auto flex w-full max-w-6xl items-center justify-between px-6 pt-8 md:px-10">
@@ -115,7 +115,14 @@ const AnimatedImageHero: React.FC<AnimatedImageHeroProps> = ({
           </span>
         )}
 
-        <h1 className="max-w-[16ch] font-serif text-4xl leading-tight md:text-6xl">{title}</h1>
+        <motion.h1
+          className="max-w-[16ch] font-lust text-5xl leading-tight md:text-7xl"
+          initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 1.25, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {title}
+        </motion.h1>
 
         {subtitle && (
           <p className="mt-4 max-w-[38ch] text-base text-white/90 md:text-xl">

@@ -231,13 +231,29 @@ const ExperienceSection: React.FC = () => {
 
         {/* Heading */}
         <div className="!mb-10">
-          <SlidingTitleReveal
-            lines={["Experience Alvodia", "Visually"]}
-            className="text-white text-[34px] md:text-[42px] leading-[1.1] font-medium [font-family:'Playfair_Display']"
-          />
+       
+       
 
-          <p
-            className="text-[#C7B8AE] mt-4 text-[15px] max-w-md"
+          <div className="!mb-6 md:!mb-3 text-left lg:text-center lg:!w-full lg:!max-w-[980px] lg:!mx-auto">
+          <div className="lg:hidden">
+            <SlidingTitleReveal
+              eyebrowClassName="!mb-1 text-[11px] tracking-[0.35em] uppercase text-[#78716C]"
+              lines={["Experience Alvodia", "Visually"]}
+              className="text-white text-[34px] md:text-[42px] leading-[1.1] font-medium [font-family:'Playfair_Display']"
+              />
+          </div>
+          <div className=" w-full hidden lg:block justify-center lg:translate-x-[7.5rem]">
+            <SlidingTitleReveal
+              eyebrowClassName="!mb-1 text-[11px] tracking-[0.35em] uppercase text-[#78716C]"
+              lines={["Experience Alvodia Visually"]}
+              className="text-white text-[34px] md:text-[42px] leading-[1.1] font-medium [font-family:'Playfair_Display']"
+              />
+          </div>
+        </div>
+
+        <div className="lg:hidden">
+        <p
+            className="text-[#C7B8AE] !mt-4 text-[15px] max-w-md"
             aria-label={subtitleText.replace("\n", " ")}
           >
             {(() => {
@@ -262,17 +278,45 @@ const ExperienceSection: React.FC = () => {
           </p>
         </div>
 
+        <div className=" w-full hidden lg:block justify-center lg:translate-x-[33rem]">
+        <p
+            className="text-[#C7B8AE] !mt-4 text-[15px] max-w-md"
+            aria-label={subtitleText.replace("\n", " ")}
+          >
+            {(() => {
+              let shown = 0;
+              return subtitleChars.map((char, idx) => {
+                if (char === "\n") return " ";
+                shown += 1;
+                const isVisible = shown <= typedCount;
+                return (
+                  <span
+                    key={`subtitle-char-${idx}`}
+                    style={{
+                      opacity: isVisible ? 1 : 0,
+                      transition: "opacity 120ms ease-out",
+                    }}
+                  >
+                    {char}
+                  </span>
+                );
+              });
+            })()}
+          </p>
+        </div>
+        
+        </div>
+
         {/* Category Pills */}
         <div className="flex gap-3 overflow-x-auto !pb-6 scrollbar-hide">
           {categories.map((item) => (
             <button
               key={item}
               onClick={() => setActiveCategory(item)}
-              className={`whitespace-nowrap !px-2 !py-2 rounded-full text-sm transition duration-300 ${
-                activeCategory === item
+              className={`whitespace-nowrap !px-2 !py-2 rounded-full text-sm transition duration-300 ${activeCategory === item
                   ? "bg-[#EADFD9] text-[#21140F]"
                   : "bg-[#3A241D] text-[#EADFD9] hover:bg-[#4A2E25]"
-              }`}
+                }`}
             >
               {item}
             </button>
@@ -301,11 +345,10 @@ const ExperienceSection: React.FC = () => {
               variants={cardVariants}
               whileHover={{ y: -6, scale: 1.01 }}
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-              className={`relative rounded-2xl overflow-hidden group shrink-0 snap-center w-[70vw] sm:w-[340px] md:w-[400px] transition-all duration-500 ${
-                cardIndex === index
+              className={`relative rounded-2xl overflow-hidden group shrink-0 snap-center w-[70vw] sm:w-[340px] md:w-[400px] transition-all duration-500 ${cardIndex === index
                   ? "md:scale-100 md:opacity-100"
                   : "md:scale-[0.94] md:opacity-60"
-              }`}
+                }`}
             >
               {/* Image */}
               <img
@@ -351,6 +394,8 @@ const ExperienceSection: React.FC = () => {
           progressFillColor="#FFFFFF"
           buttonColor="#FFFFFF"
           iconColor="#21140F"
+          progressBarClassName="!w-[100px] !max-w-[100px] shrink-0"
+          progressBarWidth={100}
         />
 
       </div>

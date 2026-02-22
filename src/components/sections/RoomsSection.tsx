@@ -60,18 +60,30 @@ const RoomsSection: React.FC = () => {
   return (
     <section
       ref={sectionRef}
-      className="w-full overflow-x-clip bg-[#FBF6E6] !py-24 !px-4 md:!px-6 lg:!px-8"
+      className="w-full overflow-x-clip bg-[#FBF6E6] bg-cover bg-center bg-no-repeat !pt-12 !pb-24 !px-4 md:!px-6 lg:!px-8"
+      style={{
+        backgroundImage:
+          "linear-gradient(rgba(251, 246, 230, 0.78), rgba(251, 246, 230, 0.78)), url('/assets/backgrounds/swanbrown.png')",
+      }}
     >
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}
-        <div className="!mb-4 md:!mb-5 text-left lg:!w-full lg:!max-w-[980px] lg:!mx-auto">
-          <SlidingTitleReveal
-            eyebrow="Accommodations"
-            eyebrowClassName="!mb-3 text-[11px] tracking-[0.35em] uppercase text-[#78716C]"
-            lines={["Rooms &", "Suites"]}
-            className="text-[44px] md:text-[52px] font-medium leading-[0.95] tracking-[0.4px] text-[#1C1917] [font-family:'Playfair_Display']"
-          />
+        <div className="!mb-6 md:!mb-3 text-left lg:text-center lg:!w-full lg:!max-w-[980px] lg:!mx-auto">
+          <div className="lg:hidden">
+            <SlidingTitleReveal
+              eyebrowClassName="!mb-1 text-[11px] tracking-[0.35em] uppercase text-[#78716C]"
+              lines={["Rooms &", "Suites"]}
+              className="text-[44px] md:text-[52px] font-lust leading-[0.95] tracking-[0.4px] text-[#1C1917]"
+            />
+          </div>
+          <div className=" w-full hidden lg:block justify-center lg:translate-x-[7.5rem]">
+            <SlidingTitleReveal
+              eyebrowClassName="!mb-1 text-[11px] tracking-[0.35em] uppercase text-[#78716C]"
+              lines={["Rooms & Suites"]}
+              className="text-[52px] font-lust leading-[0.95] tracking-[0.4px] text-[#1C1917]"
+            />
+          </div>
         </div>
 
         <div className="!mt-2 flex w-full justify-center lg:translate-x-[7.5rem]">

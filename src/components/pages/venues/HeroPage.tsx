@@ -29,10 +29,10 @@ const HeroPage: React.FC = () => {
         buttonLabel="Plan Your Event"
         onButtonClick={() => navigate("/home")}
         enableTypingSubtitle
-        centerContentClassName="-translate-y-10"
-        controlsWrapperClassName="absolute bottom-[20%] left-1/2 z-30 w-[min(92%,520px)] -translate-x-1/2"
+        centerContentClassName="-translate-y-10 lg:!w-full lg:!mx-auto lg:text-center"
+        controlsWrapperClassName="absolute bottom-[10%] left-1/2 z-30 w-[min(92%,520px)] -translate-x-1/2"
         controlsClassName="!mt-0 !px-0"
-        controlsProgressBarClassName="max-w-[140px]"
+        controlsProgressBarClassName="!w-[140px] !max-w-[140px] shrink-0"
       />
     </>
   );

@@ -6,33 +6,94 @@
 /* Define Font */
 
 @font-face {
-  font-family: lust-text-medium;
-  src: url("../public/fonts/fonnts.com-Lust-Text-Medium.otf");
+  font-family: "lust-text";
+  src: url("/fonts/fonnts.com-Lust-Text-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-  font-family: lust-text-light;
-  src: url("../public/fonts/fonnts.com-Lust-Text-Light.otf");
+  font-family: "lust-text";
+  src: url("/fonts/fonnts.com-Lust-Text-Light.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-  font-family: area-normal-regular;
-  src: url("../public/fonts/fonnts.com-Area_Normal_Regular.otf");
+  font-family: "Area Normal";
+  src: url("/fonts/fonnts.com-Area_Normal_Thin.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-  font-family: area-normal-semibold;
-  src: url("../public/fonts/fonnts.com-Area_Normal_SemiBold.otf");
+  font-family: "Area Normal";
+  src: url("/fonts/fonnts.com-Area_Normal_Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-  font-family: area-normal-bold;
-  src: url("../public/fonts/fonnts.com-Area_Normal_Bold.otf");
+  font-family: "Area Normal";
+  src: url("/fonts/fonnts.com-Area_Normal_SemiBold.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Area Normal";
+  src: url("/fonts/fonnts.com-Area_Normal_Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
 }
 
 :root {
   background-color: var(--color-background);
   color: var(--color-text);
+}
+
+.font-lust {
+  font-family: "lust-text", serif;
+}
+
+.font-lust-medium {
+  font-family: "lust-text", serif;
+  font-weight: 500;
+}
+
+.font-lust-light {
+  font-family: "lust-text", serif;
+  font-weight: 300;
+}
+
+.font-area {
+  font-family: "Area Normal", sans-serif;
+}
+
+.font-area-thin {
+  font-family: "Area Normal", sans-serif;
+  font-weight: 300;
+}
+
+.font-area-regular {
+  font-family: "Area Normal", sans-serif;
+  font-weight: 400;
+}
+
+.font-area-semibold {
+  font-family: "Area Normal", sans-serif;
+  font-weight: 600;
+}
+
+.font-area-bold {
+  font-family: "Area Normal", sans-serif;
+  font-weight: 700;
 }
 
 #root {
@@ -43,6 +104,24 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+p {
+  font-family: "Area Normal", sans-serif;
+  line-height: 1.6 !important;
+}
+
+button {
+  font-family: "lust-text", serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "lust-text", serif;
 }
 
 .pad {

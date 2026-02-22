@@ -55,7 +55,7 @@ const RoomsCard: React.FC<RoomsCardProps> = ({
           className="pointer-events-none absolute bottom-[-28px] right-0 w-[220px] opacity-25 z-0"
         /> */}
 
-        <h3 className="relative z-10 text-3xl font-serif !mb-3 text-[#1C1917]">
+        <h3 className="relative z-10 text-3xl font-lust !mb-3 text-[#1C1917]">
           {title}
         </h3>
 

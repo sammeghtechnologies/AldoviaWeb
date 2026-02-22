@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useSpring } from "framer-motion";
 
 interface LuxuryCardProps {
      image: string;
@@ -14,11 +14,38 @@ const LuxuryCard: React.FC<LuxuryCardProps> = ({
      title,
      description,
 }) => {
+     const rotateX = useMotionValue(0);
+     const rotateY = useMotionValue(0);
+     const springRotateX = useSpring(rotateX, { stiffness: 180, damping: 16, mass: 0.5 });
+     const springRotateY = useSpring(rotateY, { stiffness: 180, damping: 16, mass: 0.5 });
+
+     const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+          const rect = event.currentTarget.getBoundingClientRect();
+          const px = (event.clientX - rect.left) / rect.width;
+          const py = (event.clientY - rect.top) / rect.height;
+          const tilt = 8;
+          rotateY.set((px - 0.5) * tilt * 2);
+          rotateX.set((0.5 - py) * tilt * 2);
+     };
+
+     const handleMouseLeave = () => {
+          rotateX.set(0);
+          rotateY.set(0);
+     };
+
      return (
           <motion.div
                whileHover={{ scale: 1.02 }}
                transition={{ duration: 0.4 }}
-               className="relative w-full max-w-md h-[520px] rounded-[28px] overflow-hidden shadow-2xl group"
+               onMouseMove={handleMouseMove}
+               onMouseLeave={handleMouseLeave}
+               style={{
+                    rotateX: springRotateX,
+                    rotateY: springRotateY,
+                    transformStyle: "preserve-3d",
+                    perspective: 1200,
+               }}
+               className="relative w-full max-w-md h-[520px] rounded-[28px] overflow-hidden shadow-2xl group will-change-transform"
           >
                {/* Image */}
                <img
@@ -42,7 +69,7 @@ const LuxuryCard: React.FC<LuxuryCardProps> = ({
                          {title}
                     </h2>
 
-                    <p className="!mb-6 text-base opacity-80 leading-relaxed max-w-[85%]">
+                    <p className="!mb-6 text-base opacity-80 !leading-[1.35] max-w-[85%]">
                          {description}
                     </p>
 

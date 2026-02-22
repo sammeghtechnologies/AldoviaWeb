@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import CarouselControls from "../ui/CarouselControls";
 import LuxuryCard from "../ui/LuxuryCard";
 
@@ -26,6 +26,8 @@ const cards = [
 
 const CarouselSection: React.FC = () => {
   const [index, setIndex] = useState(0);
+  const desktopRowRef = React.useRef<HTMLDivElement | null>(null);
+  const desktopRowInView = useInView(desktopRowRef, { amount: 0.35, once: false });
 
   const next = () => {
     setIndex((prev) => (prev + 1) % cards.length);
@@ -38,7 +40,14 @@ const CarouselSection: React.FC = () => {
   };
 
   return (
-    <section className="relative flex w-full min-h-screen items-center justify-center overflow-hidden bg-[var(--color-primary)] py-20">
+    <section
+      className="relative flex w-full min-h-[84vh] md:min-h-screen items-center justify-center overflow-hidden bg-center bg-cover bg-no-repeat py-14 md:py-20 [&_p]:!text-sm"
+      style={{
+        backgroundColor: "#21140F",
+        backgroundImage:
+          "linear-gradient(rgba(33, 20, 15, 0.78), rgba(33, 20, 15, 0.78)), url('/assets/backgrounds/swanbg.png')",
+      }}
+    >
 
       <motion.div
         initial="hidden"
@@ -47,13 +56,10 @@ const CarouselSection: React.FC = () => {
         className="mx-auto flex w-full max-w-6xl flex-col items-center px-6"
       >
 
-        <div className="relative flex h-[520px] w-full items-center justify-center">
-
+        <div className="relative !mt-20 flex h-[460px] w-full items-center justify-center md:hidden">
           {cards.map((card, i) => {
             const position = (i - index + cards.length) % cards.length;
-
-            const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
-            const offset = isMobile ? 140 : 260;
+            const offset = 140;
 
             let x = 0;
             let scale = 1;
@@ -83,28 +89,9 @@ const CarouselSection: React.FC = () => {
                 key={i}
                 className="absolute w-[85%] max-w-sm cursor-grab"
                 style={{ zIndex }}
-
-                // START STACKED IN CENTER
-                initial={{
-                  x: 0,
-                  scale: 0.7,
-                  opacity: 0,
-                }}
-
-                // SPREAD TO FINAL POSITION
-                whileInView={{
-                  x,
-                  scale,
-                  opacity,
-                }}
-
-                transition={{
-                  type: "spring",
-                  stiffness: 120,
-                  damping: 20,
-                  delay: i * 0.15,
-                }}
-
+                initial={{ x: 0, scale: 0.7, opacity: 0 }}
+                whileInView={{ x, scale, opacity }}
+                transition={{ type: "spring", stiffness: 120, damping: 20, delay: i * 0.15 }}
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
                 onDragEnd={(e, info) => {
@@ -123,18 +110,49 @@ const CarouselSection: React.FC = () => {
           })}
         </div>
 
-    
+        <div ref={desktopRowRef} className="hidden !mt-8 w-full grid-cols-3 gap-10 md:grid">
+          {cards.map((card, i) => (
+            <motion.div
+              key={`desktop-${i}`}
+              initial={false}
+              animate={
+                desktopRowInView
+                  ? { opacity: 1, x: 0, y: 0, scale: 1, filter: "blur(0px)" }
+                  : { opacity: 0, x: 120, y: 10, scale: 0.96, filter: "blur(6px)" }
+              }
+              transition={{
+                type: "spring",
+                stiffness: 90,
+                damping: 18,
+                mass: 0.9,
+                delay: i * 0.12,
+              }}
+            >
+              <LuxuryCard
+                image={card.image}
+                category={card.category}
+                title={card.title}
+                description={card.description}
+              />
+            </motion.div>
+          ))}
+        </div>
 
-<CarouselControls
-         total={cards.length}
-         index={index}
-         onNext={next}
-         onPrev={prev}
-          progressTrackColor="rgba(255, 255, 255, 0.25)"
-          progressFillColor="#FFFFFF"
-          buttonColor="#FFFFFF"
-          iconColor="#21140F"
-        />
+        <div className="w-full md:hidden">
+          <CarouselControls
+            total={cards.length}
+            index={index}
+            onNext={next}
+            onPrev={prev}
+            progressTrackColor="rgba(255, 255, 255, 0.25)"
+            progressFillColor="#FFFFFF"
+            buttonColor="#FFFFFF"
+            iconColor="#21140F"
+            className="!mt-24"
+            progressBarClassName="!w-[100px] !max-w-[100px] shrink-0"
+            progressBarWidth={100}
+          />
+        </div>
 
       </motion.div>
     </section>

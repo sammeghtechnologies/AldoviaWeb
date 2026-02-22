@@ -31,7 +31,7 @@ const LocationSection: React.FC = () => {
           className="text-[32px] md:text-[42px] font-medium text-[#1C1917] [font-family:'Playfair_Display']"
         />
 
-        <p className="text-[#6B5E57] mt-3 text-[15px]">
+        <p className="text-[#6B5E57] !mt-4 text-[15px]">
           Easily accessible luxury resort
         </p>
 

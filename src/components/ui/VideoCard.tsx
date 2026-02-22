@@ -35,7 +35,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ image, title }) => {
           <Play className="w-6 h-6 md:w-8 md:h-8 text-black ml-1" />
         </div>
 
-        <h4 className="text-xl md:text-2xl font-medium">
+        <h4 className="text-xl md:text-2xl font-medium !mt-8">
           {title}
         </h4>
 
