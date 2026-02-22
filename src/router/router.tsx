@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router";
 import ProjectRoot from "../ProjectRoot"; 
 import Error404 from "../404"; 
 import HeroPage from "../components/pages/home/HeroPage";
+import VenuesHeroPage from "../components/pages/venues/HeroPage";
 
 const AppRoutes = () => {
   return (
@@ -15,6 +16,7 @@ const AppRoutes = () => {
             or delete them if they were just for testing */}
         <Route path="/bubble" element={<ProjectRoot />} />
         <Route path="/home" element={<HeroPage />} />
+        <Route path="/venues" element={<VenuesHeroPage />} />
 
         {/* 404 Page for unknown routes */}
         <Route path="*" element={<Error404 />} />

@@ -8,6 +8,9 @@ import RoomsCard from "../pages/home/RoomsCard";
 import SlidingTitleReveal from "../ui/SlidingTitleReveal";
 import { roomsData } from "../../app/mockData/roomsData";
 
+const premiumEase: [number, number, number, number] = [0.19, 1, 0.22, 1];
+const deckSpring = { type: "spring" as const, stiffness: 140, damping: 22, mass: 0.82 };
+
 const RoomsSection: React.FC = () => {
   const sectionRef = React.useRef<HTMLElement | null>(null);
   const isInView = useInView(sectionRef, { once: false, amount: 0.35 });
@@ -73,6 +76,14 @@ const RoomsSection: React.FC = () => {
 
         <div className="!mt-2 flex w-full justify-center lg:translate-x-[7.5rem]">
           <div className="relative w-full max-w-[560px] h-[530px] lg:mx-auto lg:max-w-[980px] lg:h-[580px]">
+            <motion.div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-[10%] top-16 hidden h-[76%] rounded-[44px] bg-[radial-gradient(ellipse_at_center,rgba(90,51,38,0.20)_0%,rgba(90,51,38,0.08)_45%,rgba(90,51,38,0)_78%)] blur-2xl lg:block"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, ease: premiumEase }}
+            />
+
             <button
               onClick={prev}
               className="absolute left-2 top-1/2 z-[620] hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-[#1C1917]/20 bg-white/85 text-[#1C1917] shadow-sm transition hover:bg-white md:left-4 lg:flex lg:-left-24"
@@ -95,9 +106,9 @@ const RoomsSection: React.FC = () => {
               initial={{ x: isIntroAnimating ? -220 : -40, opacity: 0 }}
               animate={{ x: 0, opacity: 0.9, rotate: -8, scale: 0.96 }}
               transition={{
-                duration: isIntroAnimating ? 0.62 : 0.35,
+                duration: isIntroAnimating ? 0.62 : 0.42,
                 delay: isIntroAnimating ? 0.1 : 0,
-                ease: [0.22, 1, 0.36, 1],
+                ease: premiumEase,
               }}
               style={{ zIndex: 220, filter: "blur(1.5px)" }}
             >
@@ -112,9 +123,9 @@ const RoomsSection: React.FC = () => {
               initial={{ x: isIntroAnimating ? 220 : 40, opacity: 0 }}
               animate={{ x: 0, opacity: 0.9, rotate: 8, scale: 0.96 }}
               transition={{
-                duration: isIntroAnimating ? 0.62 : 0.35,
+                duration: isIntroAnimating ? 0.62 : 0.42,
                 delay: isIntroAnimating ? 0.18 : 0,
-                ease: [0.22, 1, 0.36, 1],
+                ease: premiumEase,
               }}
               style={{ zIndex: 220, filter: "blur(1.5px)" }}
             >
@@ -133,10 +144,16 @@ const RoomsSection: React.FC = () => {
               }}
               animate={{
                 x: -desktopEdgeCenterOffset - 92,
+                y: 0,
                 opacity: 0.5,
                 scale: 0.84,
               }}
-              transition={{ duration: isIntroAnimating ? 0.55 : 0.45, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+              transition={{
+                ...deckSpring,
+                duration: isIntroAnimating ? 0.58 : 0.5,
+                delay: isIntroAnimating ? 0.08 : 0.02,
+                ease: premiumEase,
+              }}
               style={{ zIndex: 360, filter: "blur(2.8px)" }}
             >
               <div className="flex w-full justify-center [transform:rotateY(14deg)] origin-right">
@@ -154,10 +171,16 @@ const RoomsSection: React.FC = () => {
               }}
               animate={{
                 x: desktopEdgeCenterOffset + 92,
+                y: 0,
                 opacity: 0.5,
                 scale: 0.84,
               }}
-              transition={{ duration: isIntroAnimating ? 0.55 : 0.45, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+              transition={{
+                ...deckSpring,
+                duration: isIntroAnimating ? 0.58 : 0.5,
+                delay: isIntroAnimating ? 0.12 : 0.04,
+                ease: premiumEase,
+              }}
               style={{ zIndex: 360, filter: "blur(2.8px)" }}
             >
               <div className="flex w-full justify-center [transform:rotateY(-14deg)] origin-left">
@@ -175,9 +198,9 @@ const RoomsSection: React.FC = () => {
               }}
               animate={{ x: 0, opacity: 1, scale: 1 }}
               transition={{
-                duration: isIntroAnimating ? 0.65 : 0.42,
+                duration: isIntroAnimating ? 0.66 : 0.46,
                 delay: isIntroAnimating ? 0.26 : 0,
-                ease: [0.22, 1, 0.36, 1],
+                ease: premiumEase,
               }}
               style={{ zIndex: 500 }}
               drag={isIntroAnimating ? false : "x"}
@@ -199,11 +222,13 @@ const RoomsSection: React.FC = () => {
                   className="!px-2 shrink-0 !w-[380px] !min-w-[380px]"
                   initial={{
                     x: direction > 0 ? 160 : -160,
+                    y: 12,
                     opacity: 1,
                     scale: 0.92,
                   }}
                   animate={{
                     x: 0,
+                    y: 0,
                     opacity: 1,
                     scale: 1,
                     rotateY:
@@ -214,14 +239,19 @@ const RoomsSection: React.FC = () => {
                           : 0,
                   }}
                   transition={{
-                    duration: isIntroAnimating ? 0.62 : 0.48,
+                    ...deckSpring,
+                    duration: isIntroAnimating ? 0.66 : 0.54,
                     delay: isIntroAnimating ? 0.18 + idx * 0.06 : idx * 0.04,
-                    ease: [0.22, 1, 0.36, 1],
+                    ease: premiumEase,
                   }}
                 >
-                  <div className="flex w-full justify-center">
+                  <motion.div
+                    className="flex w-full justify-center"
+                    whileHover={{ y: -4 }}
+                    transition={{ duration: 0.3, ease: premiumEase }}
+                  >
                     <RoomsCard {...roomsData[roomIndex]} />
-                  </div>
+                  </motion.div>
                 </motion.div>
               ))}
             </div>

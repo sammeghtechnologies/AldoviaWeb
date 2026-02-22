@@ -1,15 +1,28 @@
 import React from "react";
+import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import SlidingTitleReveal from "../ui/SlidingTitleReveal";
 
 const LocationSection: React.FC = () => {
+  const sectionRef = React.useRef<HTMLElement | null>(null);
   // 👉 Replace with your real coordinates
   const latitude = 13.2068724;
   const longitude = 77.6338742;
 
   const googleMapsLink = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start 90%", "start 40%"],
+  });
+  const buttonXRaw = useTransform(scrollYProgress, [0, 1], [-140, 0]);
+  const buttonOpacityRaw = useTransform(scrollYProgress, [0, 1], [0, 1]);
+  const buttonX = useSpring(buttonXRaw, { stiffness: 80, damping: 24, mass: 0.8 });
+  const buttonOpacity = useSpring(buttonOpacityRaw, { stiffness: 80, damping: 24, mass: 0.8 });
 
   return (
-    <section className="w-full bg-[#FBF6E6] !py-20 !px-6 md:!px-10 lg:!px-16 flex justify-center">
+    <section
+      ref={sectionRef}
+      className="w-full bg-[#FBF6E6] !py-20 !px-6 md:!px-10 lg:!px-16 flex justify-center"
+    >
       <div className="mx-auto flex w-full max-w-5xl flex-col items-center text-center">
 
         {/* Heading */}
@@ -44,14 +57,21 @@ const LocationSection: React.FC = () => {
 
         {/* Get Directions Button */}
         <div className="!mt-10">
-          <button
-            onClick={() => window.open(googleMapsLink, "_blank")}
-            className="bg-[#5A3326] hover:bg-[#47271C] text-white
-                       !px-10 !py-3 rounded-full text-[1em]
-                       transition duration-300 shadow-md"
-          >
-            ➤ Get Directions
-          </button>
+          <motion.div style={{ x: buttonX, opacity: buttonOpacity }}>
+            <motion.button
+              onClick={() => window.open(googleMapsLink, "_blank")}
+              transition={{ y: { duration: 2.2, ease: "easeInOut", repeat: Infinity, repeatType: "mirror" } }}
+              animate={{ y: [0, -3, 0] }}
+              whileHover={{ y: -2, scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              style={{ willChange: "transform" }}
+              className="bg-[#5A3326] hover:bg-[#47271C] text-white
+                         !px-10 !py-3 rounded-full text-[1em]
+                         transition duration-300 shadow-md"
+            >
+              ➤ Get Directions
+            </motion.button>
+          </motion.div>
         </div>
 
       </div>

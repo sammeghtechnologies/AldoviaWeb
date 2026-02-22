@@ -5,9 +5,10 @@ import { useNavigate } from "react-router";
 
 // --- LOGO COMPONENT ---
 // ✅ FIX 1: Added introFinished prop to resolve 'isVisible' name error
-const Logo_top = ({ introFinished }: { introFinished: boolean }) => {
+const Logo_top = ({ introFinished }: { introFinished?: boolean }) => {
+  const isVisible = introFinished ?? true;
   return (
-    <div className={`logo-top relative z-[5000] transition-opacity duration-300 ${introFinished ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`logo-top relative z-[5000] transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
       <img
         src="assets/logo/aldovialogo.svg"
         alt="Aldovia"
@@ -18,9 +19,20 @@ const Logo_top = ({ introFinished }: { introFinished: boolean }) => {
 };
 
 // --- MENU ITEM COMPONENT ---
-const MenuIcon = ({ icon = "", title = "" }: any) => {
+const MenuIcon = ({
+  icon = "",
+  title = "",
+  onClick,
+}: {
+  icon?: string;
+  title?: string;
+  onClick?: () => void;
+}) => {
   return (
-    <li className="flex items-center gap-4 cursor-pointer transition-all duration-300 hover:opacity-70">
+    <li
+      onClick={onClick}
+      className="flex items-center gap-4 cursor-pointer transition-all duration-300 hover:opacity-70"
+    >
       <span className="w-8 h-8 flex items-center justify-center">
         {/* ✅ FIX 2: Wrapped in check to fix the empty string ("") src error */}
         {icon && (
@@ -331,7 +343,14 @@ const MenuFrame = ({
             >
               <MenuIcon icon={icons.wedding || "/assets/icons/wedding.svg"} title="Weddings" />
               <MenuIcon icon={icons.corporate || "/assets/icons/corporate.svg"} title="Corporate Events" />
-              <MenuIcon icon={icons.venue || "/assets/icons/venue.svg"} title="Venues" />
+              <MenuIcon
+                icon={icons.venue || "/assets/icons/venue.svg"}
+                title="Venues"
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate("/venues");
+                }}
+              />
             </ul>
           </div>
 

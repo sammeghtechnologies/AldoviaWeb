@@ -11,6 +11,8 @@ interface Props {
   progressFillColor?: string;
   buttonColor?: string;
   iconColor?: string;
+  className?: string;
+  progressBarClassName?: string;
 }
 
 const CarouselControls: React.FC<Props> = ({
@@ -22,15 +24,17 @@ const CarouselControls: React.FC<Props> = ({
   progressFillColor = "var(--color-primary)",
   buttonColor = "var(--color-primary)",
   iconColor = "#FFFFFF",
+  className = "",
+  progressBarClassName = "max-w-xs",
 }) => {
   const progress = ((index + 1) / total) * 100;
 
   return (
-    <div className="w-full max-w-6xl mx-auto !mt-10 flex items-center justify-between px-6">
+    <div className={`w-full max-w-6xl mx-auto !mt-10 flex items-center justify-between px-6 ${className}`}>
 
       {/* Progress Bar */}
       <div
-        className="flex-1 max-w-xs h-[4px] rounded-full overflow-hidden"
+        className={`flex-1 h-[4px] rounded-full overflow-hidden ${progressBarClassName}`}
         style={{ backgroundColor: progressTrackColor }}
       >
         <motion.div
