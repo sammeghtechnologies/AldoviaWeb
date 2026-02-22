@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router";
 // We import ProjectRoot instead of the deleted TestPage
 import ProjectRoot from "../ProjectRoot"; 
 import Error404 from "../404"; 
+import HeroPage from "../components/pages/home/HeroPage";
 
 const AppRoutes = () => {
   return (
@@ -13,7 +14,8 @@ const AppRoutes = () => {
         {/* You can keep these if you want alternate links to the same app, 
             or delete them if they were just for testing */}
         <Route path="/bubble" element={<ProjectRoot />} />
-        
+        <Route path="/home" element={<HeroPage />} />
+
         {/* 404 Page for unknown routes */}
         <Route path="*" element={<Error404 />} />
       </Routes>

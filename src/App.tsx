@@ -1,4 +1,6 @@
 import AssetLoader from "./AssetLoader";
+import FeatherCursor from "./components/FeatherCursor";
+import FeatherLoader from "./components/FeatherLoader";
 import { useLoader } from "./context/LoaderProvider";
 import LandingPage from "./LandingPage";
 
@@ -11,8 +13,9 @@ const App = () => {
 
   return (
     <>
+      {/* <FeatherCursor/> */}
       {!ready && <AssetLoader />}
-      {!ready && <div className="loader">Loading…</div>}
+      {!ready && <FeatherLoader/>}
       {ready && <LandingPage />}
     </>
   );

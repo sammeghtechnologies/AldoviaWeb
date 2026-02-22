@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./styles/theme.css";
 
 /* All root Styles occurs */
 
@@ -30,8 +31,8 @@
 }
 
 :root {
-  background-color: #0e0e0e;
-  color: #eeeeee;
+  background-color: var(--color-background);
+  color: var(--color-text);
 }
 
 #root {

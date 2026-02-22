@@ -1,4 +1,4 @@
-import type { RoomContent } from "./RoomData";
+import type { RoomContent } from "../../roomDetailsPanel/RoomData";
 
 interface PanelProps {
   activeId: number | null;

@@ -1,0 +1,7 @@
+:root {
+  --color-primary: #49261c;
+  --color-secondary: #f5f5dc;
+  --color-background: #0e0e0e;
+  --color-text: #eeeeee;
+  --color-muted: rgba(255, 255, 255, 0.7);
+}

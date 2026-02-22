@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { useAssets } from "../../../app/hooks/useAssets";
+import { useNavigate } from "react-router";
 
 // --- LOGO COMPONENT ---
 // ✅ FIX 1: Added introFinished prop to resolve 'isVisible' name error
@@ -8,7 +9,7 @@ const Logo_top = ({ introFinished }: { introFinished: boolean }) => {
   return (
     <div className={`logo-top relative z-[5000] transition-opacity duration-300 ${introFinished ? 'opacity-100' : 'opacity-0'}`}>
       <img
-        src="assets/logo/aldovialogo.svg" 
+        src="assets/logo/aldovialogo.svg"
         alt="Aldovia"
         className="logo-image w-[56px] h-auto object-contain block brightness-0 invert"
       />
@@ -74,8 +75,17 @@ const MenuSection = ({
 
 // --- MAIN COMPONENT ---
 // ✅ FIX 3: Destructured introFinished prop to pass down to Logo_top
-const MenuFrame = ({ masterTl, introFinished }: any) => {
+const MenuFrame = ({
+  masterTl,
+  introFinished,
+  showBookNow = true,
+}: {
+  masterTl?: any;
+  introFinished?: boolean;
+  showBookNow?: boolean;
+}) => {
   const { icons } = useAssets();
+  const navigate = useNavigate();
 
   const frameRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -208,29 +218,36 @@ const MenuFrame = ({ masterTl, introFinished }: any) => {
   return (
     <div
       ref={frameRef}
-      className="menu-frame fixed inset-0 w-full h-full z-[999999] pointer-events-none"
+      className="menu-frame fixed inset-0 w-full h-full z-[2147483646] pointer-events-none"
     >
       {/* TOP BAR */}
-      <div className="absolute left-10 right-10 top-6 flex items-center justify-between pointer-events-auto">
+      <div className="absolute left-10 right-10 top-6 z-[2147483647] flex items-center justify-between pointer-events-auto">
         {/* ✅ Pass introFinished here */}
         <Logo_top introFinished={introFinished} />
 
         <div className="flex items-center gap-10">
           {/* BOOK NOW BUTTON */}
-          <button className="px-14 py-7 text-white text-[16px] md:text-[18px] lg:text-[19px] tracking-[0.25em] uppercase transition-all duration-300 hover:opacity-70 font-medium bg-transparent border-none">
-            Book Now
-          </button>
+          {showBookNow && (
+            <button
+              onClick={() => navigate("/home")}
+              className="px-14 py-7 text-white text-[16px] md:text-[18px] lg:text-[19px] tracking-[0.25em] uppercase transition-all duration-300 hover:opacity-70 font-medium bg-transparent border-none"
+            >
+              Book Now
+            </button>
+          )}
 
           {/* FEET MENU ICON */}
           <div
             id="hamburger"
-            className="cursor-pointer transition-transform duration-300 active:scale-90"
-            onClick={() => setIsOpen(true)}
+            className={`cursor-pointer translate-x-2 transition-transform duration-300 active:scale-90 ${
+              isOpen ? "rotate-90" : "rotate-0"
+            }`}
+            onClick={() => setIsOpen((prev) => !prev)}
           >
             <img
               src="assets/icons/feet-icon.png"
               alt="Menu"
-              className="w-14 h-14 object-contain brightness-0 invert transition-all"
+              className="w-16 h-16 object-contain brightness-0 invert transition-all"
             />
           </div>
         </div>
@@ -250,19 +267,8 @@ const MenuFrame = ({ masterTl, introFinished }: any) => {
       >
         <div className="!h-full bg-gradient-to-b from-[#4b2f23]/95 via-[#4b2f23]/95 to-[#4b2f23]/95 backdrop-blur-xl !px-8 !py-10 md:!px-10 md:!py-12 lg:!px-5 lg:!py-1 relative overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.6)] border border-white/10">
 
-          {/* HEADER */}
-          <div className="flex items-center justify-between mb-10">
-            <h2 className="text-[26px] md:text-[30px] lg:text-[34px] font-medium tracking-wide text-white">
-              
-            </h2>
-
-            <button
-              onClick={() => setIsOpen(false)}
-              className="w-12 h-12  flex items-center justify-center hover:bg-white/10 transition-all text-white text-lg"
-            >
-              ✕
-            </button>
-          </div>
+          {/* Spacer so Home starts below hamburger icon area */}
+          <div className="h-14 md:h-16 lg:h-14" />
 
           {/* HOME */}
           <div className="bg-white/10 rounded-xl !p-2 flex items-center gap-5 mb-12 shadow-xl border border-white/10">
@@ -391,7 +397,7 @@ const MenuFrame = ({ masterTl, introFinished }: any) => {
           </div>
         </div>
       </div>
-        
+
     </div>
   );
 };

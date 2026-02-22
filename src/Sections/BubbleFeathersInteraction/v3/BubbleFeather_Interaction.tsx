@@ -8,7 +8,7 @@ import ScrollTrigger from "gsap/ScrollTrigger";
 
 import { useStepScroll } from "../../../components/Observer/Observer";
 import CameraFocusController from "../../../components/CameraFocusController/CameraFocusController"; 
-import RoomDetailsPanel from "../../../components/roomDetailsPanel/RoomDetailsPanel";
+import RoomDetailsPanel from "../../../components/pages/home/RoomDetailsPanel";
 import { roomData } from "../../../components/roomDetailsPanel/RoomData";
 import NaturalFeather from "../../../components/NaturalFeather/NaturalFeather";
 import WaterSurface from "../../../components/WaterSurface/WaterSurface";
