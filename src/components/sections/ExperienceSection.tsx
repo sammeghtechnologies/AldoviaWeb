@@ -74,6 +74,17 @@ const cardVariants = {
   },
 };
 
+const categorySwitchVariants = {
+  hidden: { opacity: 0, x: 140, scale: 0.88, filter: "blur(4px)" },
+  visible: {
+    opacity: 1,
+    x: 0,
+    scale: 1,
+    filter: "blur(0px)",
+    transition: { duration: 0.78, ease: [0.18, 0.94, 0.2, 1] },
+  },
+};
+
 const ExperienceSection: React.FC = () => {
   const sectionRef = React.useRef<HTMLElement | null>(null);
   const [activeCategory, setActiveCategory] = React.useState(categories[0]);
@@ -171,7 +182,7 @@ const ExperienceSection: React.FC = () => {
     setIndex(0);
     cardRefs.current = [];
     const raf = window.requestAnimationFrame(() => {
-      scrollToCard(0, "auto");
+      scrollToCard(0, "smooth");
     });
     return () => window.cancelAnimationFrame(raf);
   }, [activeCategory, scrollToCard]);
@@ -325,64 +336,70 @@ const ExperienceSection: React.FC = () => {
 
         {/* Cards */}
         <motion.div
-          key={activeCategory}
-          ref={cardsRowRef}
-          onScroll={onCardsScroll}
-          style={{ scale: cardsScale, x: cardsX, transformOrigin: "center top" }}
-          variants={cardsContainerVariants}
+          key={`category-switch-${activeCategory}`}
+          variants={categorySwitchVariants}
           initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth !pb-4 !pr-12 md:!pr-2 [scroll-padding-inline:12vw] md:[scroll-padding-inline:6rem]"
+          animate="visible"
         >
+          <motion.div
+            ref={cardsRowRef}
+            onScroll={onCardsScroll}
+            style={{ scale: cardsScale, x: cardsX, transformOrigin: "center top" }}
+            variants={cardsContainerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth !pb-4 !pr-12 md:!pr-2 [scroll-padding-inline:12vw] md:[scroll-padding-inline:6rem]"
+          >
 
-          {filteredExperiences.map((item, cardIndex) => (
-            <motion.div
-              key={item.id}
-              ref={(node) => {
-                cardRefs.current[cardIndex] = node;
-              }}
-              variants={cardVariants}
-              whileHover={{ y: -6, scale: 1.01 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-              className={`relative rounded-2xl overflow-hidden group shrink-0 snap-center w-[70vw] sm:w-[340px] md:w-[400px] transition-all duration-500 ${cardIndex === index
-                  ? "md:scale-100 md:opacity-100"
-                  : "md:scale-[0.94] md:opacity-60"
-                }`}
-            >
-              {/* Image */}
-              <img
-                src={item.image}
-                alt={item.title}
-                className="w-full h-[420px] object-cover
+            {filteredExperiences.map((item, cardIndex) => (
+              <motion.div
+                key={item.id}
+                ref={(node) => {
+                  cardRefs.current[cardIndex] = node;
+                }}
+                variants={cardVariants}
+                whileHover={{ y: -6, scale: 1.01 }}
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                className={`relative rounded-2xl overflow-hidden group shrink-0 snap-center w-[70vw] sm:w-[340px] md:w-[400px] transition-all duration-500 ${cardIndex === index
+                    ? "md:scale-100 md:opacity-100"
+                    : "md:scale-[0.94] md:opacity-60"
+                  }`}
+              >
+                {/* Image */}
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  className="w-full h-[420px] object-cover
                            transition duration-700
                            group-hover:scale-105"
-              />
+                />
 
-              {/* Overlay Gradient */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.18)_0%,rgba(255,255,255,0.02)_28%,rgba(255,255,255,0)_42%)] opacity-70 transition duration-700 group-hover:opacity-90" />
+                {/* Overlay Gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.18)_0%,rgba(255,255,255,0.02)_28%,rgba(255,255,255,0)_42%)] opacity-70 transition duration-700 group-hover:opacity-90" />
 
-              {/* Content */}
-              <div className="absolute bottom-6 left-6 right-6 text-white">
+                {/* Content */}
+                <div className="absolute bottom-6 left-6 right-6 text-white">
 
-                <span className="text-[11px] tracking-widest uppercase
+                  <span className="text-[11px] tracking-widest uppercase
                                  bg-black/50 px-3 py-1 rounded-full">
-                  {item.tag}
-                </span>
+                    {item.tag}
+                  </span>
 
-                <h3 className="mt-4 text-[22px] font-medium [font-family:'Playfair_Display']">
-                  {item.title}
-                </h3>
+                  <h3 className="mt-4 text-[22px] font-medium [font-family:'Playfair_Display']">
+                    {item.title}
+                  </h3>
 
-                <p className="text-sm text-[#E0D6D0] mt-1">
-                  {item.subtitle}
-                </p>
+                  <p className="text-sm text-[#E0D6D0] mt-1">
+                    {item.subtitle}
+                  </p>
 
-              </div>
-            </motion.div>
-          ))}
+                </div>
+              </motion.div>
+            ))}
 
+          </motion.div>
         </motion.div>
 
         <CarouselControls

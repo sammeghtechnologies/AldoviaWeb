@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { useAssets } from "../../../app/hooks/useAssets";
 import { useNavigate } from "react-router";
@@ -110,6 +110,9 @@ const MenuFrame = ({
 
   const [isOpen, setIsOpen] = useState(false);
   const [openSection, setOpenSection] = useState("stay");
+  const [isTopBarVisible, setIsTopBarVisible] = useState(true);
+  const lastScrollYRef = useRef(0);
+  const downScrollAccumRef = useRef(0);
 
   // Logo animation
   useLayoutEffect(() => {
@@ -227,13 +230,62 @@ const MenuFrame = ({
     }
   }, [openSection]);
 
+  // Hide on downward scroll; reveal after a slight upward scroll.
+  useEffect(() => {
+    const onScroll = () => {
+      const currentY = window.scrollY || 0;
+      const delta = currentY - lastScrollYRef.current;
+      lastScrollYRef.current = currentY;
+
+      if (currentY <= 8 || isOpen) {
+        downScrollAccumRef.current = 0;
+        setIsTopBarVisible(true);
+        return;
+      }
+
+      // Scrolling down: hide quickly.
+      if (delta > 6) {
+        downScrollAccumRef.current = 0;
+        setIsTopBarVisible(false);
+        return;
+      }
+
+      // Scrolling up: reveal after small cumulative movement.
+      if (delta < -1) {
+        downScrollAccumRef.current += Math.abs(delta);
+        if (downScrollAccumRef.current >= 20) {
+          setIsTopBarVisible(true);
+          downScrollAccumRef.current = 0;
+        }
+        return;
+      }
+
+      if (Math.abs(delta) < 1) {
+        return;
+      }
+
+      downScrollAccumRef.current = 0;
+    };
+
+    lastScrollYRef.current = window.scrollY || 0;
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [isOpen]);
+
   return (
     <div
       ref={frameRef}
       className="menu-frame fixed inset-0 w-full h-full z-[2147483646] pointer-events-none"
     >
       {/* TOP BAR */}
-      <div className="absolute left-10 right-10 top-6 z-[2147483647] flex items-center justify-between pointer-events-auto">
+      <div
+        className={`absolute left-10 right-10 top-6 z-[2147483647] flex items-center justify-between transition-all duration-300 ${
+          isTopBarVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "-translate-y-12 opacity-0 pointer-events-none"
+        }`}
+      >
         {/* ✅ Pass introFinished here */}
         <Logo_top introFinished={introFinished} />
 

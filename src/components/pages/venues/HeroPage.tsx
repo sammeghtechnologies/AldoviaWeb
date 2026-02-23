@@ -1,22 +1,287 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import MenuFrame from "../../MenuFrame/v2/MenuFrame";
 import AnimatedImageHero from "../../ui/AnimatedImageHero";
 import HeroBreadcrumb from "../../ui/HeroBreadcrumb";
+import CarouselCards from "../../ui/CarouselCardEvents";
+
+type VenueCard = {
+  id: string;
+  image: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  dimensions: {
+    area: string;
+    height: string;
+    width: string;
+    length: string;
+  };
+  seating: {
+    theater: string;
+    ushape: string;
+    classroom: string;
+    boardroom: string;
+    cluster: string;
+    cocktails: string;
+    round: string;
+  };
+  capacity: string;
+};
 
 const venueImages = [
   "assets/venues/herobanner/galaxy1.jpg",
   "assets/venues/herobanner/corridor.jpg",
   "assets/venues/herobanner/lotus.jpg",
 ];
+const venuesSectionBg = "/assets/backgrounds/swanbrown.png";
+
+const venueTabs = [
+  "Galaxy Grand Ballroom",
+  "Emerald Hall",
+  "Royal Pavilion",
+  "Sapphire Lounge",
+  "Crystal Court",
+  "Diamond Arena",
+] as const;
+
+type VenueTab = (typeof venueTabs)[number];
+type VenueDimensions = {
+  area: string;
+  height: string;
+  width: string;
+  length: string;
+};
+
+type VenueSeating = {
+  theater: string;
+  ushape: string;
+  classroom: string;
+  boardroom: string;
+  cluster: string;
+  cocktails: string;
+  round: string;
+};
+
+type VenueTabContent = {
+  subtitle: string;
+  description: string;
+  dimensions: VenueDimensions;
+  seating: VenueSeating;
+};
+
+const venueContentByTab: Record<VenueTab, VenueTabContent> = {
+  "Galaxy Grand Ballroom": {
+    subtitle: "Opulent Celebrations & Galas",
+    description:
+      "Spacious and versatile venue is ideal for large-scale events, from glamorous weddings to corporate galas.",
+
+    dimensions: {
+      area: "1,29,065 sq.ft",
+      height: "21 ft",
+      width: "311 ft",
+      length: "415 ft",
+    },
+
+    seating: {
+      theater: "3000",
+      ushape: "450",
+      classroom: "1800",
+      boardroom: "250",
+      cluster: "1200",
+      cocktails: "3500",
+      round: "2000",
+    },
+  },
+
+  "Emerald Hall": {
+    subtitle: "Elegant Receptions & Ceremonies",
+    description:
+      "A luxurious venue crafted for high-style receptions, engagement ceremonies, and timeless social evenings.",
+
+    dimensions: {
+      area: "95,400 sq.ft",
+      height: "18 ft",
+      width: "240 ft",
+      length: "330 ft",
+    },
+
+    seating: {
+      theater: "2200",
+      ushape: "320",
+      classroom: "1400",
+      boardroom: "180",
+      cluster: "950",
+      cocktails: "2600",
+      round: "1500",
+    },
+  },
+
+  "Royal Pavilion": {
+    subtitle: "Grand Banquets & Conferences",
+    description:
+      "Designed for premium banquets and business events with expansive floor space and refined architecture.",
+
+    dimensions: {
+      area: "78,250 sq.ft",
+      height: "20 ft",
+      width: "210 ft",
+      length: "280 ft",
+    },
+
+    seating: {
+      theater: "1800",
+      ushape: "280",
+      classroom: "1100",
+      boardroom: "160",
+      cluster: "800",
+      cocktails: "2100",
+      round: "1200",
+    },
+  },
+
+  "Sapphire Lounge": {
+    subtitle: "Intimate Premium Events",
+    description:
+      "A polished space for private events, curated parties, and executive social evenings.",
+
+    dimensions: {
+      area: "38,900 sq.ft",
+      height: "14 ft",
+      width: "150 ft",
+      length: "210 ft",
+    },
+
+    seating: {
+      theater: "850",
+      ushape: "120",
+      classroom: "500",
+      boardroom: "90",
+      cluster: "350",
+      cocktails: "1100",
+      round: "600",
+    },
+  },
+
+  "Crystal Court": {
+    subtitle: "Refined Mid-Scale Gatherings",
+    description:
+      "Elegant design and adaptable seating create an ideal setting for refined social and corporate events.",
+
+    dimensions: {
+      area: "45,700 sq.ft",
+      height: "16 ft",
+      width: "170 ft",
+      length: "230 ft",
+    },
+
+    seating: {
+      theater: "1050",
+      ushape: "160",
+      classroom: "650",
+      boardroom: "120",
+      cluster: "450",
+      cocktails: "1300",
+      round: "750",
+    },
+  },
+
+  "Diamond Arena": {
+    subtitle: "Large-Format Productions",
+    description:
+      "Built for massive productions, entertainment showcases, and full-scale wedding spectacles.",
+
+    dimensions: {
+      area: "1,42,500 sq.ft",
+      height: "28 ft",
+      width: "350 ft",
+      length: "450 ft",
+    },
+
+    seating: {
+      theater: "4200",
+      ushape: "600",
+      classroom: "2500",
+      boardroom: "400",
+      cluster: "1800",
+      cocktails: "5000",
+      round: "3000",
+    },
+  },
+};
+
+const venueImagesByTab: Record<VenueTab, string[]> = {
+  "Galaxy Grand Ballroom": [
+    "/assets/venues/herobanner/galaxy.jpg",
+    "/assets/venues/herobanner/galaxy1.jpg",
+    "/assets/venues/herobanner/corridor.jpg",
+  ],
+  "Emerald Hall": [
+    "/assets/venues/herobanner/orchid.jpg",
+    "/assets/venues/herobanner/rose.jpg",
+    "/assets/venues/herobanner/tulip.jpg",
+    "/assets/venues/herobanner/galaxy.jpg",
+    "/assets/venues/herobanner/galaxy1.jpg",
+    "/assets/venues/herobanner/corridor.jpg"
+  ],
+  "Royal Pavilion": [
+    "/assets/venues/herobanner/lotus.jpg",
+    "/assets/venues/herobanner/galaxy.jpg",
+    "/assets/venues/herobanner/galaxy1.jpg",
+  ],
+  "Sapphire Lounge": [
+    "/assets/venues/herobanner/corridor.jpg",
+    "/assets/venues/herobanner/lotus.jpg",
+    "/assets/venues/herobanner/galaxy1.jpg",
+  ],
+  "Crystal Court": [
+    "/assets/venues/herobanner/galaxy.jpg",
+    "/assets/venues/herobanner/corridor.jpg",
+    "/assets/venues/herobanner/lotus.jpg",
+  ],
+  "Diamond Arena": [
+    "/assets/venues/herobanner/galaxy1.jpg",
+    "/assets/venues/herobanner/galaxy.jpg",
+    "/assets/venues/herobanner/lotus.jpg",
+  ],
+};
+
+const venueCardsByTab: Record<VenueTab, VenueCard[]> = venueTabs.reduce(
+  (acc, tab) => {
+    const content = venueContentByTab[tab];
+    const idPrefix = tab.toLowerCase().replace(/\s+/g, "-");
+    acc[tab] = venueImagesByTab[tab].map((image, index) => ({
+      id: `${idPrefix}-${index + 1}`,
+      image,
+      title: tab,
+      subtitle: content.subtitle,
+      description: content.description,
+      dimensions: content.dimensions,
+      seating: content.seating,
+      capacity: `${content.seating.theater} seater`,
+    }));
+    return acc;
+  },
+  {} as Record<VenueTab, VenueCard[]>
+);
 
 const HeroPage: React.FC = () => {
   const navigate = useNavigate();
+  const [active, setActive] = useState<(typeof venueTabs)[number]>(
+    "Galaxy Grand Ballroom"
+  );
+  const selectedCards = venueCardsByTab[active];
+  const handleTabChange = (value: string) => {
+    if (venueTabs.includes(value as (typeof venueTabs)[number])) {
+      setActive(value as (typeof venueTabs)[number]);
+    }
+  };
+
 
   return (
     <>
       <MenuFrame showBookNow={false} />
-      <div className="fixed left-5 top-24 z-[2147483645] md:left-8 md:top-26">
+      <div className="absolute left-5 top-24 z-[2147483645] md:left-8 md:top-26">
         <HeroBreadcrumb
           label="Venues"
           onHomeClick={() => navigate("/home")}
@@ -34,6 +299,17 @@ const HeroPage: React.FC = () => {
         controlsClassName="!mt-0 !px-0"
         controlsProgressBarClassName="!w-[140px] !max-w-[140px] shrink-0"
       />
+
+      <section className="w-full">
+        <CarouselCards
+          items={selectedCards}
+          sectionBackgroundImage={venuesSectionBg}
+          tabs={[...venueTabs]}
+          activeTab={active}
+          onTabChange={handleTabChange}
+        />
+      </section>
+
     </>
   );
 };

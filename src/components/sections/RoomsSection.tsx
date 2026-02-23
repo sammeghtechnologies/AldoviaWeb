@@ -8,8 +8,15 @@ import RoomsCard from "../pages/home/RoomsCard";
 import SlidingTitleReveal from "../ui/SlidingTitleReveal";
 import { roomsData } from "../../app/mockData/roomsData";
 
-const premiumEase: [number, number, number, number] = [0.19, 1, 0.22, 1];
-const deckSpring = { type: "spring" as const, stiffness: 140, damping: 22, mass: 0.82 };
+const premiumEase: [number, number, number, number] = [0.22, 1, 0.36, 1];
+const deckSpring = {
+  type: "spring" as const,
+  stiffness: 112,
+  damping: 26,
+  mass: 0.96,
+  restDelta: 0.001,
+  restSpeed: 0.001,
+};
 
 const RoomsSection: React.FC = () => {
   const sectionRef = React.useRef<HTMLElement | null>(null);
@@ -162,15 +169,19 @@ const RoomsSection: React.FC = () => {
               }}
               transition={{
                 ...deckSpring,
-                duration: isIntroAnimating ? 0.58 : 0.5,
+                duration: isIntroAnimating ? 0.66 : 0.58,
                 delay: isIntroAnimating ? 0.08 : 0.02,
                 ease: premiumEase,
               }}
               style={{ zIndex: 360, filter: "blur(2.8px)" }}
             >
-              <div className="flex w-full justify-center [transform:rotateY(14deg)] origin-right">
+              <motion.div
+                className="flex w-full justify-center [transform:rotateY(14deg)] origin-right"
+                whileHover={{ scale: 1.05, y: -6 }}
+                transition={{ duration: 0.28, ease: premiumEase }}
+              >
                 <RoomsCard {...roomsData[desktopLeftInactiveIndex]} />
-              </div>
+              </motion.div>
             </motion.div>
 
             <motion.div
@@ -189,15 +200,19 @@ const RoomsSection: React.FC = () => {
               }}
               transition={{
                 ...deckSpring,
-                duration: isIntroAnimating ? 0.58 : 0.5,
+                duration: isIntroAnimating ? 0.66 : 0.58,
                 delay: isIntroAnimating ? 0.12 : 0.04,
                 ease: premiumEase,
               }}
               style={{ zIndex: 360, filter: "blur(2.8px)" }}
             >
-              <div className="flex w-full justify-center [transform:rotateY(-14deg)] origin-left">
+              <motion.div
+                className="flex w-full justify-center [transform:rotateY(-14deg)] origin-left"
+                whileHover={{ scale: 1.05, y: -6 }}
+                transition={{ duration: 0.28, ease: premiumEase }}
+              >
                 <RoomsCard {...roomsData[desktopRightInactiveIndex]} />
-              </div>
+              </motion.div>
             </motion.div>
 
             <motion.div
@@ -252,15 +267,15 @@ const RoomsSection: React.FC = () => {
                   }}
                   transition={{
                     ...deckSpring,
-                    duration: isIntroAnimating ? 0.66 : 0.54,
+                    duration: isIntroAnimating ? 0.74 : 0.62,
                     delay: isIntroAnimating ? 0.18 + idx * 0.06 : idx * 0.04,
                     ease: premiumEase,
                   }}
                 >
                   <motion.div
                     className="flex w-full justify-center"
-                    whileHover={{ y: -4 }}
-                    transition={{ duration: 0.3, ease: premiumEase }}
+                    whileHover={{ y: -8, scale: 1.06 }}
+                    transition={{ duration: 0.28, ease: premiumEase }}
                   >
                     <RoomsCard {...roomsData[roomIndex]} />
                   </motion.div>

@@ -16,14 +16,14 @@ const LuxuryCard: React.FC<LuxuryCardProps> = ({
 }) => {
      const rotateX = useMotionValue(0);
      const rotateY = useMotionValue(0);
-     const springRotateX = useSpring(rotateX, { stiffness: 180, damping: 16, mass: 0.5 });
-     const springRotateY = useSpring(rotateY, { stiffness: 180, damping: 16, mass: 0.5 });
+     const springRotateX = useSpring(rotateX, { stiffness: 220, damping: 14, mass: 0.45 });
+     const springRotateY = useSpring(rotateY, { stiffness: 220, damping: 14, mass: 0.45 });
 
      const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
           const rect = event.currentTarget.getBoundingClientRect();
           const px = (event.clientX - rect.left) / rect.width;
           const py = (event.clientY - rect.top) / rect.height;
-          const tilt = 8;
+          const tilt = 14;
           rotateY.set((px - 0.5) * tilt * 2);
           rotateX.set((0.5 - py) * tilt * 2);
      };
@@ -35,17 +35,21 @@ const LuxuryCard: React.FC<LuxuryCardProps> = ({
 
      return (
           <motion.div
-               whileHover={{ scale: 1.02 }}
-               transition={{ duration: 0.4 }}
+               whileHover={{
+                    scale: 1.04,
+                    y: -8,
+                    boxShadow: "0 34px 72px rgba(0,0,0,0.45), 0 8px 22px rgba(0,0,0,0.28)",
+               }}
+               transition={{ duration: 0.35 }}
                onMouseMove={handleMouseMove}
                onMouseLeave={handleMouseLeave}
                style={{
                     rotateX: springRotateX,
                     rotateY: springRotateY,
                     transformStyle: "preserve-3d",
-                    perspective: 1200,
+                    transformPerspective: 1800,
                }}
-               className="relative w-full max-w-md h-[520px] rounded-[28px] overflow-hidden shadow-2xl group will-change-transform"
+               className="relative w-full max-w-md h-[520px] rounded-[28px] overflow-hidden bg-[#1B120E] shadow-[0_22px_46px_rgba(0,0,0,0.38)] group will-change-transform"
           >
                {/* Image */}
                <img
@@ -53,14 +57,14 @@ const LuxuryCard: React.FC<LuxuryCardProps> = ({
                     alt={title}
                     loading="lazy"
                     decoding="async"
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="absolute inset-0 w-full h-full object-cover [transform:translateZ(-36px)_scale(1.12)] transition-transform duration-700 group-hover:scale-110"
                />
 
                {/* Gradient Overlay */}
-               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+               <div className="absolute inset-0 [transform:translateZ(18px)] bg-gradient-to-t from-black/92 via-black/56 to-transparent" />
 
                {/* Content */}
-               <div className="absolute bottom-0 w-full !px-8 !pb-12 !pt-20 sm:!px-10 sm:!pb-14 translate-y-6">
+               <div className="absolute bottom-0 w-full !px-8 !pb-12 !pt-20 sm:!px-10 sm:!pb-14 translate-y-6 [transform:translateZ(42px)]">
                     <p className="!mb-3 text-[12px] tracking-[0.25em] uppercase text-yellow-400">
                          {category}
                     </p>

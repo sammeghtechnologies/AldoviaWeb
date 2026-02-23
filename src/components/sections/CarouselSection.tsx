@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { motion, useInView } from "framer-motion";
+import React, { useRef, useState } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import CarouselControls from "../ui/CarouselControls";
 import LuxuryCard from "../ui/LuxuryCard";
 
@@ -26,8 +26,23 @@ const cards = [
 
 const CarouselSection: React.FC = () => {
   const [index, setIndex] = useState(0);
-  const desktopRowRef = React.useRef<HTMLDivElement | null>(null);
-  const desktopRowInView = useInView(desktopRowRef, { amount: 0.35, once: false });
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+
+  // Desktop row motion: right -> center -> left as user scrolls through this section.
+  const desktopRowX = useTransform(
+    scrollYProgress,
+    [0, 0.35, 0.62, 1],
+    [220, 0, 0, -260]
+  );
+  const desktopRowOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.12, 0.9, 1],
+    [0, 1, 1, 0.82]
+  );
 
   const next = () => {
     setIndex((prev) => (prev + 1) % cards.length);
@@ -41,6 +56,7 @@ const CarouselSection: React.FC = () => {
 
   return (
     <section
+      ref={sectionRef}
       className="relative flex w-full min-h-[84vh] md:min-h-screen items-center justify-center overflow-hidden bg-center bg-cover bg-no-repeat py-14 md:py-20 [&_p]:!text-sm"
       style={{
         backgroundColor: "#21140F",
@@ -110,24 +126,12 @@ const CarouselSection: React.FC = () => {
           })}
         </div>
 
-        <div ref={desktopRowRef} className="hidden !mt-8 w-full grid-cols-3 gap-10 md:grid">
+        <motion.div
+          style={{ x: desktopRowX, opacity: desktopRowOpacity }}
+          className="hidden !mt-8 w-full grid-cols-3 gap-10 md:grid"
+        >
           {cards.map((card, i) => (
-            <motion.div
-              key={`desktop-${i}`}
-              initial={false}
-              animate={
-                desktopRowInView
-                  ? { opacity: 1, x: 0, y: 0, scale: 1, filter: "blur(0px)" }
-                  : { opacity: 0, x: 120, y: 10, scale: 0.96, filter: "blur(6px)" }
-              }
-              transition={{
-                type: "spring",
-                stiffness: 90,
-                damping: 18,
-                mass: 0.9,
-                delay: i * 0.12,
-              }}
-            >
+            <motion.div key={`desktop-${i}`}>
               <LuxuryCard
                 image={card.image}
                 category={card.category}
@@ -136,7 +140,7 @@ const CarouselSection: React.FC = () => {
               />
             </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         <div className="w-full md:hidden">
           <CarouselControls
