@@ -5,6 +5,8 @@ import Error404 from "../404";
 import HeroPage from "../components/pages/home/HeroPage";
 import VenuesHeroPage from "../components/pages/venues/HeroPage";
 import RoomsPage from "../components/pages/rooms/RoomsPage";
+import ExperiencesPackagesPage from "../components/pages/experiencespackages/ExperiencesPackagesPage";
+
 
 const AppRoutes = () => {
   return (
@@ -19,6 +21,7 @@ const AppRoutes = () => {
         <Route path="/home" element={<HeroPage />} />
         <Route path="/venues" element={<VenuesHeroPage />} />
         <Route path="/rooms" element={<RoomsPage/>}/>
+        <Route path="/experiences-packages" element={<ExperiencesPackagesPage/>}/>  
 
         {/* 404 Page for unknown routes */}
         <Route path="*" element={<Error404 />} />

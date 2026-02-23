@@ -13,187 +13,139 @@ const RoomsPage = () => {
   const [roomIndex, setRoomIndex] = useState(0);
   const [view, setView] = useState<'hero' | 'details'>('hero');
   const [direction, setDirection] = useState<Direction>('downToDetails');
-
-  // --- STATE REFS ---
-  const viewRef = useRef(view);
-  const indexRef = useRef(roomIndex);
-  viewRef.current = view;
-  indexRef.current = roomIndex;
-
-  // --- SCROLL ENGINE REFS ---
-  const timeOfLastChange = useRef(0);
-  const accum = useRef(0); // The Trackpad Sponge
-  const lastWheelTime = useRef(0);
-  const touchStartY = useRef(0);
+  
+  // Strict locks to prevent skipping
+  const isAnimating = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // --- 1. SILENT JS PRELOADER (THE SMOOTHNESS FIX) ---
-  // This loads all background images AND gallery images into the browser cache
-  // silently, without clogging the DOM and causing lag.
-  useEffect(() => {
-    const preloadImages = () => {
-      roomsData.forEach(room => {
-        if (room.bgImage) { const img = new Image(); img.src = room.bgImage; }
-        if (room.staticImage) { const img = new Image(); img.src = room.staticImage; }
-        
-        // Preload the flying furniture
-        room.layers?.forEach(layer => {
-          if (layer.src) { const img = new Image(); img.src = layer.src; }
-        });
-        
-        // Preload the large gallery images for RoomDetails
-        room.gallery?.forEach(imgSrc => {
-          if (imgSrc) { const img = new Image(); img.src = imgSrc; }
-        });
-      });
-    };
+  const triggerPageChange = (delta: number, forceIndex?: number) => {
+    // 1. HARD LOCK: If we are already moving, kill all incoming events
+    if (isAnimating.current) return;
     
-    // Wait 500ms after the page loads before starting the heavy downloads
-    // so the initial load is instant.
-    const preloaderTimeout = setTimeout(preloadImages, 500);
-    return () => clearTimeout(preloaderTimeout);
-  }, []);
-
-  const triggerPageChange = (deltaY: number) => {
+    isAnimating.current = true;
     const totalRooms = roomsData.length;
-    const currentView = viewRef.current;
-    const currentIndex = indexRef.current;
 
-    if (deltaY > 0) {
-      if (currentView === 'hero') {
-        setDirection('downToDetails');
-        setView('details');
-      } else {
-        setDirection('downToNextHero');
-        setRoomIndex((currentIndex + 1) % totalRooms);
-        setView('hero');
-      }
+    if (forceIndex !== undefined) {
+      setDirection('downToNextHero');
+      setRoomIndex(forceIndex);
+      setView('hero');
     } else {
-      if (currentView === 'details') {
-        setDirection('upToHero');
-        setView('hero');
+      // 2. LOGIC: Move only one step regardless of how large delta is
+      if (delta > 0) {
+        if (view === 'hero') { 
+          setDirection('downToDetails'); 
+          setView('details'); 
+        } else { 
+          setDirection('downToNextHero'); 
+          setRoomIndex(p => (p + 1) % totalRooms); 
+          setView('hero'); 
+        }
       } else {
-        setDirection('upToPrevDetails');
-        setRoomIndex((currentIndex - 1 + totalRooms) % totalRooms);
-        setView('details');
+        if (view === 'details') { 
+          setDirection('upToHero'); 
+          setView('hero'); 
+        } else { 
+          setDirection('upToPrevDetails'); 
+          setRoomIndex(p => (p - 1 + totalRooms) % totalRooms); 
+          setView('details'); 
+        }
       }
     }
+
+    // 3. RELEASE LOCK: Match this exactly to your transition duration (0.8s)
+    setTimeout(() => { 
+      isAnimating.current = false; 
+    }, 850); 
   };
 
-  // --- 2. THE FLUID SCROLL LOGIC ---
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
     const handleWheel = (e: WheelEvent) => {
-      e.preventDefault(); 
-      const now = Date.now();
+      e.preventDefault();
+      
+      // 4. SENSITIVITY THRESHOLD: Ignore micro-scrolls/noise
+      if (Math.abs(e.deltaY) < 30) return;
 
-      // Reset sponge if user stops scrolling for 50ms
-      if (now - lastWheelTime.current > 50) accum.current = 0;
-      lastWheelTime.current = now;
+      // Only trigger the change; the Hard Lock handles the rest
+      triggerPageChange(e.deltaY);
+    };
 
-      // Hard lock during the 800ms animation
-      if (now - timeOfLastChange.current < 850) {
-        accum.current = 0; 
-        return;
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('wheel', handleWheel, { passive: false });
+    }
+    return () => container?.removeEventListener('wheel', handleWheel);
+  }, [view, roomIndex]);
+
+  // Preload ALL room images on component mount to eliminate any loading lag during transitions
+  // This assumes the number of rooms is small; if large, consider lazy preloading only for current/adjacent
+  // If roomsData has additional images (e.g., room.gallery: string[]), preload those here too
+  useEffect(() => {
+    roomsData.forEach(room => {
+      if (room.bgImage) {
+        const img = new Image();
+        img.src = room.bgImage;
       }
+      // Example if there are more images:
+      // room.gallery?.forEach(src => {
+      //   const img = new Image();
+      //   img.src = src;
+      // });
+    });
+  }, []);
 
-      // Add up tiny trackpad movements
-      accum.current += e.deltaY;
+  // Optional: Still preload adjacent for any dynamic changes, but with all preloaded, this is redundant
+  useEffect(() => {
+    const nextIdx = (roomIndex + 1) % roomsData.length;
+    const prevIdx = (roomIndex - 1 + roomsData.length) % roomsData.length;
+    [roomIndex, nextIdx, prevIdx].forEach(idx => {
+      const img = new Image();
+      if (roomsData[idx].bgImage) img.src = roomsData[idx].bgImage!;
+      // Add other images here if applicable
+    });
+  }, [roomIndex]);
 
-      // Trigger once momentum hits 50px
-      if (Math.abs(accum.current) > 50) {
-        const delta = accum.current;
-        accum.current = 0; 
-        timeOfLastChange.current = now; 
-        triggerPageChange(delta);
-      }
-    };
-
-    const handleTouchStart = (e: TouchEvent) => {
-      touchStartY.current = e.touches[0].clientY;
-    };
-
-    const handleTouchMove = (e: TouchEvent) => e.preventDefault();
-
-    const handleTouchEnd = (e: TouchEvent) => {
-      const now = Date.now();
-      if (now - timeOfLastChange.current < 850) return;
-
-      const distance = touchStartY.current - e.changedTouches[0].clientY;
-      if (Math.abs(distance) > 40) {
-        timeOfLastChange.current = now;
-        triggerPageChange(distance);
-      }
-    };
-
-    container.addEventListener('wheel', handleWheel, { passive: false });
-    container.addEventListener('touchstart', handleTouchStart, { passive: false });
-    container.addEventListener('touchmove', handleTouchMove, { passive: false });
-    container.addEventListener('touchend', handleTouchEnd, { passive: false });
-
-    return () => {
-      container.removeEventListener('wheel', handleWheel);
-      container.removeEventListener('touchstart', handleTouchStart);
-      container.removeEventListener('touchmove', handleTouchMove);
-      container.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, []); 
-
-  // --- 3. 2D MATRIX ANIMATIONS ---
   const slideVariants = {
-    enter: (dir: Direction) => {
-      if (dir === 'downToDetails') return { y: '100%', x: '0%' };
-      if (dir === 'downToNextHero') return { x: '100%', y: '0%' }; 
-      if (dir === 'upToHero') return { y: '-100%', x: '0%' };
-      if (dir === 'upToPrevDetails') return { x: '-100%', y: '0%' }; 
-      return { x: '0%', y: '0%' };
-    },
-    center: {
-      x: '0%', y: '0%'
-    },
-    exit: (dir: Direction) => {
-      if (dir === 'downToDetails') return { y: '-100%', x: '0%' }; 
-      if (dir === 'downToNextHero') return { x: '-100%', y: '0%' }; 
-      if (dir === 'upToHero') return { y: '100%', x: '0%' }; 
-      if (dir === 'upToPrevDetails') return { x: '100%', y: '0%' }; 
-      return { x: '0%', y: '0%' };
-    },
+    enter: (dir: Direction) => ({
+      y: dir.includes('downToDetails') ? '100%' : dir.includes('upToHero') ? '-100%' : 0,
+      x: dir === 'downToNextHero' ? '100%' : dir === 'upToPrevDetails' ? '-100%' : 0,
+    }),
+    center: { x: 0, y: 0 },
+    exit: (dir: Direction) => ({
+      y: dir.includes('downToDetails') ? '-100%' : dir.includes('upToHero') ? '100%' : 0,
+      x: dir === 'downToNextHero' ? '-100%' : dir === 'upToPrevDetails' ? '100%' : 0,
+    }),
   };
-
-  const pageKey = view === 'hero' ? 'hero-view' : `details-view-${roomIndex}`;
 
   return (
-    <div ref={containerRef} className="relative w-full h-screen overflow-hidden bg-[#111] font-sans">
-      
-      <div className="fixed top-0 w-full z-50 pointer-events-none">
-        <div className="pointer-events-auto">
-          <Navbar />
-        </div>
-      </div>
+    <div ref={containerRef} className="relative w-full h-screen overflow-hidden bg-black">
+      <Navbar />
 
-      {/* DOM PRELOADER DELETED. IT IS NOW HANDLED EFFICIENTLY IN JS ABOVE */}
-
-      <AnimatePresence initial={false} custom={direction}>
+      <AnimatePresence initial={false} custom={direction} mode="popLayout">
         <motion.div
-          key={pageKey} 
+          key={`${view}-${roomIndex}`}
           custom={direction}
           variants={slideVariants}
           initial="enter"
           animate="center"
           exit="exit"
-          // Switched to a hyper-smooth Apple-style cubic bezier ease
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          style={{ willChange: "transform" }}
-          className="absolute inset-0 w-full h-full bg-[#111]"
+          transition={{ 
+            duration: 0.8, 
+            ease: [0.19, 1, 0.22, 1] // High-end "Apple" quintic ease
+          }}
+          style={{ 
+            position: 'absolute',
+            inset: 0,
+            willChange: 'transform',
+            transform: 'translate3d(0,0,0)',
+            backfaceVisibility: 'hidden'
+          }}
         >
           {view === 'hero' ? (
             <HeroSection 
               activeRoom={roomsData[roomIndex]} 
               setActiveRoom={(room) => {
                 const targetIdx = roomsData.findIndex(r => r.id === room.id);
-                setRoomIndex(targetIdx);
+                triggerPageChange(0, targetIdx);
               }} 
             />
           ) : (
