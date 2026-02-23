@@ -19,9 +19,9 @@ const Navbar = () => {
           Book Now
         </button>
         {/* Fixed width and height so the SVG never gets crushed */}
-        <button className="w-8 h-8 flex items-center justify-center hover:scale-105 transition-transform">
-          <Navhamburger />
-        </button>
+<button className="relative right-4 w-8 h-8 flex items-center justify-center hover:scale-105 transition-transform">
+  <Navhamburger />
+</button>
       </div>
       
     </nav>
