@@ -47,9 +47,9 @@ export default function CarouselCards({
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const frameRef = useRef<number | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [zoomedImage, setZoomedImage] = useState<{ src: string; alt: string } | null>(null);
+  const [zoomedIndex, setZoomedIndex] = useState<number | null>(null);
 
-  const cardWidth = useMemo(() => "min(78vw, 320px)", []);
+  const cardWidth = useMemo(() => "clamp(190px, 80vw, 280px)", []);
   const itemsSignature = useMemo(
     () => items.map((item) => item.id).join("|"),
     [items]
@@ -106,6 +106,19 @@ export default function CarouselCards({
     onSwipedRight: () => setIndexAndScroll(activeIndex - 1),
     trackMouse: true,
   });
+  const zoomHandlers = useSwipeable({
+    onSwipedLeft: () =>
+      setZoomedIndex((prev) => {
+        if (prev === null || items.length === 0) return prev;
+        return (prev + 1) % items.length;
+      }),
+    onSwipedRight: () =>
+      setZoomedIndex((prev) => {
+        if (prev === null || items.length === 0) return prev;
+        return (prev - 1 + items.length) % items.length;
+      }),
+    trackMouse: true,
+  });
 
   useEffect(() => {
     const initialIndex = Math.min(defaultActiveIndex, Math.max(0, items.length - 1));
@@ -141,11 +154,23 @@ export default function CarouselCards({
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setZoomedImage(null);
+        setZoomedIndex(null);
+      }
+      if (event.key === "ArrowRight") {
+        setZoomedIndex((prev) => {
+          if (prev === null || items.length === 0) return prev;
+          return (prev + 1) % items.length;
+        });
+      }
+      if (event.key === "ArrowLeft") {
+        setZoomedIndex((prev) => {
+          if (prev === null || items.length === 0) return prev;
+          return (prev - 1 + items.length) % items.length;
+        });
       }
     };
 
-    if (zoomedImage) {
+    if (zoomedIndex !== null) {
       document.body.style.overflow = "hidden";
       window.addEventListener("keydown", onKeyDown);
     }
@@ -154,7 +179,7 @@ export default function CarouselCards({
       document.body.style.overflow = "";
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [zoomedImage]);
+  }, [items.length, zoomedIndex]);
 
   if (items.length === 0) {
     return null;
@@ -163,137 +188,144 @@ export default function CarouselCards({
 
   return (
     <section
-      className="relative mx-auto w-full overflow-hidden !pb-8"
-      style={{
-        backgroundImage: `url(/assets/venues/herobanner/galaxy.jpg)`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
+      className="relative mx-auto w-full overflow-hidden !pb-2"
     >
-      <div className="absolute inset-0 bg-black/80" />
-      <div className="relative z-10">
-        {tabs.length > 0 && activeTab && onTabChange && (
-          <div className="!px-2 md:!px-6 lg:!px-10 !pt-4">
-            <ScrollSelectTabs items={tabs} active={activeTab} onChange={onTabChange} />
-          </div>
-        )}
-        <div
-          {...handlers}
-          ref={containerRef}
-          className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory !py-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          style={{
-            paddingInline: `calc((100% - ${cardWidth}) / 2)`,
-            perspective: "1200px",
-          }}
-        >
-          {items.map((item, index) => (
-            <motion.div
-              key={item.id}
-              ref={(node) => {
-                cardRefs.current[index] = node;
-              }}
-              animate={{
-                scale:
-                  index === activeIndex
-                    ? 1
-                    : Math.abs(index - activeIndex) === 1
-                      ? 0.92
-                      : 0.86,
-                opacity:
-                  index === activeIndex
-                    ? 1
-                    : Math.abs(index - activeIndex) === 1
-                      ? 0.78
-                      : 0.62,
-                y:
-                  index === activeIndex
-                    ? 0
-                    : Math.abs(index - activeIndex) === 1
-                      ? 10
-                      : 18,
-                rotateY:
-                  index === activeIndex
-                    ? 0
-                    : index < activeIndex
-                      ? 8
-                      : -8,
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 240,
-                damping: 26,
-                mass: 0.7,
-              }}
-              className="snap-center flex-shrink-0 rounded-2xl bg-white shadow-xl cursor-grab select-none overflow-hidden"
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(14, 1, 1, 0.78), rgba(65, 52, 47, 0.78)), url('/assets/venues/herobanner/corridor.jpg')",
+        }}
+      />
+      <div className="relative z-10 !pt-8">
+        <div className="z-[130] w-full">
+          {tabs.length > 0 && activeTab && onTabChange && (
+            <div className="!px-2 md:!px-6 lg:!px-10">
+              <ScrollSelectTabs items={tabs} active={activeTab} onChange={onTabChange} />
+            </div>
+          )}
+        </div>
+        <div className="!pb-24">
+          <div className="z-[120]">
+            <div
+              {...handlers}
+              ref={containerRef}
+              className="flex gap-2 overflow-x-auto scroll-smooth snap-x snap-mandatory !py-5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               style={{
-                width: cardWidth,
-                transformStyle: "preserve-3d",
-                zIndex: items.length - Math.abs(index - activeIndex),
+                paddingInline: `calc((100% - ${cardWidth}) / 2)`,
+                perspective: "1200px",
               }}
             >
-              <div className="h-80 rounded-t-2xl overflow-hidden">
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="h-full w-full object-cover cursor-zoom-in"
-                  onClick={() => setZoomedImage({ src: item.image, alt: item.title })}
-                />
-              </div>
-            </motion.div>
-          ))}
+              {items.map((item, index) => (
+                <motion.div
+                  key={item.id}
+                  ref={(node) => {
+                    cardRefs.current[index] = node;
+                  }}
+                  animate={{
+                    scale:
+                      index === activeIndex
+                        ? 1.08
+                        : Math.abs(index - activeIndex) === 1
+                          ? 0.92
+                          : 0.86,
+                    opacity:
+                      index === activeIndex
+                        ? 1
+                        : Math.abs(index - activeIndex) === 1
+                          ? 0.78
+                          : 0.62,
+                    rotateY:
+                      index === activeIndex
+                        ? 0
+                        : index < activeIndex
+                          ? 8
+                          : -8,
+                  }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 240,
+                    damping: 26,
+                    mass: 0.7,
+                  }}
+                  className="snap-center flex-shrink-0 rounded-2xl bg-white shadow-xl cursor-grab select-none overflow-hidden"
+                  style={{
+                    width: cardWidth,
+                    transformStyle: "preserve-3d",
+                    zIndex: items.length - Math.abs(index - activeIndex),
+                  }}
+                >
+                  <div className="h-70 rounded-t-2xl overflow-hidden">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="h-full w-full object-cover cursor-zoom-in"
+                      onClick={() => setZoomedIndex(index)}
+                    />
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          <div className="!mt-1">
+            <VenueInfo
+              contentKey={activeTab ?? activeItem.id}
+              title={activeItem.title}
+              subtitle={activeItem.subtitle ?? "Opulent Celebrations & Galas"}
+              description={
+                activeItem.description ??
+                "Spacious and versatile venue is ideal for large-scale events, from glamorous weddings to corporate galas."
+              }
+              dimensions={
+                activeItem.dimensions ?? {
+                  area: "1,29,065 sq.ft",
+                  height: "21 ft",
+                  width: "311 ft",
+                  length: "415 ft",
+                }
+              }
+              seatings={
+                activeItem.seating ?? {
+                  theater: "3000",
+                  ushape: "450",
+                  classroom: "1800",
+                  boardroom: "250",
+                  cluster: "1200",
+                  cocktails: "3500",
+                  round: "2000",
+                }
+              }
+              capacity={activeItem.capacity ?? "3000 seater"}
+              backgroundImage={sectionBackgroundImage}
+            />
+          </div>
         </div>
-        <VenueInfo
-          title={activeItem.title}
-          subtitle={activeItem.subtitle ?? "Opulent Celebrations & Galas"}
-          description={
-            activeItem.description ??
-            "Spacious and versatile venue is ideal for large-scale events, from glamorous weddings to corporate galas."
-          }
-          dimensions={
-            activeItem.dimensions ?? {
-              area: "1,29,065 sq.ft",
-              height: "21 ft",
-              width: "311 ft",
-              length: "415 ft",
-            }
-          }
-          seatings={
-            activeItem.seating ?? {
-              theater: "3000",
-              ushape: "450",
-              classroom: "1800",
-              boardroom: "250",
-              cluster: "1200",
-              cocktails: "3500",
-              round: "2000",
-            }
-          }
-          capacity={activeItem.capacity ?? "3000 seater"}
-          backgroundImage={sectionBackgroundImage}
-        />
       </div>
 
-      {zoomedImage && (
+      {zoomedIndex !== null && (
         <div
-          className="fixed inset-0 z-[2147483646] flex items-center justify-center bg-black/85 backdrop-blur-sm !p-4"
-          onClick={() => setZoomedImage(null)}
+          {...zoomHandlers}
+          className="fixed inset-0 z-[2147483646] flex items-center justify-center overflow-x-hidden bg-black/85 backdrop-blur-sm !p-4"
+          onClick={() => setZoomedIndex(null)}
           role="presentation"
         >
           <button
             type="button"
-            onClick={() => setZoomedImage(null)}
-            className="absolute top-5 right-5 grid h-10 w-10 place-items-center rounded-full border border-white/40 bg-black/40 text-xl leading-none text-white hover:bg-black/60"
+            onClick={() => setZoomedIndex(null)}
+            className="absolute bottom-6 left-1/2 grid h-11 w-11 -translate-x-1/2 place-items-center rounded-full border border-white/40 bg-black/50 text-xl leading-none text-white hover:bg-black/70"
             aria-label="Close image preview"
           >
             ×
           </button>
-          <img
-            src={zoomedImage.src}
-            alt={zoomedImage.alt}
-            className="max-h-[90vh] w-auto max-w-[92vw] rounded-xl shadow-2xl"
-            onClick={(event) => event.stopPropagation()}
-          />
+          <div className="flex h-full w-full items-center justify-center overflow-x-hidden">
+            <img
+              src={items[zoomedIndex]?.image}
+              alt={items[zoomedIndex]?.title ?? "Venue image"}
+              className="mx-auto block max-h-[84vh] w-[min(92vw,1100px)] rounded-xl object-contain shadow-2xl"
+              onClick={(event) => event.stopPropagation()}
+            />
+          </div>
         </div>
       )}
     </section>

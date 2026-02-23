@@ -31,7 +31,7 @@ const MenuIcon = ({
   return (
     <li
       onClick={onClick}
-      className="flex items-center gap-4 cursor-pointer transition-all duration-300 hover:opacity-70"
+      className="!my-3 flex items-center gap-4 cursor-pointer transition-all duration-300 hover:opacity-70"
     >
       <span className="w-8 h-8 flex items-center justify-center">
         {/* ✅ FIX 2: Wrapped in check to fix the empty string ("") src error */}
@@ -393,14 +393,28 @@ const MenuFrame = ({
               className="!mt-5 space-y-8 !pl-2 overflow-hidden"
               style={{ height: openSection === "celebrate" ? "auto" : 0 }}
             >
-              <MenuIcon icon={icons.wedding || "/assets/icons/wedding.svg"} title="Weddings" />
-              <MenuIcon icon={icons.corporate || "/assets/icons/corporate.svg"} title="Corporate Events" />
+              <MenuIcon
+                icon={icons.wedding || "/assets/icons/wedding.svg"}
+                title="Weddings"
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate("/venues", { state: { mode: "wedding" } });
+                }}
+              />
+              <MenuIcon
+                icon={icons.corporate || "/assets/icons/corporate.svg"}
+                title="Corporate Events"
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate("/venues", { state: { mode: "corporate" } });
+                }}
+              />
               <MenuIcon
                 icon={icons.venue || "/assets/icons/venue.svg"}
                 title="Venues"
                 onClick={() => {
                   setIsOpen(false);
-                  navigate("/venues");
+                  navigate("/venues", { state: { mode: "venue" } });
                 }}
               />
             </ul>

@@ -1,9 +1,12 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import MenuFrame from "../../MenuFrame/v2/MenuFrame";
 import AnimatedImageHero from "../../ui/AnimatedImageHero";
 import HeroBreadcrumb from "../../ui/HeroBreadcrumb";
 import CarouselCards from "../../ui/CarouselCardEvents";
+import SplitActionButtons from "../../ui/SplitActionButtons";
+import StartPlanEventModal from "../../ui/StartPlanEventModal";
+import EventDetailsModal from "../../ui/EventDetailsModal";
 
 type VenueCard = {
   id: string;
@@ -29,10 +32,22 @@ type VenueCard = {
   capacity: string;
 };
 
-const venueImages = [
+const defaultVenueImages = [
   "assets/venues/herobanner/galaxy1.jpg",
   "assets/venues/herobanner/corridor.jpg",
   "assets/venues/herobanner/lotus.jpg",
+];
+
+const weddingImages = [
+  "/assets/venues/wedding/wedding1.jpg",
+  "/assets/venues/wedding/wedding2.jpg",
+  "/assets/venues/wedding/wedding3.jpg",
+  "/assets/venues/wedding/wedding4.JPG",
+];
+const corporateImages = [
+  "/assets/venues/corporate/corporate1.jpg",
+  "/assets/venues/corporate/corporate2.jpg",
+  "/assets/venues/corporate/corporate3.jpg",
 ];
 const venuesSectionBg = "/assets/backgrounds/swanbrown.png";
 
@@ -267,6 +282,42 @@ const venueCardsByTab: Record<VenueTab, VenueCard[]> = venueTabs.reduce(
 
 const HeroPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const pageMode =
+    location.state?.mode === "wedding"
+      ? "wedding"
+      : location.state?.mode === "corporate"
+        ? "corporate"
+        : "venue";
+  const heroImages =
+    pageMode === "wedding" ? weddingImages : pageMode === "corporate" ? corporateImages : defaultVenueImages;
+  const heroTitle =
+    pageMode === "wedding"
+      ? "your wedding your way"
+      : pageMode === "corporate"
+        ? "Your professional Event Destination"
+        : "Our Venues";
+  const heroSubtitle =
+    pageMode === "wedding"
+      ? "Savour the finest flavours in our curated dining destination"
+      : pageMode === "corporate"
+        ? "state-of-the-art facilities for conferences, offsites, and team building"
+      : "Savor the finest flavors in our curated dining destinations.";
+  const breadcrumbLabel =
+    pageMode === "wedding" ? "Weddings" : pageMode === "corporate" ? "Corporate Events" : "Venues";
+  const handleRequestProposal = () => {
+    if (pageMode === "wedding") {
+      setSelectedEventType("Wedding");
+      setDetailsOpen(true);
+      return;
+    }
+    if (pageMode === "corporate") {
+      setSelectedEventType("Corporate");
+      setDetailsOpen(true);
+      return;
+    }
+    setOpen(true);
+  };
   const [active, setActive] = useState<(typeof venueTabs)[number]>(
     "Galaxy Grand Ballroom"
   );
@@ -277,22 +328,27 @@ const HeroPage: React.FC = () => {
     }
   };
 
+  const [open, setOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [selectedEventType, setSelectedEventType] = useState("Wedding");
+
+
 
   return (
     <>
       <MenuFrame showBookNow={false} />
       <div className="absolute left-5 top-24 z-[2147483645] md:left-8 md:top-26">
         <HeroBreadcrumb
-          label="Venues"
+          label={breadcrumbLabel}
           onHomeClick={() => navigate("/home")}
         />
       </div>
       <AnimatedImageHero
-        images={venueImages}
-        title="Our Venues"
-        subtitle="Savor the finest flavors in our curated dining destinations."
+        images={heroImages}
+        title={heroTitle}
+        subtitle={heroSubtitle}
         buttonLabel="Plan Your Event"
-        onButtonClick={() => navigate("/home")}
+        onButtonClick={handleRequestProposal}
         enableTypingSubtitle
         centerContentClassName="-translate-y-10 lg:!w-full lg:!mx-auto lg:text-center"
         controlsWrapperClassName="absolute bottom-[10%] left-1/2 z-30 w-[min(92%,520px)] -translate-x-1/2"
@@ -300,7 +356,7 @@ const HeroPage: React.FC = () => {
         controlsProgressBarClassName="!w-[140px] !max-w-[140px] shrink-0"
       />
 
-      <section className="w-full">
+      <section className="w-full" >
         <CarouselCards
           items={selectedCards}
           sectionBackgroundImage={venuesSectionBg}
@@ -309,7 +365,46 @@ const HeroPage: React.FC = () => {
           onTabChange={handleTabChange}
         />
       </section>
+      {!open && !detailsOpen && (
+        <SplitActionButtons
+          primaryLabel="Request Proposal"
+          secondaryLabel="Download Brochure"
+          onPrimaryClick={handleRequestProposal}
+          className="!fixed !bottom-0 !left-0 !right-0 !z-[2147483645] !mx-auto lg:!hidden"
+        />
+      )}
 
+      <StartPlanEventModal
+        open={open}
+        onClose={() => setOpen(false)}
+        onSubmit={(eventType) => {
+          const normalized = String(eventType)
+            .replace(/[-_]/g, " ")
+            .replace(/\s+/g, " ")
+            .trim()
+            .replace(/\b\w/g, (char) => char.toUpperCase());
+          setSelectedEventType(normalized || "Wedding");
+          setOpen(false);
+          setDetailsOpen(true);
+        }}
+      />
+      <EventDetailsModal
+        open={detailsOpen}
+        onClose={() => setDetailsOpen(false)}
+        onBack={() => {
+          setDetailsOpen(false);
+          setOpen(true);
+        }}
+        eventType={selectedEventType}
+        venue={active}
+        venueOptions={[...venueTabs]}
+        eventTypeOptions={["Wedding", "Corporate"]}
+        onDone={(payload) => {
+          console.log("Event inquiry payload:", payload);
+          setDetailsOpen(false);
+          navigate("/home");
+        }}
+      />
     </>
   );
 };

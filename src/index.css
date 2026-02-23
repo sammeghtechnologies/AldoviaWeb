@@ -111,8 +111,13 @@ p {
   line-height: 1.6 !important;
 }
 
-button {
-  font-family: "lust-text", serif;
+span {
+  font-family: "Area Normal", sans-serif;
+}
+
+button,
+button * {
+  font-family: "lust-text", serif !important;
 }
 
 h1,

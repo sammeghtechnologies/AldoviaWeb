@@ -14,7 +14,7 @@ export default function ScrollSelectTabs({
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="w-full !mt-1 !mb-6">
+    <div className="w-full !mt-0 !mb-3">
       <div
         ref={containerRef}
         className="flex gap-3 overflow-x-auto whitespace-nowrap scroll-smooth

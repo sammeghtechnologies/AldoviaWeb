@@ -17,12 +17,17 @@ const SplitActionButtons: React.FC<SplitActionButtonsProps> = ({
 }) => {
   return (
     <div
-      className={`!flex !flex-row !items-center !justify-between !gap-3 !w-full md:!w-[492px] lg:!hidden !border-t-[1.156px] !border-t-[rgba(229,231,235,0.50)] !bg-[#FBF6E6] !shadow-[0_-4px_20px_0_rgba(0,0,0,0.08)] ${className}`}
-      style={{
-        height: "79px",
-        padding: "0 15.985px",
-      }}
-    >
+    className={`!flex !flex-row !items-center !justify-between !gap-3 !w-full md:!w-[492px] lg:!hidden 
+    !border-t-[1.156px] !border-t-[rgba(229,231,235,0.50)] 
+    !bg-[rgba(251,246,230,0.6)] 
+    backdrop-blur-xl 
+    !shadow-[0_-4px_20px_0_rgba(0,0,0,0.08)] 
+    ${className}`}
+    style={{
+      height: "79px",
+      padding: "0 15.985px",
+    }}
+  >
       <button
         type="button"
         onClick={onPrimaryClick}
