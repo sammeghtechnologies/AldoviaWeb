@@ -4,6 +4,7 @@ import ProjectRoot from "../ProjectRoot";
 import Error404 from "../404"; 
 import HeroPage from "../components/pages/home/HeroPage";
 import VenuesHeroPage from "../components/pages/venues/HeroPage";
+import RoomsPage from "../components/pages/rooms/RoomsPage";
 
 const AppRoutes = () => {
   return (
@@ -17,6 +18,7 @@ const AppRoutes = () => {
         <Route path="/bubble" element={<ProjectRoot />} />
         <Route path="/home" element={<HeroPage />} />
         <Route path="/venues" element={<VenuesHeroPage />} />
+        <Route path="/rooms" element={<RoomsPage/>}/>
 
         {/* 404 Page for unknown routes */}
         <Route path="*" element={<Error404 />} />
