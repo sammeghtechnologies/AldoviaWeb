@@ -60,7 +60,7 @@ const diningSections: DiningSection[] = [
   },
 ];
 
-const SECTION_BG_VIDEO = "/assets/video/swanflight.webm";
+//const SECTION_BG_VIDEO = "/assets/video/swanflight.webm";
 
 const RestaurantSection: React.FC = () => {
   const sectionRef = React.useRef<HTMLElement | null>(null);
