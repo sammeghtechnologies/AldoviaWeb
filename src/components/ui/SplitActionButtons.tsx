@@ -18,9 +18,8 @@ const SplitActionButtons: React.FC<SplitActionButtonsProps> = ({
   return (
     <div
     className={`!flex !flex-row !items-center !justify-between !gap-3 !w-full md:!w-[492px] lg:!hidden 
-    !border-t-[1.156px] !border-t-[rgba(229,231,235,0.50)] 
-    !bg-[rgba(251,246,230,0.6)] 
-    backdrop-blur-xl 
+    !bg-[rgba(73, 72, 72, 0.55)] 
+    backdrop-blur-[300px]
     !shadow-[0_-4px_20px_0_rgba(0,0,0,0.08)] 
     ${className}`}
     style={{
@@ -39,7 +38,7 @@ const SplitActionButtons: React.FC<SplitActionButtonsProps> = ({
       <button
         type="button"
         onClick={onSecondaryClick}
-        className="!flex-1 !px-4 md:!px-7 !py-2.5 !rounded-full !bg-transparent !text-[#4A2C21] !border !border-[#6C4A3A] !text-[13px] md:!text-[16px] !font-medium !leading-[20px] !text-center"
+        className="!flex-1 !px-4 md:!px-7 !py-2.5 !rounded-full !bg-transparent !text-[#FFFFFF] !border !border-[#FFFFFF] !text-[13px] md:!text-[16px] !font-medium !leading-[20px] !text-center"
       >
         {secondaryLabel}
       </button>

@@ -19,6 +19,9 @@ interface AnimatedImageHeroProps {
   controlsClassName?: string;
   controlsProgressBarClassName?: string;
   centerContentClassName?: string;
+  enableEntryAnimation?: boolean;
+  entryDuration?: number;
+  enableStaggeredTitle?: boolean;
 }
 
 const AnimatedImageHero: React.FC<AnimatedImageHeroProps> = ({
@@ -38,10 +41,14 @@ const AnimatedImageHero: React.FC<AnimatedImageHeroProps> = ({
   controlsClassName = "",
   controlsProgressBarClassName = "max-w-xs",
   centerContentClassName = "",
+  enableEntryAnimation = false,
+  entryDuration = 1.8,
+  enableStaggeredTitle = false,
 }) => {
   const [activeIndex, setActiveIndex] = React.useState(0);
   const [typedCount, setTypedCount] = React.useState(0);
   const subtitleChars = React.useMemo(() => (subtitle ? subtitle.split("") : []), [subtitle]);
+  const titleWords = React.useMemo(() => title.split(" "), [title]);
 
   React.useEffect(() => {
     if (images.length <= 1) return;
@@ -77,7 +84,12 @@ const AnimatedImageHero: React.FC<AnimatedImageHeroProps> = ({
   }, [images.length]);
 
   return (
-    <section className={`relative w-full overflow-hidden text-white ${heightClassName} ${className}`}>
+    <motion.section
+      className={`relative w-full overflow-hidden text-white ${heightClassName} ${className}`}
+      initial={enableEntryAnimation ? { opacity: 0, scale: 1.035 } : false}
+      animate={enableEntryAnimation ? { opacity: 1, scale: 1 } : undefined}
+      transition={enableEntryAnimation ? { duration: entryDuration, ease: [0.22, 1, 0.36, 1] } : undefined}
+    >
       {images.map((image, index) => {
         const isActive = index === activeIndex;
         return (
@@ -116,16 +128,35 @@ const AnimatedImageHero: React.FC<AnimatedImageHeroProps> = ({
         )}
 
         <motion.h1
-          className="max-w-[16ch] font-lust text-5xl leading-tight md:text-7xl"
+          className="max-w-[16ch] font-lust text-5xl !leading-[1] md:text-7xl"
           initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{ duration: 1.25, ease: [0.22, 1, 0.36, 1] }}
         >
-          {title}
+          {enableStaggeredTitle ? (
+            titleWords.map((word, index) => (
+              <motion.span
+                key={`${word}-${index}`}
+                className="inline-block"
+                initial={{ opacity: 0, y: 18, filter: "blur(4px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                transition={{
+                  duration: 0.7,
+                  delay: 0.18 + index * 0.14,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+              >
+                {word}
+                {index < titleWords.length - 1 ? "\u00A0" : ""}
+              </motion.span>
+            ))
+          ) : (
+            title
+          )}
         </motion.h1>
 
         {subtitle && (
-          <p className="mt-4 max-w-[38ch] text-base text-white/90 md:text-xl">
+          <p className="!mt-8 max-w-[38ch] text-base text-white/90 md:text-xl">
             {enableTypingSubtitle
               ? subtitleChars.map((char, index) => (
                 <span
@@ -158,16 +189,16 @@ const AnimatedImageHero: React.FC<AnimatedImageHeroProps> = ({
               onNext={onNext}
               onPrev={onPrev}
               progressTrackColor="rgba(255, 255, 255, 0.3)"
-              progressFillColor="#FFFFFF"
-              buttonColor="rgba(255,255,255,0.92)"
-              iconColor="#21140F"
+              progressFillColor="#f5f5dc"
+              buttonColor="#f5f5dc"
+              iconColor="#49261c"
               className={controlsClassName}
               progressBarClassName={controlsProgressBarClassName}
             />
           </div>
         )}
       </div>
-    </section>
+    </motion.section>
   );
 };
 

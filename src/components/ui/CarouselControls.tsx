@@ -14,6 +14,7 @@ interface Props {
   className?: string;
   progressBarClassName?: string;
   progressBarWidth?: number;
+  buttonsClassName?: string;
 }
 
 const CarouselControls: React.FC<Props> = ({
@@ -24,10 +25,10 @@ const CarouselControls: React.FC<Props> = ({
   progressTrackColor = "rgba(255, 255, 255, 0.20)",
   progressFillColor = "var(--color-primary)",
   buttonColor = "var(--color-primary)",
-  iconColor = "#FFFFFF",
   className = "",
   progressBarClassName = "w-[100px] max-w-[100px] shrink-0",
   progressBarWidth,
+  buttonsClassName = "",
 }) => {
   const progress = ((index + 1) / total) * 100;
 
@@ -53,13 +54,13 @@ const CarouselControls: React.FC<Props> = ({
       </div>
 
       {/* Arrows */}
-      <div className="flex items-center gap-4">
+      <div className={`flex items-center gap-4 ${buttonsClassName}`}>
         <button
           onClick={onPrev}
           className="w-10 h-10 flex items-center justify-center rounded-full hover:opacity-80 transition"
           style={{ backgroundColor: buttonColor }}
         >
-          <ArrowLeft className="w-4 h-4" style={{ color: iconColor }} />
+          <ArrowLeft className="w-4 h-4 ![color:var(--color-primary)]" />
         </button>
 
         <button
@@ -67,7 +68,7 @@ const CarouselControls: React.FC<Props> = ({
           className="w-10 h-10 flex items-center justify-center rounded-full hover:opacity-80 transition"
           style={{ backgroundColor: buttonColor }}
         >
-          <ArrowRight className="w-4 h-4" style={{ color: iconColor }} />
+          <ArrowRight className="w-4 h-4 ![color:var(--color-primary)]" />
         </button>
       </div>
     </div>

@@ -70,7 +70,7 @@ const cardVariants = {
     x: 0,
     y: 0,
     scale: 1,
-    transition: { duration: 0.72, ease: [0.2, 0.95, 0.22, 1] },
+    transition: { duration: 0.72, ease: [0.2, 0.95, 0.22, 1] as const },
   },
 };
 
@@ -81,7 +81,7 @@ const categorySwitchVariants = {
     x: 0,
     scale: 1,
     filter: "blur(0px)",
-    transition: { duration: 0.78, ease: [0.18, 0.94, 0.2, 1] },
+    transition: { duration: 0.78, ease: [0.18, 0.94, 0.2, 1] as const },
   },
 };
 
@@ -360,7 +360,7 @@ const ExperienceSection: React.FC = () => {
                 }}
                 variants={cardVariants}
                 whileHover={{ y: -6, scale: 1.01 }}
-                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] as const }}
                 className={`relative rounded-2xl overflow-hidden group shrink-0 snap-center w-[70vw] sm:w-[340px] md:w-[400px] transition-all duration-500 ${cardIndex === index
                     ? "md:scale-100 md:opacity-100"
                     : "md:scale-[0.94] md:opacity-60"

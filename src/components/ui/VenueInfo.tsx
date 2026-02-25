@@ -29,11 +29,11 @@ interface VenueInfoProps {
 const layoutItems = [
   { key: "theater", label: "Theater", icon: "/assets/layouts/theater.png" },
   { key: "ushape", label: "U-Shape", icon: "/assets/layouts/ushape.png" },
-  { key: "classroom", label: "Classroom", icon: "/assets/layouts/ushape.png" },
-  { key: "boardroom", label: "Boardroom", icon: "/assets/layouts/ushape.png" },
-  { key: "cluster", label: "Cluster", icon: "/assets/layouts/ushape.png" },
-  { key: "cocktails", label: "Cocktails", icon: "/assets/layouts/ushape.png" },
-  { key: "round", label: "Round", icon: "/assets/layouts/ushape.png" },
+  { key: "classroom", label: "Classroom", icon: "/assets/layouts/classroom.png" },
+  { key: "boardroom", label: "Boardroom", icon: "/assets/layouts/boardroom.png" },
+  { key: "cluster", label: "Cluster", icon: "/assets/layouts/cluster.png" },
+  { key: "cocktails", label: "Cocktails", icon: "/assets/layouts/cocktail.png" },
+  { key: "round", label: "Round", icon: "/assets/layouts/round.png" },
 ] as const;
 
 const venueBackgroundOverlayClass = "absolute";
@@ -137,7 +137,7 @@ export default function VenueInfo({
       />
       <div className="absolute" />
 
-      <div className="relative z-10 max-h-[56vh] overflow-y-auto overflow-x-hidden overscroll-contain !px-4 !pt-6 !pb-24 md:!px-7 md:!pt-8 md:!pb-28 text-white [scrollbar-width:thin]">
+      <div className="relative z-10 max-h-[56vh] overflow-y-auto overflow-x-hidden overscroll-y-auto !px-4 !pt-6 !pb-24 md:!px-7 md:!pt-8 md:!pb-28 lg:max-h-[72vh] lg:!pt-6 text-white [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={animationKey}
@@ -148,7 +148,8 @@ export default function VenueInfo({
           >
             <SlidingTitleReveal
               lines={[title]}
-              className="[font-family:'Playfair_Display'] text-[50px] md:text-[56px] leading-[0.9] tracking-tight text-white"
+              className="[font-family:'Playfair_Display'] text-[50px] md:text-[56px] leading-[0.95] tracking-tight text-white !pb-4"
+              lineClassName="!pb-2"
             />
 
             <span className="block !mt-3 h-[3px] w-16 rounded-full bg-[#CFAB57]" />
@@ -174,7 +175,13 @@ export default function VenueInfo({
                 <span>{dimensions.area}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[#CFAB57] text-base">👥</span>
+                <span className="text-[#AA8F6A] text-base">
+                  <img
+                    src={"/assets/layouts/heads.png"}
+                    alt={"seatings"}
+                    className="h-8 w-8 object-contain"
+                  />
+                </span>
                 <span>{capacity}</span>
               </div>
             </div>
@@ -221,7 +228,6 @@ export default function VenueInfo({
         </AnimatePresence>
       </div>
 
-      <div className="pointer-events-none absolute right-4 bottom-7 h-16 w-[2px] rounded-full bg-white/25" />
     </div>
   );
 }

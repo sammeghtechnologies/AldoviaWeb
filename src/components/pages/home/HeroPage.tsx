@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router";
 import HeroContent from "./HeroContent";
 import HeroStats from "./HeroStats";
 import ScrollIndicator from "./ScrollIndicator";
@@ -15,6 +16,7 @@ const ImmersiveSection = lazy(() => import("../../sections/ImmersiveSection"));
 const RoomsSection = lazy(() => import("../../sections/RoomsSection"));
 
 const HeroPage: React.FC = () => {
+  const navigate = useNavigate();
   const [showStickyActions, setShowStickyActions] = React.useState(false);
 
   React.useEffect(() => {
@@ -103,7 +105,10 @@ const HeroPage: React.FC = () => {
           showStickyActions ? "!translate-y-0 !opacity-100" : "!translate-y-6 !opacity-0 !pointer-events-none"
         }`}
       >
-        <SplitActionButtons className="!w-full md:!w-[492px]" />
+        <SplitActionButtons
+          onSecondaryClick={() => navigate("/venues")}
+          className="!w-full md:!w-[492px]"
+        />
       </div>
     </>
   );

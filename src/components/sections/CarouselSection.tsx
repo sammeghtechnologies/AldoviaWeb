@@ -110,7 +110,7 @@ const CarouselSection: React.FC = () => {
                 transition={{ type: "spring", stiffness: 120, damping: 20, delay: i * 0.15 }}
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
-                onDragEnd={(e, info) => {
+                onDragEnd={(_, info) => {
                   if (info.offset.x < -100) next();
                   if (info.offset.x > 100) prev();
                 }}

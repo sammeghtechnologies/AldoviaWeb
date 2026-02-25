@@ -370,8 +370,22 @@ const MenuFrame = ({
               {/* ✅ Fallbacks to direct public paths */}
               <MenuIcon icon={icons.bed || "/assets/icons/bed.svg"} title="Rooms" />
               <MenuIcon icon={icons.star || "/assets/icons/star.svg"} title="Experiences & Packages" />
-              <MenuIcon icon={icons.forkknife || "/assets/icons/forkknife.svg"} title="Dining" />
-              <MenuIcon icon={icons.activity || "/assets/icons/activity.svg"} title="Activities" />
+              <MenuIcon
+                icon={icons.forkknife || "/assets/icons/forkknife.svg"}
+                title="Dining"
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate("/dining");
+                }}
+              />
+              <MenuIcon
+                icon={icons.activity || "/assets/icons/activity.svg"}
+                title="Activities"
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate("/activities");
+                }}
+              />
             </ul>
           </div>
 

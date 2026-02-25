@@ -57,18 +57,18 @@ export default function StartPlanEventModal({ open, onClose, onSubmit }: StartPl
                                    <div className="flex justify-end !mb-4">
                                         <button
                                              onClick={onClose}
-                                             className="text-black w-9 h-9 flex items-center justify-center rounded-md"
+                                             className="!text-[var(--color-primary)] w-9 h-9 flex items-center justify-center rounded-md"
                                         >
                                              ✕
                                         </button>
                                    </div>
 
                                    {/* Heading */}
-                                   <h2 className="font-lust-medium text-3xl font-semibold text-center text-black !mb-2">
+                                   <h2 className="font-lust-medium text-3xl font-semibold text-center !text-[var(--color-primary)] !mb-2">
                                         Your Dream Event Awaits
                                    </h2>
 
-                                   <p className="font-area text-center text-black !mb-6">
+                                   <p className="font-area text-center !text-[var(--color-primary)] !mb-6">
                                         Create unforgettable memories in our stunning venues
                                    </p>
 
@@ -82,13 +82,13 @@ export default function StartPlanEventModal({ open, onClose, onSubmit }: StartPl
                                                   }`}
                                         >
                                              <img
-                                                  src="/assets/venues/wedding/wedding1.jpg"
+                                                  src="/assets/herobackgrounds/wedding/wedding1.jpg"
                                                   alt="Wedding Event"
                                                   loading="eager"
                                                   decoding="async"
                                                   className="h-30 w-full object-cover"
                                              />
-                                             <div className="font-area !py-3 text-center text-[.8em] text-black bg-white">
+                                             <div className="font-area !py-3 text-center text-[.8em] !text-[var(--color-primary)] bg-white">
                                                   Wedding Event
                                              </div>
                                         </div>
@@ -101,24 +101,24 @@ export default function StartPlanEventModal({ open, onClose, onSubmit }: StartPl
                                                   }`}
                                         >
                                              <img
-                                                  src="/assets/venues/corporate/corporate1.jpg"
+                                                  src="/assets/herobackgrounds/corporate/corporate1.jpg"
                                                   alt="Corporate Event"
                                                   loading="eager"
                                                   decoding="async"
                                                   className="h-30 w-full object-cover"
                                              />
-                                             <div className="font-area !py-3 text-center text-[.8em] text-black bg-white">
+                                             <div className="font-area !py-3 text-center text-[.8em] !text-[var(--color-primary)] bg-white">
                                                   Corporate Event
                                              </div>
                                         </div>
                                    </div>
 
                                    {/* What's Included */}
-                                   <h3 className="font-lust-medium text-xl font-semibold text-black !mb-2">
+                                   <h3 className="font-lust-medium text-xl font-semibold !text-[var(--color-primary)] !mb-2">
                                         What's Included
                                    </h3>
 
-                                   <ul className="font-area space-y-3 !mb-8 text-black text-sm">
+                                   <ul className="font-area space-y-3 !mb-8 !text-[var(--color-primary)] text-sm">
                                         <li className="flex items-start gap-2">
                                              <span className="text-[#6B3F2E] mt-1">▪</span>
                                              Grand Lawn for outdoor ceremonies

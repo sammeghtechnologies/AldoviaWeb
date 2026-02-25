@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface PersonalInfoModalProps {
@@ -41,6 +41,15 @@ export default function PersonalInfoModal({
     }
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open]);
+
   return (
     <AnimatePresence initial={false}>
       {open && (
@@ -66,16 +75,16 @@ export default function PersonalInfoModal({
                 <button
                   type="button"
                   onClick={onBack ?? onClose}
-                  className="font-area text-black text-2xl leading-none"
+                  className="font-area !text-[var(--color-primary)] text-2xl leading-none"
                   aria-label="Go back"
                 >
                   ←
                 </button>
-                <h2 className="font-lust-medium text-2xl text-black">Event Inquiry</h2>
+                <h2 className="font-lust-medium text-2xl !text-[var(--color-primary)]">Event Inquiry</h2>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="font-area text-black text-2xl leading-none"
+                  className="font-area !text-[var(--color-primary)] text-2xl leading-none"
                   aria-label="Close"
                 >
                   ×
@@ -90,8 +99,8 @@ export default function PersonalInfoModal({
 
               {!submitted ? (
                 <>
-                  <h3 className="font-lust-medium text-4xl text-black">Enter Your Details</h3>
-                  <p className="font-area !mt-1 text-black/80 text-[20px]">Fill your details for Proposal</p>
+                  <h3 className="font-lust-medium text-4xl !text-[var(--color-primary)]">Enter Your Details</h3>
+                  <p className="font-area !mt-1 !text-[var(--color-primary)] text-[20px]">Fill your details for Proposal</p>
 
                   <div className="!mt-8 !space-y-5">
                     <input
@@ -99,7 +108,7 @@ export default function PersonalInfoModal({
                       value={fullName}
                       onChange={(event) => setFullName(event.target.value)}
                       placeholder="Full Name*"
-                      className="font-area h-14 w-full rounded-xl border border-black/15 bg-white !px-4 !py-3 text-black outline-none"
+                      className="font-area h-14 w-full rounded-xl border border-black/15 bg-white !px-4 !py-3 !text-[var(--color-primary)] outline-none"
                     />
                     <input
                       type="tel"
@@ -107,14 +116,14 @@ export default function PersonalInfoModal({
                       value={mobileNumber}
                       onChange={(event) => setMobileNumber(event.target.value)}
                       placeholder="Mobile Number*"
-                      className="font-area h-14 w-full rounded-xl border border-black/15 bg-white !px-4 !py-3 text-black outline-none"
+                      className="font-area h-14 w-full rounded-xl border border-black/15 bg-white !px-4 !py-3 !text-[var(--color-primary)] outline-none"
                     />
                     <input
                       type="email"
                       value={emailAddress}
                       onChange={(event) => setEmailAddress(event.target.value)}
                       placeholder="Email Address"
-                      className="font-area h-14 w-full rounded-xl border border-black/15 bg-white !px-4 !py-3 text-black outline-none"
+                      className="font-area h-14 w-full rounded-xl border border-black/15 bg-white !px-4 !py-3 !text-[var(--color-primary)] outline-none"
                     />
                   </div>
 
@@ -127,7 +136,7 @@ export default function PersonalInfoModal({
                   </button>
 
                   {showWhyText && (
-                    <p className="font-area !mt-2 text-[14px] text-black/70">
+                    <p className="font-area !mt-2 text-[14px] !text-[var(--color-primary)]">
                       We collect information
                     </p>
                   )}
@@ -152,27 +161,27 @@ export default function PersonalInfoModal({
                   <div className="!mx-auto !mb-6 grid h-20 w-20 place-items-center bg-[#D7F2DF] text-5xl text-[#16984A]">
                     ✓
                   </div>
-                  <h3 className="font-lust-medium text-center text-5xl text-black">Proposal Submitted!</h3>
-                  <p className="font-area !mt-2 text-center text-black/70 text-[20px]">
+                  <h3 className="font-lust-medium text-center text-5xl !text-[var(--color-primary)]">Proposal Submitted!</h3>
+                  <p className="font-area !mt-2 text-center !text-[var(--color-primary)] text-[20px]">
                     Our Representative will get back to you shortly!
                   </p>
 
                   <div className="!mt-8 rounded-2xl bg-[#ECEDEF] !p-5">
                     <div className="font-area flex items-center justify-between !py-1 text-[22px]">
-                      <span className="text-black/70">Event Type</span>
-                      <span className="text-black">{summaryData.eventType || "-"}</span>
+                      <span className="!text-[var(--color-primary)]">Event Type</span>
+                      <span className="!text-[var(--color-primary)]">{summaryData.eventType || "-"}</span>
                     </div>
                     <div className="font-area flex items-center justify-between !py-1 text-[22px]">
-                      <span className="text-black/70">Event Date from</span>
-                      <span className="text-black">{summaryData.eventDateFrom || "-"}</span>
+                      <span className="!text-[var(--color-primary)]">Event Date from</span>
+                      <span className="!text-[var(--color-primary)]">{summaryData.eventDateFrom || "-"}</span>
                     </div>
                     <div className="font-area flex items-center justify-between !py-1 text-[22px]">
-                      <span className="text-black/70">Event Date to</span>
-                      <span className="text-black">{summaryData.eventDateTo || "-"}</span>
+                      <span className="!text-[var(--color-primary)]">Event Date to</span>
+                      <span className="!text-[var(--color-primary)]">{summaryData.eventDateTo || "-"}</span>
                     </div>
                     <div className="font-area flex items-center justify-between !py-1 text-[22px]">
-                      <span className="text-black/70">Guests</span>
-                      <span className="text-black">{summaryData.expectedGuestCount ?? "-"}</span>
+                      <span className="!text-[var(--color-primary)]">Guests</span>
+                      <span className="!text-[var(--color-primary)]">{summaryData.expectedGuestCount ?? "-"}</span>
                     </div>
                   </div>
 

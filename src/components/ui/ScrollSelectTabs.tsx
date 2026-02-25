@@ -18,6 +18,8 @@ export default function ScrollSelectTabs({
       <div
         ref={containerRef}
         className="flex gap-3 overflow-x-auto whitespace-nowrap scroll-smooth
+                   lg:w-full lg:mx-auto lg:overflow-visible
+                   lg:justify-center lg:translate-x-30
                    !px-4 !py-3 
                    [-ms-overflow-style:none] [scrollbar-width:none]
                    [&::-webkit-scrollbar]:hidden"
@@ -32,8 +34,8 @@ export default function ScrollSelectTabs({
               className={`!px-6 !py-2 !rounded-[10px] text-sm font-medium transition-all duration-300 flex-shrink-0
                 ${
                   isActive
-                    ? "bg-[#f5f5dc] text-black shadow-md"
-                    : "bg-[#2c2c2c] text-white hover:bg-white/10"
+                    ? "bg-[#f5f5dc] !text-[var(--color-primary)] shadow-md"
+                    : "bg-[#2c2c2c] !text-green hover:bg-white/10"
                 }`}
             >
               {item}

@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 
 interface SlidingTitleRevealProps {
   lines: string[];
@@ -9,7 +9,7 @@ interface SlidingTitleRevealProps {
   eyebrowClassName?: string;
 }
 
-const lineVariants = {
+const lineVariants: Variants = {
   hidden: { y: "115%", opacity: 0 },
   visible: (index: number) => ({
     y: "0%",
@@ -17,7 +17,7 @@ const lineVariants = {
     transition: {
       duration: 0.85,
       delay: index * 0.14,
-      ease: [0.22, 1, 0.36, 1],
+      ease: [0.22, 1, 0.36, 1] as const,
     },
   }),
 };
@@ -36,7 +36,7 @@ const SlidingTitleReveal: React.FC<SlidingTitleRevealProps> = ({
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, amount: 0.7 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }}
           className={eyebrowClassName}
         >
           {eyebrow}

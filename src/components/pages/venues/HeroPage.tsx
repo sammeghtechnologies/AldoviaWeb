@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import MenuFrame from "../../MenuFrame/v2/MenuFrame";
 import AnimatedImageHero from "../../ui/AnimatedImageHero";
@@ -33,23 +33,23 @@ type VenueCard = {
 };
 
 const defaultVenueImages = [
-  "assets/venues/herobanner/galaxy1.jpg",
-  "assets/venues/herobanner/corridor.jpg",
-  "assets/venues/herobanner/lotus.jpg",
+  "assets/herobackgrounds/herobanner/galaxy1.jpg",
+  "assets/herobackgrounds/herobanner/corridor.jpg",
+  "assets/herobackgrounds/herobanner/lotus.jpg",
 ];
 
 const weddingImages = [
-  "/assets/venues/wedding/wedding1.jpg",
-  "/assets/venues/wedding/wedding2.jpg",
-  "/assets/venues/wedding/wedding3.jpg",
-  "/assets/venues/wedding/wedding4.JPG",
+  "/assets/herobackgrounds/wedding/wedding1.jpg",
+  "/assets/herobackgrounds/wedding/wedding2.jpg",
+  "/assets/herobackgrounds/wedding/wedding3.jpg",
+  "/assets/herobackgrounds/wedding/wedding4.JPG",
 ];
 const corporateImages = [
-  "/assets/venues/corporate/corporate1.jpg",
-  "/assets/venues/corporate/corporate2.jpg",
-  "/assets/venues/corporate/corporate3.jpg",
+  "/assets/herobackgrounds/corporate/corporate1.jpg",
+  "/assets/herobackgrounds/corporate/corporate2.jpg",
+  "/assets/herobackgrounds/corporate/corporate3.jpg",
 ];
-const venuesSectionBg = "/assets/backgrounds/swanbrown.png";
+const herobackgroundsSectionBg = "/assets/backgrounds/swanbrown.png";
 
 const venueTabs = [
   "Galaxy Grand Ballroom",
@@ -68,7 +68,7 @@ type VenueDimensions = {
   length: string;
 };
 
-type VenueSeating = {
+type herobackgroundseating = {
   theater: string;
   ushape: string;
   classroom: string;
@@ -82,7 +82,12 @@ type VenueTabContent = {
   subtitle: string;
   description: string;
   dimensions: VenueDimensions;
-  seating: VenueSeating;
+  seating: herobackgroundseating;
+};
+
+const parseSeaterCount = (value: string) => {
+  const numeric = Number(String(value).replace(/[^0-9]/g, ""));
+  return Number.isFinite(numeric) && numeric > 0 ? numeric : 100;
 };
 
 const venueContentByTab: Record<VenueTab, VenueTabContent> = {
@@ -227,37 +232,37 @@ const venueContentByTab: Record<VenueTab, VenueTabContent> = {
 
 const venueImagesByTab: Record<VenueTab, string[]> = {
   "Galaxy Grand Ballroom": [
-    "/assets/venues/herobanner/galaxy.jpg",
-    "/assets/venues/herobanner/galaxy1.jpg",
-    "/assets/venues/herobanner/corridor.jpg",
+    "/assets/herobackgrounds/herobanner/galaxy.jpg",
+    "/assets/herobackgrounds/herobanner/galaxy1.jpg",
+    "/assets/herobackgrounds/herobanner/corridor.jpg",
   ],
   "Emerald Hall": [
-    "/assets/venues/herobanner/orchid.jpg",
-    "/assets/venues/herobanner/rose.jpg",
-    "/assets/venues/herobanner/tulip.jpg",
-    "/assets/venues/herobanner/galaxy.jpg",
-    "/assets/venues/herobanner/galaxy1.jpg",
-    "/assets/venues/herobanner/corridor.jpg"
+    "/assets/herobackgrounds/herobanner/orchid.jpg",
+    "/assets/herobackgrounds/herobanner/rose.jpg",
+    "/assets/herobackgrounds/herobanner/tulip.jpg",
+    "/assets/herobackgrounds/herobanner/galaxy.jpg",
+    "/assets/herobackgrounds/herobanner/galaxy1.jpg",
+    "/assets/herobackgrounds/herobanner/corridor.jpg"
   ],
   "Royal Pavilion": [
-    "/assets/venues/herobanner/lotus.jpg",
-    "/assets/venues/herobanner/galaxy.jpg",
-    "/assets/venues/herobanner/galaxy1.jpg",
+    "/assets/herobackgrounds/herobanner/lotus.jpg",
+    "/assets/herobackgrounds/herobanner/galaxy.jpg",
+    "/assets/herobackgrounds/herobanner/galaxy1.jpg",
   ],
   "Sapphire Lounge": [
-    "/assets/venues/herobanner/corridor.jpg",
-    "/assets/venues/herobanner/lotus.jpg",
-    "/assets/venues/herobanner/galaxy1.jpg",
+    "/assets/herobackgrounds/herobanner/corridor.jpg",
+    "/assets/herobackgrounds/herobanner/lotus.jpg",
+    "/assets/herobackgrounds/herobanner/galaxy1.jpg",
   ],
   "Crystal Court": [
-    "/assets/venues/herobanner/galaxy.jpg",
-    "/assets/venues/herobanner/corridor.jpg",
-    "/assets/venues/herobanner/lotus.jpg",
+    "/assets/herobackgrounds/herobanner/galaxy.jpg",
+    "/assets/herobackgrounds/herobanner/corridor.jpg",
+    "/assets/herobackgrounds/herobanner/lotus.jpg",
   ],
   "Diamond Arena": [
-    "/assets/venues/herobanner/galaxy1.jpg",
-    "/assets/venues/herobanner/galaxy.jpg",
-    "/assets/venues/herobanner/lotus.jpg",
+    "/assets/herobackgrounds/herobanner/galaxy1.jpg",
+    "/assets/herobackgrounds/herobanner/galaxy.jpg",
+    "/assets/herobackgrounds/herobanner/lotus.jpg",
   ],
 };
 
@@ -293,7 +298,7 @@ const HeroPage: React.FC = () => {
     pageMode === "wedding" ? weddingImages : pageMode === "corporate" ? corporateImages : defaultVenueImages;
   const heroTitle =
     pageMode === "wedding"
-      ? "your wedding your way"
+      ? "Crafted Around Your Love Story."
       : pageMode === "corporate"
         ? "Your professional Event Destination"
         : "Our Venues";
@@ -331,6 +336,21 @@ const HeroPage: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [selectedEventType, setSelectedEventType] = useState("Wedding");
+  const [showSplitActions, setShowSplitActions] = useState(false);
+  const venueMaxGuestsByTab = venueTabs.reduce<Record<string, number>>((acc, tab) => {
+    acc[tab] = parseSeaterCount(venueContentByTab[tab].seating.theater);
+    return acc;
+  }, {});
+
+  useEffect(() => {
+    const onScroll = () => {
+      setShowSplitActions(window.scrollY > window.innerHeight * 0.9);
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
 
 
@@ -350,7 +370,7 @@ const HeroPage: React.FC = () => {
         buttonLabel="Plan Your Event"
         onButtonClick={handleRequestProposal}
         enableTypingSubtitle
-        centerContentClassName="-translate-y-10 lg:!w-full lg:!mx-auto lg:text-center"
+        centerContentClassName="-translate-y-10 lg:translate-y-0 lg:!w-full lg:!mx-auto lg:text-center"
         controlsWrapperClassName="absolute bottom-[10%] left-1/2 z-30 w-[min(92%,520px)] -translate-x-1/2"
         controlsClassName="!mt-0 !px-0"
         controlsProgressBarClassName="!w-[140px] !max-w-[140px] shrink-0"
@@ -359,13 +379,13 @@ const HeroPage: React.FC = () => {
       <section className="w-full" >
         <CarouselCards
           items={selectedCards}
-          sectionBackgroundImage={venuesSectionBg}
+          sectionBackgroundImage={herobackgroundsSectionBg}
           tabs={[...venueTabs]}
           activeTab={active}
           onTabChange={handleTabChange}
         />
       </section>
-      {!open && !detailsOpen && (
+      {!open && !detailsOpen && showSplitActions && (
         <SplitActionButtons
           primaryLabel="Request Proposal"
           secondaryLabel="Download Brochure"
@@ -398,6 +418,7 @@ const HeroPage: React.FC = () => {
         eventType={selectedEventType}
         venue={active}
         venueOptions={[...venueTabs]}
+        venueMaxGuestsByTab={venueMaxGuestsByTab}
         eventTypeOptions={["Wedding", "Corporate"]}
         onDone={(payload) => {
           console.log("Event inquiry payload:", payload);

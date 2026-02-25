@@ -6,7 +6,7 @@
 /* Define Font */
 
 @font-face {
-  font-family: "lust-text";
+  font-family: "Lust";
   src: url("/fonts/fonnts.com-Lust-Text-Medium.otf") format("opentype");
   font-weight: 500;
   font-style: normal;
@@ -14,7 +14,7 @@
 }
 
 @font-face {
-  font-family: "lust-text";
+  font-family: "Lust";
   src: url("/fonts/fonnts.com-Lust-Text-Light.otf") format("opentype");
   font-weight: 300;
   font-style: normal;
@@ -55,20 +55,20 @@
 
 :root {
   background-color: var(--color-background);
-  color: var(--color-text);
+  color: var(--color-secondary);
 }
 
 .font-lust {
-  font-family: "lust-text", serif;
+  font-family: "Lust", serif;
 }
 
 .font-lust-medium {
-  font-family: "lust-text", serif;
+  font-family: "Lust", serif;
   font-weight: 500;
 }
 
 .font-lust-light {
-  font-family: "lust-text", serif;
+  font-family: "Lust", serif;
   font-weight: 300;
 }
 
@@ -107,17 +107,22 @@
 }
 
 p {
-  font-family: "Area Normal", sans-serif;
+  font-family: "Area Normal", sans-serif !important;
   line-height: 1.6 !important;
+  color: var(--color-secondary);
+
 }
 
 span {
-  font-family: "Area Normal", sans-serif;
+  font-family: "Area Normal", sans-serif !important;
+  color: var(--color-secondary);
+
 }
 
 button,
 button * {
-  font-family: "lust-text", serif !important;
+  font-family: "Lust", serif !important;
+
 }
 
 h1,
@@ -126,9 +131,24 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "lust-text", serif;
+  font-family: "Lust", serif !important;
+
+}
+
+h1 span,
+h2 span,
+h3 span,
+h4 span,
+h5 span,
+h6 span,
+button span {
+  font-family: "Lust", serif !important;
 }
 
 .pad {
   padding: 2rem;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
 }

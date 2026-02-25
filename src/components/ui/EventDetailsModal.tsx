@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface EventDetailsModalProps {
@@ -8,6 +8,7 @@ interface EventDetailsModalProps {
   eventType: string;
   venue: string;
   venueOptions: string[];
+  venueMaxGuestsByTab?: Record<string, number>;
   eventTypeOptions?: string[];
   onDone?: (payload: {
     eventType: string;
@@ -39,6 +40,7 @@ export default function EventDetailsModal({
   eventType,
   venue,
   venueOptions,
+  venueMaxGuestsByTab = {},
   eventTypeOptions = defaultEventTypes,
   onDone,
 }: EventDetailsModalProps) {
@@ -56,7 +58,7 @@ export default function EventDetailsModal({
   const [selectedVenue, setSelectedVenue] = useState(venue || venueOptions[0] || "");
   const [eventDateFrom, setEventDateFrom] = useState("");
   const [eventDateTo, setEventDateTo] = useState("");
-  const [expectedGuestCount, setExpectedGuestCount] = useState<string>("400");
+  const [expectedGuestCount, setExpectedGuestCount] = useState<number>(100);
 
   const [fullName, setFullName] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
@@ -72,7 +74,34 @@ export default function EventDetailsModal({
     setStep("details");
     setSelectedEventType(normalizedEventType || mergedEventTypeOptions[0] || "Wedding");
     setSelectedVenue(venue || venueOptions[0] || "");
+    setExpectedGuestCount(100);
   }, [open, normalizedEventType, venue, venueOptions, mergedEventTypeOptions]);
+
+  useEffect(() => {
+    if (!open) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open]);
+
+  const maxGuestsForSelectedVenue = useMemo(() => {
+    const maxGuests = venueMaxGuestsByTab[selectedVenue] ?? 100;
+    return Math.max(100, maxGuests);
+  }, [selectedVenue, venueMaxGuestsByTab]);
+  const todayDate = useMemo(() => new Date().toISOString().split("T")[0], []);
+
+  useEffect(() => {
+    setExpectedGuestCount((prev) => Math.max(100, Math.min(prev, maxGuestsForSelectedVenue)));
+  }, [maxGuestsForSelectedVenue]);
+
+  useEffect(() => {
+    if (!eventDateFrom || !eventDateTo) return;
+    if (eventDateTo < eventDateFrom) {
+      setEventDateTo(eventDateFrom);
+    }
+  }, [eventDateFrom, eventDateTo]);
 
   const currentStep = step === "details" ? 1 : step === "personal" ? 2 : 3;
 
@@ -81,7 +110,7 @@ export default function EventDetailsModal({
     venue: selectedVenue,
     eventDateFrom,
     eventDateTo,
-    expectedGuestCount: expectedGuestCount ? Number(expectedGuestCount) : null,
+    expectedGuestCount: expectedGuestCount || null,
     fullName,
     mobileNumber,
     emailAddress,
@@ -122,16 +151,16 @@ export default function EventDetailsModal({
                     }
                     setStep("personal");
                   }}
-                  className="font-area text-black text-2xl leading-none"
+                  className="font-area !text-[var(--color-primary)] text-2xl leading-none"
                   aria-label="Go back"
                 >
                   ←
                 </button>
-                <h2 className="font-lust-medium text-[2em] leading-none text-black">Event Inquiry</h2>
+                <h2 className="font-lust-medium text-[2em] leading-none !text-[var(--color-primary)]">Event Inquiry</h2>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="font-area text-black text-2xl leading-none"
+                  className="font-area !text-[var(--color-primary)] text-2xl leading-none"
                   aria-label="Close"
                 >
                   ×
@@ -153,15 +182,15 @@ export default function EventDetailsModal({
                     exit={{ opacity: 0, y: -14 }}
                     transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                   >
-                    <h3 className="font-lust-medium text-xl text-black">Event Details</h3>
-                    <p className="font-area !mt-1 text-black/80 text-[.9em]">When are you planning your event?</p>
+                    <h3 className="font-lust-medium text-xl !text-[var(--color-primary)]">Event Details</h3>
+                    <p className="font-area !mt-1 !text-[var(--color-primary)] text-[.9em]">When are you planning your event?</p>
 
                     <div className="!mt-7 !space-y-5">
                       <div className="rounded-[1em] border border-[#D8C59F] bg-[#ECE8E2] !p-2">
-                        <label className="font-area block text-black/70 text-[.9em]">Event Type</label>
+                        <label className="font-area block !text-[var(--color-primary)] text-[.9em]">Event Type</label>
                         <div className="relative !mt-2">
                           <select
-                            className="font-area h-11 w-full appearance-none bg-transparent !pr-10 text-[1em] text-black outline-none"
+                            className="font-area h-11 w-full appearance-none bg-transparent !pr-10 text-[1em] !text-[var(--color-primary)] outline-none"
                             value={selectedEventType}
                             onChange={(event) => setSelectedEventType(event.target.value)}
                           >
@@ -171,50 +200,64 @@ export default function EventDetailsModal({
                               </option>
                             ))}
                           </select>
-                          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-black/60">⌄</span>
+                          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 !text-[var(--color-primary)]">⌄</span>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 !gap-4">
                         <div>
-                          <label className="font-area !mb-2 block text-black/85 text-[.9em]">Event Date from</label>
+                          <label className="font-area !mb-2 block !text-[var(--color-primary)] text-[.9em]">Event Date from</label>
                           <input
                             type="date"
+                            min={todayDate}
                             value={eventDateFrom}
                             onChange={(event) => setEventDateFrom(event.target.value)}
-                            className="font-area text-[1em] h-14 w-full rounded-xl border border-black/15 bg-white !p-2 !pr-10 !pl-4 text-black outline-none [&::-webkit-calendar-picker-indicator]:!mr-1"
+                            className="font-area text-[1em] h-14 w-full rounded-xl border border-black/15 bg-white !p-2 !pr-10 !pl-2 !text-[var(--color-primary)] outline-none [&::-webkit-calendar-picker-indicator]:!mr-1"
                           />
                         </div>
                         <div>
-                          <label className="font-area !mb-2 block text-black/85 text-[.9em]">Event Date to</label>
+                          <label className="font-area !mb-2 block !text-[var(--color-primary)] text-[.9em]">Event Date to</label>
                           <input
                             type="date"
+                            min={eventDateFrom || todayDate}
                             value={eventDateTo}
                             onChange={(event) => setEventDateTo(event.target.value)}
-                            className="font-area text-[1em] h-14 w-full rounded-xl border border-black/15 bg-white !p-2 !pr-10 !pl-4 text-black outline-none [&::-webkit-calendar-picker-indicator]:!mr-1"
+                            className="font-area text-[1em] h-14 w-full rounded-xl border border-black/15 bg-white !p-2 !pr-10 !pl-2 !text-[var(--color-primary)] outline-none [&::-webkit-calendar-picker-indicator]:!mr-1"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label className="font-area !mb-2 block text-black/85 text-[.9em]">Expected Guest Count</label>
-                        <input
-                          type="number"
-                          inputMode="numeric"
-                          min={1}
-                          value={expectedGuestCount}
-                          onChange={(event) => setExpectedGuestCount(event.target.value)}
-                          className="font-area text-[1em] h-14 w-full rounded-xl border border-black/15 bg-white !p-2 !pr-10 !pl-4 text-black outline-none"
-                        />
+                        <label className="font-area !mb-2 block !text-[var(--color-primary)] text-[.9em]">Expected Guest Count</label>
+                        <div className="rounded-xl border border-[var(--color-primary)]/20 !px-2 ">
+                          <div className="flex items-center gap-3 !pt-5">
+                            <input
+                            type="range"
+                            min={50}
+                            max={maxGuestsForSelectedVenue}
+                            step={50}
+                            value={expectedGuestCount}
+                            onChange={(event) => setExpectedGuestCount(Number(event.target.value))}
+                            className="h-2 w-full cursor-pointer appearance-none rounded-full bg-[var(--color-primary)]/20 accent-[var(--color-primary)] [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[var(--color-primary)]"
+                          />
+                            <span className="min-w-[80px] text-[.9em] rounded-[10px] border border-[var(--color-primary)]/25 bg-[var(--color-secondary)] px-3 py-2 text-center text-[.9em] font-semibold !text-[var(--color-primary)]">
+                              {expectedGuestCount.toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="font-area !mt-2 flex items-center justify-between text-[12px] !text-[var(--color-primary)]">
+                            <span>100</span>
+                            <span>{maxGuestsForSelectedVenue.toLocaleString()}</span>
+                          </div>
+                        </div>
                       </div>
 
                       <div>
-                        <label className="font-area !mb-2 block text-black/85 text-[.9em]">Venues</label>
+                        <label className="font-area !mb-2 block !text-[var(--color-primary)] text-[.9em]">Venues</label>
                         <div className="relative">
                           <select
                             value={selectedVenue}
                             onChange={(event) => setSelectedVenue(event.target.value)}
-                            className="font-area text-[1em] h-14 w-full appearance-none rounded-xl border border-black/15 bg-white !p-2 !pr-10 !pl-4 text-black outline-none"
+                            className="font-area text-[1em] h-14 w-full appearance-none rounded-xl border border-black/15 bg-white !p-2 !pr-10 !pl-4 !text-[var(--color-primary)] outline-none"
                           >
                             {venueOptions.map((option) => (
                               <option key={option} value={option}>
@@ -222,7 +265,7 @@ export default function EventDetailsModal({
                               </option>
                             ))}
                           </select>
-                          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-black/60">⌄</span>
+                          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 !text-[var(--color-primary)]">⌄</span>
                         </div>
                       </div>
                     </div>
@@ -245,8 +288,8 @@ export default function EventDetailsModal({
                     exit={{ opacity: 0, y: -14 }}
                     transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                   >
-                    <h3 className="font-lust-medium text-xl text-black">Enter Your Details</h3>
-                    <p className="font-area !mt-1 text-black/80 text-[.9em]">Fill your details for Proposal</p>
+                    <h3 className="font-lust-medium text-xl !text-[var(--color-primary)]">Enter Your Details</h3>
+                    <p className="font-area !mt-1 !text-[var(--color-primary)] text-[.9em]">Fill your details for Proposal</p>
 
                     <div className="!mt-8 !space-y-5">
                       <input
@@ -254,7 +297,7 @@ export default function EventDetailsModal({
                         value={fullName}
                         onChange={(event) => setFullName(event.target.value)}
                         placeholder="Full Name*"
-                        className="text-[.9em] font-area h-14 w-full rounded-xl border border-black/15 bg-white !px-4 !py-3 text-black outline-none"
+                        className="text-[.9em] font-area h-14 w-full rounded-xl border border-black/15 bg-white !px-4 !py-3 !text-[var(--color-primary)] outline-none"
                       />
                       <input
                         type="tel"
@@ -262,14 +305,14 @@ export default function EventDetailsModal({
                         value={mobileNumber}
                         onChange={(event) => setMobileNumber(event.target.value)}
                         placeholder="Mobile Number*"
-                        className="text-[.9em] font-area h-14 w-full rounded-xl border border-black/15 bg-white !px-4 !py-3 text-black outline-none"
+                        className="text-[.9em] font-area h-14 w-full rounded-xl border border-black/15 bg-white !px-4 !py-3 !text-[var(--color-primary)] outline-none"
                       />
                       <input
                         type="email"
                         value={emailAddress}
                         onChange={(event) => setEmailAddress(event.target.value)}
                         placeholder="Email Address"
-                        className="text-[.9em] font-area h-14 w-full rounded-xl border border-black/15 bg-white !px-4 !py-3 text-black outline-none"
+                        className="text-[.9em] font-area h-14 w-full rounded-xl border border-black/15 bg-white !px-4 !py-3 !text-[var(--color-primary)] outline-none"
                       />
                     </div>
 
@@ -283,7 +326,7 @@ export default function EventDetailsModal({
                       </button>
 
                       {showWhyText && (
-                        <p className="font-area !mt-2 text-[14px] text-black/70 max-w-md mx-auto">
+                        <p className="font-area !mt-2 text-[14px] !text-[var(--color-primary)] max-w-md mx-auto">
                           Your information helps our team connect with you to craft a personalized event experience.
                         </p>
                       )}
@@ -310,27 +353,27 @@ export default function EventDetailsModal({
                     <div className="rounded-full !mx-auto !mb-6 grid h-20 w-20 place-items-center bg-[#D7F2DF] text-5xl text-[#16984A]">
                       ✓
                     </div>
-                    <h3 className="font-lust-medium text-center text-2xl text-black">Proposal Submitted!</h3>
-                    <p className="font-area !mt-2 text-center text-black/70 text-[1em]">
+                    <h3 className="font-lust-medium text-center text-2xl !text-[var(--color-primary)]">Proposal Submitted!</h3>
+                    <p className="font-area !mt-2 text-center !text-[var(--color-primary)] text-[1em]">
                       Our Representative will get back to you shortly!
                     </p>
 
                     <div className="!mt-8 rounded-2xl bg-[#ECEDEF] !p-5">
                       <div className="font-area flex items-center justify-between !py-1 text-[1em]">
-                        <span className="text-black/70">Event Type</span>
-                        <span className="text-black">{summaryPayload.eventType || "-"}</span>
+                        <span className="!text-[var(--color-primary)]">Event Type</span>
+                        <span className="!text-[var(--color-primary)]">{summaryPayload.eventType || "-"}</span>
                       </div>
                       <div className="font-area flex items-center justify-between !py-1 text-[1em]">
-                        <span className="text-black/70">Event Date from</span>
-                        <span className="text-black">{summaryPayload.eventDateFrom || "-"}</span>
+                        <span className="!text-[var(--color-primary)]">Event Date from</span>
+                        <span className="!text-[var(--color-primary)]">{summaryPayload.eventDateFrom || "-"}</span>
                       </div>
                       <div className="font-area flex items-center justify-between !py-1 text-[1em]">
-                        <span className="text-black/70">Event Date to</span>
-                        <span className="text-black">{summaryPayload.eventDateTo || "-"}</span>
+                        <span className="!text-[var(--color-primary)]">Event Date to</span>
+                        <span className="!text-[var(--color-primary)]">{summaryPayload.eventDateTo || "-"}</span>
                       </div>
                       <div className="font-area flex items-center justify-between !py-1 text-[1em]">
-                        <span className="text-black/70">Guests</span>
-                        <span className="text-black">{summaryPayload.expectedGuestCount ?? "-"}</span>
+                        <span className="!text-[var(--color-primary)]">Guests</span>
+                        <span className="!text-[var(--color-primary)]">{summaryPayload.expectedGuestCount ?? "-"}</span>
                       </div>
                     </div>
 
