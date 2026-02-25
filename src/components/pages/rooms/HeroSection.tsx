@@ -22,32 +22,21 @@ const HeroSection = ({ activeRoom, setActiveRoom }: Props) => {
   return (
     <section className="relative w-full h-screen flex flex-col items-center justify-center bg-[#111] overflow-hidden">
       
-      {/* --- RESPONSIVE ROOM SELECTION BAR --- 
-          Dynamic positioning: Top (mobile) | Bottom (desktop)
-      */}
- 
- <div className="absolute top-[95px] md:top-auto md:bottom-8 w-full z-40 px-4 md:px-8 flex justify-center pointer-events-auto">
+      {/* --- DESKTOP ONLY MENU: Hidden on mobile (hidden md:flex) --- */}
+      <div className="hidden md:flex absolute bottom-8 w-full z-40 px-8 justify-center pointer-events-auto">
         <div 
-          className="flex items-center gap-4 md:gap-6 bg-[#00000000] backdrop-blur-xl/1 !p-3 md:!p-4 rounded-3xl md:rounded-full border-2 border-white/20 shadow-[0_30px_70px_rgba(0,0,0,0.7)] overflow-x-auto w-full max-w-[98%] md:max-w-max !min-h-[50px] md:!min-h-[60px] relative bottom-[-20px]"
-          // --- FORCING NO SCROLLBAR VISUALLY ---
-          style={{
-            msOverflowStyle: 'none',  /* IE and Edge */
-            scrollbarWidth: 'none',   /* Firefox */
-          }}
+          className="flex items-center gap-6 bg-[#00000000] backdrop-blur-xl/1 !p-2 rounded-full border-2 border-white/20 shadow-[0_30px_70px_rgba(0,0,0,0.7)] overflow-x-auto max-w-max !min-h-[60px]"
+          style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}
         >
-          {/* Injecting Webkit hide to ensure it works on Chrome/Safari */}
-          <style>{`
-            div::-webkit-scrollbar { display: none !important; }
-          `}</style>
-
+          <style>{`div::-webkit-scrollbar { display: none !important; }`}</style>
           {roomsData.map((room) => (
             <button
               key={room.id}
               onClick={() => setActiveRoom(room)}
-              className={`!px-6 md:px-8 !py-2 md:py-4 rounded-lg md:rounded-full text-[13px] md:text-[14px] whitespace-nowrap transition-all duration-300 ${
+              className={`!px-7 !py-3 rounded-full text-[14px] whitespace-nowrap transition-all duration-300 ${
                 activeRoom.id === room.id 
-                  ? 'bg-[#C19B54] text-black shadow-lg font-bold' // Gold active state
-                  : 'text-white/80 hover:text-white hover:bg-white/10 font-semibold'
+                  ? 'bg-[#F3EFE6] text-[#4c3628] font-bold shadow-md' // Client change: Beige bg, Brown text
+                  : 'text-[#F3EFE6]/90 hover:text-[#F3EFE6] hover:bg-white/10 font-semibold' // Client change: Beige text for inactive
               }`}
             >
               {room.navLabel || room.title}
@@ -55,25 +44,49 @@ const HeroSection = ({ activeRoom, setActiveRoom }: Props) => {
           ))}
         </div>
       </div>
+
       <div className="absolute inset-0 w-full h-full z-0">
-        {/* --- MOBILE VIEW: DYNAMIC STATIC BACKGROUND --- 
-            Pulling directly from activeRoom. No more hard-coding.
-        */}
+        
+        {/* --- MOBILE VIEW --- */}
         <div className="md:hidden absolute inset-0 w-full h-full">
           <AnimatePresence mode="wait">
-            <motion.img 
-              key={`bg-${activeRoom.id}`}
-              // Dynamically loads the specific mobile image for the active room
-              src={activeRoom.mobileStaticImage || activeRoom.staticImage} 
+            <motion.div
+              key={`mobile-bg-${activeRoom.id}`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-              alt="Room Background" 
-              className="w-full h-full object-cover"
-            />
+              exit={{ opacity: 0, transition: { duration: 0.3 } }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+              className="absolute inset-0 w-full h-full overflow-hidden"
+            >
+              {/* If we have mobile layers, animate them! Otherwise, fallback to static image */}
+              {activeRoom.mobileLayers && activeRoom.mobileBgImage ? (
+                <>
+                  <img src={activeRoom.mobileBgImage} alt="Background" className="absolute inset-0 w-full h-full object-cover" />
+                  
+                  {/* Mobile Furniture Animation */}
+                  {activeRoom.mobileLayers.map((layer) => (
+                    <motion.img
+                      key={layer.id}
+                      src={layer.src}
+                      draggable={false}
+                      initial={getInitialPosition(layer.slideFrom)}
+                      animate={{ x: "0%", y: "0%", opacity: 1 }} 
+                      transition={{ type: 'tween', ease: 'easeOut', duration: 0.6, delay: 0.1 }}
+                      className={`absolute ${layer.className || 'inset-0 w-full h-full object-contain'}`}
+                    />
+                  ))}
+                </>
+              ) : (
+                <img 
+                  src={activeRoom.mobileStaticImage || activeRoom.staticImage} 
+                  alt="Room Background" 
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </motion.div>
           </AnimatePresence>
 
+          {/* Text Layer (Rooms & Suits) */}
           <AnimatePresence mode="wait">
             {activeRoom.textLayer && (
               <motion.img
@@ -89,7 +102,7 @@ const HeroSection = ({ activeRoom, setActiveRoom }: Props) => {
           </AnimatePresence>
         </div>
 
-        {/* --- DESKTOP VIEW: DYNAMIC FALLING LAYERS --- */}
+        {/* --- DESKTOP VIEW (Completely Untouched Layout) --- */}
         <div className="hidden md:block absolute inset-0 w-full h-full">
           <AnimatePresence mode="wait">
             <motion.div
@@ -101,20 +114,10 @@ const HeroSection = ({ activeRoom, setActiveRoom }: Props) => {
               className="absolute inset-0 w-full h-full overflow-hidden"
             >
               {activeRoom.isStatic ? (
-                <img 
-                  src={activeRoom.staticImage} 
-                  alt={activeRoom.title} 
-                  className="w-full h-full object-cover"
-                />
+                <img src={activeRoom.staticImage} alt={activeRoom.title} className="w-full h-full object-cover" />
               ) : (
                 <>
-                  <img 
-                    src={activeRoom.bgImage} 
-                    alt="Background" 
-                    className="absolute inset-0 w-full h-full object-cover" 
-                  />
-                  
-                  {/* Preserved Desktop Furniture Animation */}
+                  <img src={activeRoom.bgImage} alt="Background" className="absolute inset-0 w-full h-full object-cover" />
                   {activeRoom.layers?.map((layer) => (
                     <motion.img
                       key={layer.id}
@@ -122,26 +125,16 @@ const HeroSection = ({ activeRoom, setActiveRoom }: Props) => {
                       draggable={false}
                       initial={getInitialPosition(layer.slideFrom)}
                       animate={{ x: "0%", y: "0%", opacity: 1 }} 
-                      transition={{ 
-                        type: 'tween', 
-                        ease: 'easeOut', 
-                        duration: 0.6, 
-                        delay: 0.1 
-                      }}
+                      transition={{ type: 'tween', ease: 'easeOut', duration: 0.6, delay: 0.1 }}
                       className={`absolute ${layer.className || 'inset-0 w-full h-full object-contain'}`}
                     />
                   ))}
-
                   {activeRoom.textLayer && (
                     <motion.img
                       src={activeRoom.textLayer}
                       initial={{ scale: 0.9, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      transition={{ 
-                        delay: 0.5, 
-                        duration: 0.4, 
-                        ease: "easeOut" 
-                      }}
+                      transition={{ delay: 0.5, duration: 0.4, ease: "easeOut" }}
                       className={`${activeRoom.textClassName || "absolute bottom-[15%] left-[50%] -translate-x-1/2 w-[40%] object-contain z-20 pointer-events-none"}`}
                     />
                   )}

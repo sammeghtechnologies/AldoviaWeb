@@ -29,7 +29,6 @@ const RoomsPage = () => {
   }, []);
 
   const triggerPageChange = (delta: number, forceIndex?: number) => {
-    // 1. HARD HARDWARE LOCK: Discard everything while moving
     if (isAnimating.current) return;
 
     if (forceIndex !== undefined) {
@@ -39,7 +38,6 @@ const RoomsPage = () => {
     }
 
     if (delta > 0) {
-      // GOING DOWN
       if (view === 'hero') {
         isAnimating.current = true;
         setDirection('toDetails');
@@ -48,7 +46,6 @@ const RoomsPage = () => {
         setTimeout(() => { detailsCooldown.current = false; }, 1500);
       } else if (view === 'details') {
         const el = document.getElementById('details-scroll-container');
-        // Only trigger footer if user is physically at the very end of Section 2
         if (el && (el.scrollHeight - el.scrollTop <= el.clientHeight + 2)) {
           if (detailsCooldown.current) return;
           isAnimating.current = true;
@@ -57,7 +54,6 @@ const RoomsPage = () => {
         }
       }
     } else if (delta < 0) {
-      // GOING UP
       if (view === 'footer') {
         isAnimating.current = true;
         setDirection('fromFooter');
@@ -66,7 +62,6 @@ const RoomsPage = () => {
         setTimeout(() => { detailsCooldown.current = false; }, 1500);
       } else if (view === 'details') {
         const el = document.getElementById('details-scroll-container');
-        // Only trigger hero if user is physically at the top of Section 2
         if (el && el.scrollTop <= 2) {
           if (detailsCooldown.current) return;
           isAnimating.current = true;
@@ -76,13 +71,11 @@ const RoomsPage = () => {
       }
     }
 
-    // Lock for full transition duration
     setTimeout(() => { isAnimating.current = false; }, 950);
   };
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      // KILL MOMENTUM: If an animation is live, prevent all scroll events
       if (isAnimating.current) {
         e.preventDefault();
         return;
@@ -97,7 +90,6 @@ const RoomsPage = () => {
         const isAtTop = el.scrollTop <= 2;
         const isAtBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 2;
 
-        // Only hijack if at boundaries; otherwise let native scroll work
         if ((isAtTop && e.deltaY < 0) || (isAtBottom && e.deltaY > 0)) {
           e.preventDefault();
           triggerPageChange(e.deltaY);
@@ -138,7 +130,15 @@ const RoomsPage = () => {
           className="absolute inset-0"
         >
           {view === 'hero' && <HeroSection activeRoom={roomsData[roomIndex]} setActiveRoom={(room) => triggerPageChange(0, roomsData.indexOf(room))} />}
-          {view === 'details' && <RoomDetails room={roomsData[roomIndex]} />}
+          
+          {/* FIXED: Passed setActiveRoom down so the mobile menu works and clears the error */}
+          {view === 'details' && (
+            <RoomDetails 
+              room={roomsData[roomIndex]} 
+              setActiveRoom={(room) => setRoomIndex(roomsData.findIndex(r => r.id === room.id))} 
+            />
+          )}
+          
           {view === 'footer' && <Footer />}
         </motion.div>
       </AnimatePresence>
