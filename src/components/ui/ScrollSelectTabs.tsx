@@ -20,7 +20,7 @@ export default function ScrollSelectTabs({
         className="flex gap-3 overflow-x-auto whitespace-nowrap scroll-smooth
                    lg:w-full lg:mx-auto lg:overflow-visible
                    lg:justify-center lg:translate-x-30
-                   !px-4 !py-3 
+                   !px-4 !py-3 lg:!py-1.5
                    [-ms-overflow-style:none] [scrollbar-width:none]
                    [&::-webkit-scrollbar]:hidden"
       >
@@ -31,7 +31,7 @@ export default function ScrollSelectTabs({
             <button
               key={item}
               onClick={() => onChange(item)}
-              className={`!px-6 !py-2 !rounded-[10px] text-sm font-medium transition-all duration-300 flex-shrink-0
+              className={`!px-6 !py-2 lg:!py-1 !rounded-[10px] text-sm font-medium transition-all duration-300 flex-shrink-0
                 ${
                   isActive
                     ? "bg-[var(--color-secondary)] !text-[var(--color-primary)] shadow-md"

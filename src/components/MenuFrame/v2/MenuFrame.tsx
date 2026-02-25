@@ -31,7 +31,7 @@ const MenuIcon = ({
   return (
     <li
       onClick={onClick}
-      className="!my-3 flex items-center gap-4 cursor-pointer transition-all duration-300 hover:opacity-70"
+      className="!my-3 lg:!my-1.5 flex items-center gap-4 cursor-pointer transition-all duration-300 hover:opacity-70"
     >
       <span className="w-8 h-8 flex items-center justify-center">
         {/* ✅ FIX 2: Wrapped in check to fix the empty string ("") src error */}
@@ -45,7 +45,7 @@ const MenuIcon = ({
         )}
       </span>
 
-      <span className="text-[16px] md:text-[18px] lg:text-[20px] font-light tracking-[0.12em] text-white/90">
+      <span className="text-[16px] md:text-[18px] lg:text-[18px] font-light tracking-[0.12em] text-white/90">
         {title}
       </span>
     </li>
@@ -68,7 +68,7 @@ const MenuSection = ({
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center justify-between text-[12px] md:text-[14px] lg:text-[15px] tracking-[0.35em] uppercase text-yellow-500 hover:text-yellow-400 transition-all"
+      className="w-full flex items-center justify-between text-[12px] md:text-[14px] lg:text-[13px] tracking-[0.35em] uppercase text-yellow-500 hover:text-yellow-400 transition-all"
     >
       {title}
 
@@ -294,7 +294,7 @@ const MenuFrame = ({
           {showBookNow && (
             <button
               onClick={() => navigate("/home")}
-              className="px-14 py-7 text-white text-[16px] md:text-[18px] lg:text-[19px] tracking-[0.25em] uppercase transition-all duration-300 hover:opacity-70 font-medium bg-transparent border-none"
+              className="px-14 py-7 text-white text-[16px] md:text-[18px] lg:text-[17px] tracking-[0.25em] uppercase transition-all duration-300 hover:opacity-70 font-medium bg-transparent border-none"
             >
               Book Now
             </button>
@@ -329,13 +329,13 @@ const MenuFrame = ({
         ref={sidebarRef}
         className="fixed !top-0 !right-0 !h-full w-[380px] md:w-[420px] lg:w-[460px] max-w-[95%] translate-x-full pointer-events-auto !p-0 md:!p-0 lg:!p-0"
       >
-        <div className="!h-full bg-gradient-to-b from-[#4b2f23]/95 via-[#4b2f23]/95 to-[#4b2f23]/95 backdrop-blur-xl !px-8 !py-10 md:!px-10 md:!py-12 lg:!px-5 lg:!py-1 relative overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.6)] border border-white/10">
+        <div className="!h-full bg-gradient-to-b from-[#4b2f23]/75 via-[#4b2f23]/75 to-[#4b2f23]/75 backdrop-blur-xl !px-8 !py-10 md:!px-10 md:!py-12 lg:!px-5 lg:!py-1 relative overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.6)] border border-white/10">
 
           {/* Spacer so Home starts below hamburger icon area */}
           <div className="h-14 md:h-16 lg:h-14" />
 
           {/* HOME */}
-          <div className="bg-white/10 rounded-xl !p-2 flex items-center gap-5 mb-12 shadow-xl border border-white/10">
+          <div className="bg-white/6 rounded-xl !p-2 flex items-center gap-5 mb-12 shadow-xl border border-white/10">
             <img
               src={icons.home || "/assets/icons/home.svg"}
               alt=""
@@ -343,7 +343,7 @@ const MenuFrame = ({
               style={{ filter: "brightness(0) invert(1)" }}
             />
 
-            <span className="text-[17px] md:text-[19px] lg:text-[21px] tracking-wide text-white/90">
+            <span className="text-[17px] md:text-[19px] lg:text-[19px] tracking-wide text-white/90">
               Home
             </span>
           </div>
@@ -364,7 +364,7 @@ const MenuFrame = ({
 
             <ul
               ref={stayRef}
-              className="!mt-5 space-y-8 !pl-2 overflow-hidden"
+              className="!mt-5 lg:!mt-3 space-y-8 lg:space-y-4 !pl-2 overflow-hidden"
               style={{ height: openSection === "stay" ? "auto" : 0 }}
             >
               {/* ✅ Fallbacks to direct public paths */}
@@ -404,7 +404,7 @@ const MenuFrame = ({
 
             <ul
               ref={celebrateRef}
-              className="!mt-5 space-y-8 !pl-2 overflow-hidden"
+              className="!mt-5 lg:!mt-3 space-y-8 lg:space-y-4 !pl-2 overflow-hidden"
               style={{ height: openSection === "celebrate" ? "auto" : 0 }}
             >
               <MenuIcon
@@ -449,7 +449,7 @@ const MenuFrame = ({
 
             <ul
               ref={discoverRef}
-              className="!mt-5 space-y-8 !pl-2 overflow-hidden"
+              className="!mt-5 lg:!mt-3 space-y-8 lg:space-y-4 !pl-2 overflow-hidden"
               style={{ height: openSection === "discover" ? "auto" : 0 }}
             >
               <MenuIcon icon={icons.about || "/assets/icons/about.svg"} title="About Us" />
@@ -459,11 +459,11 @@ const MenuFrame = ({
 
           {/* CONTACT */}
           <div className="absolute bottom-14 left-8 right-8">
-            <p className="text-[11px] md:text-[12px] lg:text-[13px] tracking-[0.35em] uppercase text-white/50 !mb-6">
+            <p className="text-[11px] md:text-[12px] lg:text-[12px] tracking-[0.35em] uppercase text-white/50 !mb-6">
               Get in touch
             </p>
 
-            <div className="flex flex-col gap-6 text-[15px] md:text-[17px] lg:text-[18px] text-white/80">
+            <div className="flex flex-col gap-6 text-[15px] md:text-[17px] lg:text-[16px] text-white/80">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full border border-yellow-500/40 flex items-center justify-center">
                   <img

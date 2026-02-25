@@ -201,7 +201,7 @@ export default function VenueInfo({
               </div>
             </div>
 
-            <h3 className="!mt-7 !mb-1 text-xl font-semibold">Seating Layout</h3>
+            <h3 className="!mt-7 !mb-1 text-xl font-semibold !text-[var(--color-secondary)]">Seating Layout</h3>
             <div className="mt-4 grid grid-cols-2 gap-3 bg-transparent sm:grid-cols-3 lg:grid-cols-4">
               {layoutItems.map((item) => (
                 <div
