@@ -128,7 +128,7 @@ const AnimatedImageHero: React.FC<AnimatedImageHeroProps> = ({
         )}
 
         <motion.h1
-          className="max-w-[16ch] font-lust text-5xl !leading-[1] md:text-7xl"
+          className="max-w-[16ch] font-lust text-5xl !leading-[1] md:text-7xl !text-[var(--color-secondary)]"
           initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{ duration: 1.25, ease: [0.22, 1, 0.36, 1] }}
@@ -176,7 +176,11 @@ const AnimatedImageHero: React.FC<AnimatedImageHeroProps> = ({
         <button
           type="button"
           onClick={onButtonClick}
-          className="!mt-8 !rounded-[999px] !border !border-[rgba(255,255,255,0.30)] !bg-[rgba(255,255,255,0.10)] !px-7 !py-3 text-sm font-medium text-white backdrop-blur-md transition duration-300 hover:!bg-[rgba(255,255,255,0.18)] md:text-base"
+          className={`!mt-8 !rounded-[999px] !border !border-[rgba(255,255,255,0.30)] !bg-[rgba(255,255,255,0.10)] !px-7 !py-3 text-sm font-medium backdrop-blur-md transition duration-300 hover:!bg-[rgba(255,255,255,0.18)] md:text-base ${
+            buttonLabel === "Explore Activities" || buttonLabel === "Plan Your Event"
+              ? "!text-[var(--color-secondary)]"
+              : "text-white"
+          }`}
         >
           {buttonLabel}
         </button>

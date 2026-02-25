@@ -25,6 +25,7 @@ const CarouselControls: React.FC<Props> = ({
   progressTrackColor = "rgba(255, 255, 255, 0.20)",
   progressFillColor = "var(--color-primary)",
   buttonColor = "var(--color-primary)",
+  iconColor = "var(--color-primary)",
   className = "",
   progressBarClassName = "w-[100px] max-w-[100px] shrink-0",
   progressBarWidth,
@@ -60,7 +61,7 @@ const CarouselControls: React.FC<Props> = ({
           className="w-10 h-10 flex items-center justify-center rounded-full hover:opacity-80 transition"
           style={{ backgroundColor: buttonColor }}
         >
-          <ArrowLeft className="w-4 h-4 ![color:var(--color-primary)]" />
+          <ArrowLeft className="w-4 h-4" style={{ color: iconColor }} />
         </button>
 
         <button
@@ -68,7 +69,7 @@ const CarouselControls: React.FC<Props> = ({
           className="w-10 h-10 flex items-center justify-center rounded-full hover:opacity-80 transition"
           style={{ backgroundColor: buttonColor }}
         >
-          <ArrowRight className="w-4 h-4 ![color:var(--color-primary)]" />
+          <ArrowRight className="w-4 h-4" style={{ color: iconColor }} />
         </button>
       </div>
     </div>

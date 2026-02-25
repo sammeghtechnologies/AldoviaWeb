@@ -34,8 +34,8 @@ export default function ScrollSelectTabs({
               className={`!px-6 !py-2 !rounded-[10px] text-sm font-medium transition-all duration-300 flex-shrink-0
                 ${
                   isActive
-                    ? "bg-[#f5f5dc] !text-[var(--color-primary)] shadow-md"
-                    : "bg-[#2c2c2c] !text-green hover:bg-white/10"
+                    ? "bg-[var(--color-secondary)] !text-[var(--color-primary)] shadow-md"
+                    : "bg-[var(--color-secondary)]/18 !text-[var(--color-secondary)] hover:bg-[var(--color-secondary)]/28"
                 }`}
             >
               {item}
