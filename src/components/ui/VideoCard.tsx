@@ -31,11 +31,11 @@ const VideoCard: React.FC<VideoCardProps> = ({ image, title }) => {
       <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-6">
 
         {/* Gold Play Button */}
-        <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-yellow-500 flex items-center justify-center mb-6 shadow-xl">
-          <Play className="w-6 h-6 md:w-8 md:h-8 text-black ml-1" />
+        <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[var(--color-secondary)]/25 border border-[var(--color-secondary)]/45 flex items-center justify-center mb-6 shadow-xl">
+          <Play className="w-6 h-6 md:w-8 md:h-8  ml-1" />
         </div>
 
-        <h4 className="text-xl md:text-2xl font-medium !mt-8">
+        <h4 className="text-xl md:text-2xl font-medium !mt-8 !text-[var(--color-secondary)]">
           {title}
         </h4>
 

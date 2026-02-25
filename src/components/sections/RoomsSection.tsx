@@ -81,14 +81,16 @@ const RoomsSection: React.FC = () => {
             <SlidingTitleReveal
               eyebrowClassName="!mb-1 text-[11px] tracking-[0.35em] uppercase text-[#78716C]"
               lines={["Rooms &", "Suites"]}
-              className="text-[44px] md:text-[52px] font-lust leading-[0.95] tracking-[0.4px] text-[#1C1917]"
+              className="text-[44px] md:text-[52px] font-lust leading-[0.95] tracking-[0.4px] !text-[var(--color-primary)]"
+              lineClassName="!text-[var(--color-primary)]"
             />
           </div>
           <div className=" w-full hidden lg:block justify-center lg:translate-x-[7.5rem]">
             <SlidingTitleReveal
               eyebrowClassName="!mb-1 text-[11px] tracking-[0.35em] uppercase text-[#78716C]"
               lines={["Rooms & Suites"]}
-              className="text-[52px] font-lust leading-[0.95] tracking-[0.4px] text-[#1C1917]"
+              className="text-[52px] font-lust leading-[0.95] tracking-[0.4px] !text-[var(--color-primary)]"
+              lineClassName="!text-[var(--color-primary)]"
             />
           </div>
         </div>

@@ -219,7 +219,7 @@ const ExperienceSection: React.FC = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full overflow-hidden bg-[#21140F] !py-20 !px-5 md:!px-10 lg:!px-16"
+      className="relative w-full overflow-hidden bg-[#21140F] !py-20 !px-5 md:!px-10 lg:!px-30"
     >
       <motion.div
         aria-hidden="true"
@@ -253,11 +253,11 @@ const ExperienceSection: React.FC = () => {
               className="text-white text-[34px] md:text-[42px] leading-[1.1] font-medium [font-family:'Playfair_Display']"
               />
           </div>
-          <div className=" w-full hidden lg:block justify-center lg:translate-x-[7.5rem]">
+          <div className="w-full hidden lg:flex justify-center">
             <SlidingTitleReveal
               eyebrowClassName="!mb-1 text-[11px] tracking-[0.35em] uppercase text-[#78716C]"
               lines={["Experience Alvodia Visually"]}
-              className="text-white text-[34px] md:text-[42px] leading-[1.1] font-medium [font-family:'Playfair_Display']"
+              className="text-white text-[34px] md:text-[42px] leading-[1.1] font-medium [font-family:'Playfair_Display'] text-center"
               />
           </div>
         </div>
@@ -289,9 +289,9 @@ const ExperienceSection: React.FC = () => {
           </p>
         </div>
 
-        <div className=" w-full hidden lg:block justify-center lg:translate-x-[33rem]">
+        <div className="w-full hidden lg:flex justify-center">
         <p
-            className="text-[#C7B8AE] !mt-4 text-[15px] max-w-md"
+            className="text-[var(--color-secondary)] !mt-4 text-[15px] max-w-md text-center"
             aria-label={subtitleText.replace("\n", " ")}
           >
             {(() => {
@@ -325,7 +325,7 @@ const ExperienceSection: React.FC = () => {
               key={item}
               onClick={() => setActiveCategory(item)}
               className={`whitespace-nowrap !px-2 !py-2 rounded-full text-sm transition duration-300 ${activeCategory === item
-                  ? "bg-[#EADFD9] text-[#21140F]"
+                  ? "bg-[var(--color-secondary)] text-[#21140F]"
                   : "bg-[#3A241D] text-[#EADFD9] hover:bg-[#4A2E25]"
                 }`}
             >
@@ -380,10 +380,10 @@ const ExperienceSection: React.FC = () => {
                 <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.18)_0%,rgba(255,255,255,0.02)_28%,rgba(255,255,255,0)_42%)] opacity-70 transition duration-700 group-hover:opacity-90" />
 
                 {/* Content */}
-                <div className="absolute bottom-6 left-6 right-6 text-white">
+                <div className="absolute bottom-6 left-6 right-6 !text-[var(--color-secondary)]">
 
                   <span className="text-[11px] tracking-widest uppercase
-                                 bg-black/50 px-3 py-1 rounded-full">
+                                 px-3 py-1 rounded-full">
                     {item.tag}
                   </span>
 
@@ -408,7 +408,7 @@ const ExperienceSection: React.FC = () => {
           onNext={onNext}
           onPrev={onPrev}
           progressTrackColor="rgba(255, 255, 255, 0.25)"
-          progressFillColor="#FFFFFF"
+          progressFillColor="#000"
           buttonColor="#FFFFFF"
           iconColor="#21140F"
           progressBarClassName="!w-[100px] !max-w-[100px] shrink-0"

@@ -59,15 +59,15 @@ const RoomsCard: React.FC<RoomsCardProps> = ({
           {title}
         </h3>
 
-        <p className="relative z-10 text-gray-600 !mb-6 text-[#57534D]">
+        <p className="relative z-10 !mb-6 !text-[var(--color-primary)]">
           {description}
         </p>
 
         {/* Meta Row */}
-        <div className="relative z-10 flex items-center text-[#79716B] text-sm !mb-8 !space-x-2">
-          <span>{size}</span>
-          <span>•</span>
-          <span>{guests}</span>
+        <div className="relative z-10 flex items-center !text-[var(--color-primary)] text-sm !mb-8 !space-x-2">
+          <span className="!text-[var(--color-primary)]">{size}</span>
+          <span className="!text-[var(--color-primary)]">•</span>
+          <span className="!text-[var(--color-primary)]">{guests}</span>
         </div>
 
         {/* Book Button */}

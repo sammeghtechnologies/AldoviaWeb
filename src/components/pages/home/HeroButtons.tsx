@@ -12,15 +12,15 @@ const HeroButtons: React.FC = () => {
       transition={{ delay: 0.6 }}
       className="mt-10 flex flex-col items-center gap-5"
     >
-      <div className="flex flex-col items-center gap-5 lg:flex-row">
+      <div className="flex flex-col items-center gap-5 lg:flex-row !text-[var(--color-secondary)]">
         <button
-          className={`${buttonLayoutClass} bg-[var(--color-primary)] hover:brightness-90 transition-all duration-500 text-white rounded-full text-lg shadow-2xl backdrop-blur-md`}
+          className={`${buttonLayoutClass} !text-[var(--color-secondary)] bg-[var(--color-primary)] hover:brightness-90 transition-all duration-500 text-white rounded-full text-lg shadow-2xl backdrop-blur-md`}
         >
           Book Your Stay
         </button>
 
         <button
-          className={`${buttonLayoutClass} border border-white/50 bg-white/10 backdrop-blur-lg hover:bg-white/20 transition-all duration-500 text-white rounded-full text-lg`}
+          className={`${buttonLayoutClass} !text-[var(--color-secondary)] border border-white/50 bg-white/10 backdrop-blur-lg hover:bg-white/20 transition-all duration-500 text-white rounded-full text-lg`}
         >
           Plan Your Event
         </button>
@@ -30,7 +30,7 @@ const HeroButtons: React.FC = () => {
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 1, duration: 0.6, ease: "easeOut" }}
-        className="mt-2 flex items-center gap-2 text-lg group"
+        className="mt-2 flex items-center gap-2 text-lg group !text-[var(--color-secondary)]"
       >
         <span className="transition-transform group-hover:translate-x-2">
           →

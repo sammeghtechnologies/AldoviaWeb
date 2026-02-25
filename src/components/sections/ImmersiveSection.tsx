@@ -49,7 +49,7 @@ const ImmersiveSection: React.FC = () => {
               Immersive Experience
             </p>
 
-            <h3 className="!pt-2 !pb-2 text-4xl font-serif leading-tight !mb-6 max-w-[16ch] md:text-4xl">
+            <h3 className="!pt-2 !pb-2 text-4xl font-serif leading-tight !mb-6 max-w-[16ch] md:text-4xl !text-[var(--color-secondary)]">
               Before You Arrive
             </h3>
 
@@ -57,11 +57,11 @@ const ImmersiveSection: React.FC = () => {
               Experience our venues, rooms, and amenities in stunning 360° detail
             </p>
 
-            <button className="!inline-flex !pt-2 !pr-[31.561px] !pb-2 !pl-[33.002px] !justify-center !items-center !rounded-[8px] !bg-white !text-black !font-medium hover:!bg-gray-200 !transition">
+            <button className="!inline-flex !pt-2 !pr-[31.561px] !pb-2 !pl-[33.002px] !justify-center !items-center !rounded-[8px] !bg-[var(--color-secondary)] !text-black !font-medium hover:!bg-gray-200 !transition">
               Enter 360° Virtual Tour
             </button>
 
-            <p className="!pt-1 !pb-1 mt-5 text-[.8em] text-white/60">
+            <p className="!pt-1 !pb-1 mt-5 text-[.8em] text-white/60 !text-[var(--color-secondary)]">
               Loads in 5-10 seconds • Exit anytime
             </p>
           </div>

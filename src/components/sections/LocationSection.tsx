@@ -28,16 +28,17 @@ const LocationSection: React.FC = () => {
         {/* Heading */}
         <SlidingTitleReveal
           lines={["Perfectly Located"]}
-          className="text-[32px] md:text-[42px] font-medium text-[#1C1917] [font-family:'Playfair_Display']"
+          className="text-[32px] md:text-[42px] font-medium !text-[var(--color-primary)] [font-family:'Playfair_Display']"
+          lineClassName="!text-[var(--color-primary)]"
         />
 
-        <p className="text-[#6B5E57] !mt-4 text-[15px]">
+        <p className="!text-[var(--color-primary)] !mt-4 text-[15px]">
           Easily accessible luxury resort
         </p>
 
         {/* Airport Badge */}
-        <div className="mt-6">
-          <span className="inline-flex items-center gap-2 bg-[#E9D6A5] text-[#3D2B1F] !px-4 !py-2 rounded-full text-sm font-medium">
+        <div className="!mt-4">
+          <span className="inline-flex items-center gap-2 bg-[#E9D6A5] !text-[var(--color-primary)] !px-4 !py-2 rounded-full text-sm font-medium">
             📍 15 minutes from Bangalore Airport
           </span>
         </div>

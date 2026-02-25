@@ -50,8 +50,12 @@ const SlidingTitleReveal: React.FC<SlidingTitleRevealProps> = ({
         className={className}
       >
         {lines.map((line, index) => (
-          <span key={`${line}-${index}`} className={`block overflow-hidden ${lineClassName}`}>
-            <motion.span custom={index} variants={lineVariants} className="block will-change-transform">
+          <span key={`${line}-${index}`} className="block overflow-hidden">
+            <motion.span
+              custom={index}
+              variants={lineVariants}
+              className={`block will-change-transform ${lineClassName}`}
+            >
               {line}
             </motion.span>
           </span>

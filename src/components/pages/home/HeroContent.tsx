@@ -21,6 +21,7 @@ const HeroContent: React.FC = () => {
           lg:text-7xl 
           leading-[1.15] 
           tracking-tight
+          text-[var(--color-secondary)]
         ">
           Escape into Grandeur
         </h1>
@@ -35,6 +36,7 @@ const HeroContent: React.FC = () => {
           font-light
           leading-6
           text-white/90
+          text-[var(--color-secondary)]
         ">
           Grand Celebrations. Timeless Stays.
         </p>
