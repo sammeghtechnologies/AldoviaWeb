@@ -91,8 +91,8 @@ const RestaurantSection: React.FC = () => {
 
   return (
     <section ref={sectionRef} className="relative h-[300vh] w-full bg-[#F4F1E8]">
-      <div className="sticky top-0 min-h-screen w-full overflow-hidden px-3 sm:px-5 md:px-10 lg:px-16 py-6 sm:py-8 md:py-16 lg:py-20 flex items-center bg-[#000]">
-        <video
+      <div className="sticky top-0 min-h-screen w-full overflow-hidden px-3 sm:px-5 md:px-10 lg:px-16 py-6 sm:py-8 md:py-16 lg:py-20 flex items-center bg-[var(--color-primary)]">
+        {/* <video
           className="absolute inset-0 h-full w-full object-cover"
           autoPlay
           loop
@@ -102,7 +102,7 @@ const RestaurantSection: React.FC = () => {
           aria-hidden="true"
         >
           <source src={SECTION_BG_VIDEO} type="video/webm" />
-        </video>
+        </video> */}
         <div className="absolute inset-0 bg-[#F4F1E8]/72 backdrop-blur-[1px]" />
 
         <div
@@ -150,9 +150,7 @@ const RestaurantSection: React.FC = () => {
               <h2 className="whitespace-nowrap text-[2.6rem] sm:text-[3rem] md:text-[3.2rem] lg:text-[3.2rem] font-serif leading-[0.9] tracking-tight text-[var(--color-secondary)]/80">
                 {fullTitle}
               </h2>
-              <h2 className="whitespace-nowrap text-[2.6rem] sm:text-[3rem] md:text-[3.2rem] lg:text-[7.2rem] font-serif leading-[0.9] tracking-tight text-[var(--color-secondary)] absolute top-0 left-0 max-lg:[clip-path:polygon(0_0,80px_0,80px_100%,0_100%)] lg:[clip-path:polygon(0_0,200px_0,200px_100%,0_100%)]">
-                {fullTitle}
-              </h2>
+            
             </div>
 
             <p className="!mt-3 sm:!mt-4 text-base sm:text-lg md:text-[28px] font-serif text-[var(--color-secondary)]">
@@ -165,7 +163,7 @@ const RestaurantSection: React.FC = () => {
 
             <div className="flex flex-col gap-3 sm:gap-5 !py-4 sm:!py-7 text-[var(--color-secondary)] z-10 relative">
               <div className="flex items-center gap-3 sm:gap-4">
-                <span className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[var(--color-secondary)]/10 text-[var(--color-secondary)]">
+                <span className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full !bg-[var(--color-secondary)]/10 !text-[var(--color-primary)]">
                   <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.7} d="M12 21s7-4.35 7-11a7 7 0 10-14 0c0 6.65 7 11 7 11z" />
                     <circle cx="12" cy="10" r="2.5" strokeWidth={1.7} />
@@ -178,7 +176,7 @@ const RestaurantSection: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-3 sm:gap-4">
-                <span className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[var(--color-secondary)]/10 text-[var(--color-secondary)]">
+                <span className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full !bg-[var(--color-secondary)]/10 !text-[var(--color-primary)]">
                   <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="12" cy="12" r="8" strokeWidth={1.7} />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.7} d="M12 8v4l2.8 1.6" />
@@ -191,7 +189,7 @@ const RestaurantSection: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-3 sm:gap-4">
-                <span className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[var(--color-secondary)]/10 text-[var(--color-secondary)]">
+                <span className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full !bg-[var(--color-secondary)]/10 !text-[var(--color-primary)]">
                   <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.7} d="M17 20v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2" />
                     <circle cx="10" cy="8" r="3" strokeWidth={1.7} />
@@ -200,8 +198,8 @@ const RestaurantSection: React.FC = () => {
                   </svg>
                 </span>
                 <div>
-                  <p className="text-xs sm:text-sm text-[var(--color-secondary)]/75">Capacity</p>
-                  <p className="text-[18px] sm:text-[24px] font-semibold text-[var(--color-secondary)]">{section.capacity}</p>
+                  <p className="text-xs sm:text-sm !text-[var(--color-secondary)]/75">Capacity</p>
+                  <p className="text-[18px] sm:text-[24px] font-semibold !text-[var(--color-secondary)]">{section.capacity}</p>
                 </div>
               </div>
             </div>

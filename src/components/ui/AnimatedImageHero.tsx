@@ -189,9 +189,9 @@ const AnimatedImageHero: React.FC<AnimatedImageHeroProps> = ({
               onNext={onNext}
               onPrev={onPrev}
               progressTrackColor="rgba(255, 255, 255, 0.3)"
-              progressFillColor="#f5f5dc"
-              buttonColor="#f5f5dc"
-              iconColor="#49261c"
+              progressFillColor="var(--color-secondary)"
+              buttonColor="var(--color-secondary)"
+              iconColor="var(--color-primary)"
               className={controlsClassName}
               progressBarClassName={controlsProgressBarClassName}
             />
