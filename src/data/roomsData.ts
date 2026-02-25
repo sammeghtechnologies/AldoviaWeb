@@ -9,6 +9,7 @@ export interface RoomData {
   id: string;
   title: string;
   navLabel: string;
+   mobileStaticImage?: string;
   isStatic: boolean;
   staticImage?: string; 
   bgImage?: string;
@@ -26,6 +27,7 @@ export const roomsData: RoomData[] = [
     id: 'deluxe-room',
     title: 'Deluxe Rooms',
     navLabel: 'Deluxe Rooms',
+    mobileStaticImage: '/assets/rooms/deluxe-room/room.png',
     isStatic: true, 
     staticImage: '/assets/rooms/deluxe-room/room.png',
     gallery: [
@@ -41,6 +43,7 @@ export const roomsData: RoomData[] = [
     id: 'luxury-room',
     title: 'Luxury Rooms',
     navLabel: 'Luxury Rooms',
+    mobileStaticImage: '/assets/rooms/deluxe-room/room.png',
     isStatic: false,
     // bgImage: '/assets/rooms/luxury-room/bg.png',
     // textLayer: '/assets/rooms/luxury-room/RoomsSuits.png',
@@ -75,6 +78,7 @@ export const roomsData: RoomData[] = [
     id: '1-bedroom-suite',
     title: '1 Bedroom Suite',
     navLabel: '1 Bedroom Suite',
+    mobileStaticImage: '/assets/rooms/deluxe-room/room.png',
     isStatic: false,
     bgImage: '/assets/rooms/1-bedroom-suite/bg.png',
     textLayer: '/assets/rooms/1-bedroom-suite/RoomsSuits.png',
@@ -100,6 +104,7 @@ export const roomsData: RoomData[] = [
     id: '2-bedroom-suite',
     title: '2 Bedroom Suite',
     navLabel: '2 Bedroom Suite',
+    mobileStaticImage: '/assets/rooms/deluxe-room/room.png',
     isStatic: false,
     bgImage: '/assets/rooms/2-bedroom-suite/bg.png',
     textLayer: '/assets/rooms/2-bedroom-suite/RoomsSuits.png',
@@ -125,6 +130,7 @@ export const roomsData: RoomData[] = [
     id: 'deluxe-suite',
     title: 'Deluxe Suite',
     navLabel: 'Deluxe Suite',
+    mobileStaticImage: '/assets/rooms/deluxe-suite/room.png',
     isStatic: false,
     bgImage: '/assets/rooms/deluxe-suite/bg.png',
     textLayer: '/assets/rooms/deluxe-suite/RoomsSuits.png',
@@ -150,6 +156,7 @@ export const roomsData: RoomData[] = [
     id: 'executive-suite',
     title: 'Executive Suite',
     navLabel: 'Executive Suite',
+    mobileStaticImage: '/assets/rooms/deluxe-room/room.png',
     isStatic: false,
     bgImage: '/assets/rooms/executive-suite/bg.png',
     textLayer: '/assets/rooms/executive-suite/RoomsSuits.png',

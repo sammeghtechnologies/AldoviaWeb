@@ -1,115 +1,71 @@
-import { type RoomData } from '../../../data/roomsData';
+'use client';
 
-const RoomDetails = ({ room }: { room: RoomData }) => {
-  // 1. SMART TITLE SPLIT
-  // Instead of taking the first word, we take the LAST word (e.g., "Rooms" or "Suite")
-  // and leave everything else grouped together (e.g., "1 Bedroom" or "Executive").
-  const titleParts = room.title.split(' ');
+import { motion } from 'framer-motion';
+import { roomsData, type RoomData } from '../../../data/roomsData';
+
+interface Props { room?: RoomData; }
+
+const RoomDetails = ({ room }: Props) => {
+  const displayRoom = room || roomsData[0];
+  const images = displayRoom.gallery || [displayRoom.staticImage, displayRoom.staticImage, displayRoom.staticImage];
+  const titleParts = displayRoom.title.split(' ');
   const secondPart = titleParts.length > 1 ? titleParts.pop() : '';
-  const firstPart = titleParts.join(' ') || room.title;
+  const firstPart = titleParts.join(' ') || displayRoom.title;
 
   return (
-    <section 
-      className="relative w-full min-h-screen py-24 px-10 md:px-20 flex items-center bg-[#F4F1E8] overflow-hidden"
-    >
-      <div 
-        className="absolute right-[-5%] bottom-[-5%] w-[60vw] h-[90vh] bg-no-repeat bg-right-bottom bg-contain opacity-[0.15] pointer-events-none"
-        style={{ backgroundImage: `url('/assets/rooms/background/page2bg.png')` }}
-      />
-
-      <div className="max-w-[1300px] w-full mx-auto flex flex-col md:flex-row items-center justify-between gap-12 md:gap-16 relative z-10">
-
-        {/* --- LEFT: The Expanding 3-Image Gallery --- */}
-        <div className="group flex h-[400px] md:h-[550px] w-full md:w-[55%] gap-4 shrink-0 relative">
-          {room.gallery.slice(0, 3).map((imgSrc, index) => (
-            <div 
-              key={index}
-              className={`
-                relative h-full overflow-hidden rounded-[2rem] shadow-lg cursor-pointer transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]
-                ${index === 2 ? 'w-[60%]' : 'w-[20%]'}
-                group-hover:w-[15%]
-                hover:!w-[70%]
-              `}
-            >
-              <img 
-                src={imgSrc || '/fallback.jpg'} 
-                alt={`${room.title} view ${index + 1}`} 
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-              />
-            </div>
+    <section id="details-scroll-container" className="relative w-full h-screen bg-[#F3EFE6] overflow-y-auto overflow-x-hidden touch-pan-y overscroll-none">
+      <div className="w-full min-h-full flex flex-col md:flex-row items-center justify-center md:p-16 py-20">
+        
+        {/* Gallery: Desktop expands | Mobile stays as equal strips */}
+        <div className="group flex h-[50vh] md:h-[75vh] w-full md:w-1/2 gap-1 md:gap-4 z-10 mb-8 md:mb-0">
+          {images.slice(0, 3).map((img, i) => (
+            <motion.div key={i} initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.8, delay: i * 0.1 }}
+              className={`relative h-full overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] w-1/3 rounded-none md:rounded-[2.5rem] md:shadow-xl md:cursor-pointer ${i === 2 ? 'md:w-[50%]' : 'md:w-[25%]'} md:group-hover:w-[15%] md:hover:!w-[70%] ${i === 0 ? 'md:mt-16' : i === 1 ? 'md:mb-16' : 'md:mt-8'}`}>
+              <img src={img} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            </motion.div>
           ))}
         </div>
 
-        {/* --- RIGHT: Text & Split-Color Title --- */}
-        <div className="flex flex-col relative w-full md:w-[45%] md:pl-10 lg:pl-12 justify-center">
-
-          {/* THE MATHEMATICAL OVERLAP FIX 
-              We use whitespace-nowrap to prevent long names ("1 Bedroom") from breaking into two lines.
-          */}
-          <div className="relative max-lg:-translate-x-[80px] lg:-translate-x-[280px] translate-y-[20px] lg:translate-y-[40px] pointer-events-none z-20 whitespace-nowrap">
+        {/* Text Details & Split-Title */}
+        <div className="flex flex-col relative w-full md:w-1/2 z-10 px-6 md:px-0 md:pl-16 pb-20 md:pb-0 text-[#4c3628] justify-center">
+        <div className="relative max-md:-translate-x-[40px] md:-translate-x-[200px] lg:-translate-x-[280px] translate-y-[20px] pointer-events-none z-20 whitespace-nowrap left-[10.5%]">
             
-            {/* Layer 1: Dark Brown Base */}
-            <h2 className="text-[6rem] lg:text-[10.5rem] font-serif leading-[0.85] tracking-tight text-[#4c3628]">
+            {/* Base Layer: Dark Brown (Visible on all devices) */}
+            <h2 className="text-[5rem] md:text-[8rem] lg:text-[10rem] font-serif leading-[0.85] tracking-tight text-[#4c3628]">
               {firstPart}
             </h2>
             
-            {/* Layer 2: Beige Overlay 
-                MATH MAGIC: Because we translated the wrapper left by exactly 200px on desktop (and 80px on mobile),
-                we use a polygon clip-path to make this layer exactly 200px wide (80px on mobile).
-                This ensures the cut-line flawlessly hits the column boundary every single time, 
-                no matter how long the text is.
-            */}
-            <h2 
-              className="text-[6rem] lg:text-[10.5rem] font-serif leading-[0.85] tracking-tight text-[#f5f5dc] absolute top-0 left-0 max-lg:[clip-path:polygon(0_0,80px_0,80px_100%,0_100%)] lg:[clip-path:polygon(0_0,200px_0,200px_100%,0_100%)]"
-            >
+            {/* Overlay Layer: Beige (Hidden on mobile, visible on desktop) */}
+            <h2 className="hidden md:block text-[5rem] md:text-[8rem] lg:text-[10rem] font-serif leading-[0.85] tracking-tight text-[#f3efe6] absolute top-0 left-0 md:[clip-path:polygon(0_0,200px_0,200px_100%,0_100%)]">
               {firstPart}
             </h2>
-            
           </div>
-
-          {/* SECOND PART ("Rooms", "Suite") */}
-          <h2 className="text-[4rem] lg:text-[7.5rem] font-serif italic leading-none text-[#4c3628] mt-[10px] lg:mt-[20px]">
-            {secondPart}
-          </h2>
-
-          {/* DESCRIPTION */}
-          <p className="text-sm md:text-[15px] text-[#423229] max-w-sm leading-[1.7] mt-8 lg:mt-10 font-medium z-10 relative">
-            With its muted interiors, soft headboard and evocative ceiling accents, the {room.title} exudes an air of sophistication.
+          <h2 className="text-[3.5rem] md:text-[6rem] lg:text-[7.5rem] font-serif italic leading-none text-[#4c3628] mt-[5px]">{secondPart}</h2>
+          
+          <p className="text-[15px] md:text-[17px] text-[#423229] max-w-sm leading-relaxed !mt-8 !ml-7 font-medium">
+            {displayRoom.description}
           </p>
 
-          {/* ICONS & DETAILS */}
-          <div className="flex flex-wrap gap-8 py-6 text-[#423229] z-10 relative">
+          {/* --- AMENITIES: Occupancy and Bed Type --- */}
+          <div className="flex items-center gap-10 !mt-8 !mb-4 !ml-7 text-[#4c3628]/80 font-medium text-[15px] md:text-[16px]">
             <div className="flex items-center gap-3">
-              <svg className="w-5 h-5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
               </svg>
-              <span className="text-sm font-medium">2 adults + 2 children</span>
+              <span>2 adults + 2 children</span>
             </div>
-            
             <div className="flex items-center gap-3">
-              <svg className="w-5 h-5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 11v6a2 2 0 002 2h14a2 2 0 002-2v-6M3 11h18m-9 0v-8m-9 8h18" />
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 4v16"/><path d="M2 11h20"/><path d="M2 17h20"/><path d="M22 4v16"/><path d="M18 11V4"/><path d="M6 11V4"/>
               </svg>
-              <span className="text-sm font-medium">King bed</span>
+              <span>King bed</span>
             </div>
           </div>
 
-          {/* BUTTON */}
-          <button 
-            className="w-fit border border-[#4c3628]/40 rounded-full text-[11px] font-bold tracking-[0.25em] text-[#4c3628] hover:bg-[#4c3628] hover:text-[#f5f5dc] transition-all duration-300 z-10 relative uppercase"
-            style={{ 
-              marginTop: '25px', 
-              paddingTop: '18px', 
-              paddingBottom: '18px', 
-              paddingLeft: '48px', 
-              paddingRight: '48px' 
-            }}
-          >
-            BOOK NOW
+          <button className="bg-[#00000000] border-2 text-[#4c3628] rounded-full uppercase w-fit !px-12 !py-5 !ml-7 text-[12px] font-bold tracking-[0.1em] mt-10 shadow-lg transition-transform hover:scale-105 active:scale-95">
+            Book Now
           </button>
-
         </div>
-
       </div>
     </section>
   );

@@ -6,151 +6,140 @@ import { roomsData } from '../../../data/roomsData';
 import Navbar from './Navbar';
 import HeroSection from './HeroSection';
 import RoomDetails from './RoomDetails';
+import Footer from '../../sections/Footer';
 
-type Direction = 'downToDetails' | 'downToNextHero' | 'upToHero' | 'upToPrevDetails';
+type ViewState = 'hero' | 'details' | 'footer';
+type Direction = 'toDetails' | 'toHero' | 'toFooter' | 'fromFooter';
 
 const RoomsPage = () => {
   const [roomIndex, setRoomIndex] = useState(0);
-  const [view, setView] = useState<'hero' | 'details'>('hero');
-  const [direction, setDirection] = useState<Direction>('downToDetails');
+  const [view, setView] = useState<ViewState>('hero');
+  const [direction, setDirection] = useState<Direction>('toDetails');
   
-  // Strict locks to prevent skipping
   const isAnimating = useRef(false);
+  const detailsCooldown = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const touchStartY = useRef(0);
+
+  useEffect(() => {
+    roomsData.forEach((room) => {
+      if (room.bgImage) { const img = new Image(); img.src = room.bgImage; }
+      if (room.gallery) { room.gallery.forEach((src) => { const img = new Image(); img.src = src; }); }
+    });
+  }, []);
 
   const triggerPageChange = (delta: number, forceIndex?: number) => {
-    // 1. HARD LOCK: If we are already moving, kill all incoming events
+    // 1. HARD HARDWARE LOCK: Discard everything while moving
     if (isAnimating.current) return;
-    
-    isAnimating.current = true;
-    const totalRooms = roomsData.length;
 
     if (forceIndex !== undefined) {
-      setDirection('downToNextHero');
       setRoomIndex(forceIndex);
       setView('hero');
-    } else {
-      // 2. LOGIC: Move only one step regardless of how large delta is
-      if (delta > 0) {
-        if (view === 'hero') { 
-          setDirection('downToDetails'); 
-          setView('details'); 
-        } else { 
-          setDirection('downToNextHero'); 
-          setRoomIndex(p => (p + 1) % totalRooms); 
-          setView('hero'); 
+      return;
+    }
+
+    if (delta > 0) {
+      // GOING DOWN
+      if (view === 'hero') {
+        isAnimating.current = true;
+        setDirection('toDetails');
+        setView('details');
+        detailsCooldown.current = true;
+        setTimeout(() => { detailsCooldown.current = false; }, 1500);
+      } else if (view === 'details') {
+        const el = document.getElementById('details-scroll-container');
+        // Only trigger footer if user is physically at the very end of Section 2
+        if (el && (el.scrollHeight - el.scrollTop <= el.clientHeight + 2)) {
+          if (detailsCooldown.current) return;
+          isAnimating.current = true;
+          setDirection('toFooter');
+          setView('footer');
         }
-      } else {
-        if (view === 'details') { 
-          setDirection('upToHero'); 
-          setView('hero'); 
-        } else { 
-          setDirection('upToPrevDetails'); 
-          setRoomIndex(p => (p - 1 + totalRooms) % totalRooms); 
-          setView('details'); 
+      }
+    } else if (delta < 0) {
+      // GOING UP
+      if (view === 'footer') {
+        isAnimating.current = true;
+        setDirection('fromFooter');
+        setView('details');
+        detailsCooldown.current = true;
+        setTimeout(() => { detailsCooldown.current = false; }, 1500);
+      } else if (view === 'details') {
+        const el = document.getElementById('details-scroll-container');
+        // Only trigger hero if user is physically at the top of Section 2
+        if (el && el.scrollTop <= 2) {
+          if (detailsCooldown.current) return;
+          isAnimating.current = true;
+          setDirection('toHero');
+          setView('hero');
         }
       }
     }
 
-    // 3. RELEASE LOCK: Match this exactly to your transition duration (0.8s)
-    setTimeout(() => { 
-      isAnimating.current = false; 
-    }, 850); 
+    // Lock for full transition duration
+    setTimeout(() => { isAnimating.current = false; }, 950);
   };
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      
-      // 4. SENSITIVITY THRESHOLD: Ignore micro-scrolls/noise
-      if (Math.abs(e.deltaY) < 30) return;
+      // KILL MOMENTUM: If an animation is live, prevent all scroll events
+      if (isAnimating.current) {
+        e.preventDefault();
+        return;
+      }
 
-      // Only trigger the change; the Hard Lock handles the rest
-      triggerPageChange(e.deltaY);
+      const el = document.getElementById('details-scroll-container');
+      
+      if (view === 'hero' || view === 'footer') {
+        e.preventDefault();
+        if (Math.abs(e.deltaY) > 30) triggerPageChange(e.deltaY);
+      } else if (view === 'details' && el) {
+        const isAtTop = el.scrollTop <= 2;
+        const isAtBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 2;
+
+        // Only hijack if at boundaries; otherwise let native scroll work
+        if ((isAtTop && e.deltaY < 0) || (isAtBottom && e.deltaY > 0)) {
+          e.preventDefault();
+          triggerPageChange(e.deltaY);
+        }
+      }
     };
 
     const container = containerRef.current;
-    if (container) {
-      container.addEventListener('wheel', handleWheel, { passive: false });
-    }
+    if (container) container.addEventListener('wheel', handleWheel, { passive: false });
     return () => container?.removeEventListener('wheel', handleWheel);
-  }, [view, roomIndex]);
+  }, [view]);
 
-  // Preload ALL room images on component mount to eliminate any loading lag during transitions
-  // This assumes the number of rooms is small; if large, consider lazy preloading only for current/adjacent
-  // If roomsData has additional images (e.g., room.gallery: string[]), preload those here too
-  useEffect(() => {
-    roomsData.forEach(room => {
-      if (room.bgImage) {
-        const img = new Image();
-        img.src = room.bgImage;
-      }
-      // Example if there are more images:
-      // room.gallery?.forEach(src => {
-      //   const img = new Image();
-      //   img.src = src;
-      // });
-    });
-  }, []);
+  const handleTouchStart = (e: React.TouchEvent) => { touchStartY.current = e.touches[0].clientY; };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (isAnimating.current) return;
+    const dist = touchStartY.current - e.changedTouches[0].clientY;
+    if (Math.abs(dist) > 60) triggerPageChange(dist);
+  };
 
-  // Optional: Still preload adjacent for any dynamic changes, but with all preloaded, this is redundant
-  useEffect(() => {
-    const nextIdx = (roomIndex + 1) % roomsData.length;
-    const prevIdx = (roomIndex - 1 + roomsData.length) % roomsData.length;
-    [roomIndex, nextIdx, prevIdx].forEach(idx => {
-      const img = new Image();
-      if (roomsData[idx].bgImage) img.src = roomsData[idx].bgImage!;
-      // Add other images here if applicable
-    });
-  }, [roomIndex]);
-
-  const slideVariants = {
-    enter: (dir: Direction) => ({
-      y: dir.includes('downToDetails') ? '100%' : dir.includes('upToHero') ? '-100%' : 0,
-      x: dir === 'downToNextHero' ? '100%' : dir === 'upToPrevDetails' ? '-100%' : 0,
-    }),
-    center: { x: 0, y: 0 },
-    exit: (dir: Direction) => ({
-      y: dir.includes('downToDetails') ? '-100%' : dir.includes('upToHero') ? '100%' : 0,
-      x: dir === 'downToNextHero' ? '-100%' : dir === 'upToPrevDetails' ? '100%' : 0,
-    }),
+  const variants = {
+    enter: (dir: Direction) => ({ y: (dir === 'toDetails' || dir === 'toFooter') ? '100%' : '-100%' }),
+    center: { y: 0 },
+    exit: (dir: Direction) => ({ y: (dir === 'toDetails' || dir === 'toFooter') ? '-100%' : '100%' }),
   };
 
   return (
-    <div ref={containerRef} className="relative w-full h-screen overflow-hidden bg-black">
+    <div ref={containerRef} className="relative w-full h-screen overflow-hidden bg-black" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       <Navbar />
-
       <AnimatePresence initial={false} custom={direction} mode="popLayout">
         <motion.div
-          key={`${view}-${roomIndex}`}
+          key={view}
           custom={direction}
-          variants={slideVariants}
+          variants={variants}
           initial="enter"
           animate="center"
           exit="exit"
-          transition={{ 
-            duration: 0.8, 
-            ease: [0.19, 1, 0.22, 1] // High-end "Apple" quintic ease
-          }}
-          style={{ 
-            position: 'absolute',
-            inset: 0,
-            willChange: 'transform',
-            transform: 'translate3d(0,0,0)',
-            backfaceVisibility: 'hidden'
-          }}
+          transition={{ duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
+          className="absolute inset-0"
         >
-          {view === 'hero' ? (
-            <HeroSection 
-              activeRoom={roomsData[roomIndex]} 
-              setActiveRoom={(room) => {
-                const targetIdx = roomsData.findIndex(r => r.id === room.id);
-                triggerPageChange(0, targetIdx);
-              }} 
-            />
-          ) : (
-            <RoomDetails room={roomsData[roomIndex]} />
-          )}
+          {view === 'hero' && <HeroSection activeRoom={roomsData[roomIndex]} setActiveRoom={(room) => triggerPageChange(0, roomsData.indexOf(room))} />}
+          {view === 'details' && <RoomDetails room={roomsData[roomIndex]} />}
+          {view === 'footer' && <Footer />}
         </motion.div>
       </AnimatePresence>
     </div>
