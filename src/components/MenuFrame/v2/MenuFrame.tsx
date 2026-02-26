@@ -45,7 +45,7 @@ const MenuIcon = ({
         )}
       </span>
 
-      <span className="text-[16px] md:text-[18px] lg:text-[18px] font-light tracking-[0.12em] text-white/90">
+      <span className="text-[14px] md:text-[16px] lg:text-[16px] font-light tracking-[0.12em] text-white/90">
         {title}
       </span>
     </li>
@@ -335,11 +335,11 @@ const MenuFrame = ({
           <div className="h-14 md:h-16 lg:h-14" />
 
           {/* HOME */}
-          <div className="bg-white/6 rounded-xl !p-2 flex items-center gap-5 mb-12 shadow-xl border border-white/10">
+          <div className="!p-1  !mt-5 flex items-center gap-5 mb-12 shadow-xl">
             <img
               src={icons.home || "/assets/icons/home.svg"}
               alt=""
-              className="w-8 h-8 object-contain opacity-90"
+              className="w-6 h6- object-contain opacity-90"
               style={{ filter: "brightness(0) invert(1)" }}
             />
 

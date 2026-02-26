@@ -234,7 +234,7 @@ export default function ExperienceInfoSection({ sections }: ExperienceInfoSectio
   if (!sections?.length) return null;
 
   return (
-    <section className="w-full flex flex-col items-center gap-0 !pb-0 md:!pb-16">
+    <section className="w-full flex flex-col items-center gap-0 !pb-0 md:!pb-0">
       {filteredSections.map((item, index) => (
         <ExperienceInfoCard
           key={item.id}

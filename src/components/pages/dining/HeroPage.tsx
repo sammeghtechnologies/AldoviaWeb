@@ -2,6 +2,7 @@ import React from "react";
 import MenuFrame from "../../MenuFrame/v2/MenuFrame";
 import AnimatedImageHero from "../../ui/AnimatedImageHero";
 import RestaurantSection from "../../sections/RestaurantSection";
+import Footer from "../../sections/Footer";
 
 const DiningHeroPage: React.FC = () => {
   const diningImages = [
@@ -28,6 +29,7 @@ const DiningHeroPage: React.FC = () => {
         controlsProgressBarClassName="!w-[140px] !max-w-[140px] shrink-0"
       />
       <RestaurantSection/>
+      <Footer/>
     </section>
   );
 };

@@ -7,6 +7,7 @@ import CarouselCards from "../../ui/CarouselCardEvents";
 import SplitActionButtons from "../../ui/SplitActionButtons";
 import StartPlanEventModal from "../../ui/StartPlanEventModal";
 import EventDetailsModal from "../../ui/EventDetailsModal";
+import Footer from "../../sections/Footer";
 
 type VenueCard = {
   id: string;
@@ -426,6 +427,7 @@ const HeroPage: React.FC = () => {
           navigate("/home");
         }}
       />
+      <Footer/>
     </>
   );
 };
