@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router";
+import RoomsPage from "../components/pages/rooms/RoomsPage";
 
 const ProjectRoot = lazy(() => import("../ProjectRoot"));
 const Error404 = lazy(() => import("../404"));
@@ -23,6 +24,7 @@ const AppRoutes = () => {
             or delete them if they were just for testing */}
           <Route path="/bubble" element={<ProjectRoot />} />
           <Route path="/home" element={<HeroPage />} />
+          <Route path="/rooms" element={<RoomsPage/>} />
           <Route path="/venues" element={<VenuesHeroPage />} />
           <Route path="/activities" element={<ActivitiesHeroPage />} />
           <Route path="/dining" element={<DiningHeroPage />} />

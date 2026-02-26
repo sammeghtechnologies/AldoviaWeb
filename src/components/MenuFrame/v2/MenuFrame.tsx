@@ -282,9 +282,8 @@ const MenuFrame = ({
     >
       {/* TOP BAR */}
       <div
-        className={`absolute left-10 right-10 top-6 z-[2147483647] flex items-center justify-between transition-all duration-300 ${
-          isTopBarVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "-translate-y-12 opacity-0 pointer-events-none"
-        }`}
+        className={`absolute left-10 right-10 top-6 z-[2147483647] flex items-center justify-between transition-all duration-300 ${isTopBarVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "-translate-y-12 opacity-0 pointer-events-none"
+          }`}
       >
         {/* ✅ Pass introFinished here */}
         <Logo_top introFinished={introFinished} />
@@ -303,9 +302,8 @@ const MenuFrame = ({
           {/* FEET MENU ICON */}
           <div
             id="hamburger"
-            className={`cursor-pointer translate-x-2 transition-transform duration-300 active:scale-90 ${
-              isOpen ? "rotate-90" : "rotate-0"
-            }`}
+            className={`cursor-pointer translate-x-2 transition-transform duration-300 active:scale-90 ${isOpen ? "rotate-90" : "rotate-0"
+              }`}
             onClick={() => setIsOpen((prev) => !prev)}
           >
             <img
@@ -368,7 +366,13 @@ const MenuFrame = ({
               style={{ height: openSection === "stay" ? "auto" : 0 }}
             >
               {/* ✅ Fallbacks to direct public paths */}
-              <MenuIcon icon={icons.bed || "/assets/icons/bed.svg"} title="Rooms" />
+              <MenuIcon
+                icon={icons.bed || "/assets/icons/bed.svg"}
+                title="Rooms"
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate("/rooms");
+                }} />
               <MenuIcon
                 icon={icons.star || "/assets/icons/star.svg"}
                 title="Experiences & Packages"
