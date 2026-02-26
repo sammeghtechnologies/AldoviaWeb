@@ -1,33 +1,38 @@
+import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router";
-// We import ProjectRoot instead of the deleted TestPage
-import ProjectRoot from "../ProjectRoot"; 
-import Error404 from "../404"; 
-import HeroPage from "../components/pages/home/HeroPage";
-import VenuesHeroPage from "../components/pages/venues/HeroPage";
-import ActivitiesHeroPage from "../components/pages/activities/HeroPage";
-import DiningHeroPage from "../components/pages/dining/HeroPage";
-import ExperienceHeroPage from "../components/pages/experience/HeroPage";
+
+const ProjectRoot = lazy(() => import("../ProjectRoot"));
+const Error404 = lazy(() => import("../404"));
+const HeroPage = lazy(() => import("../components/pages/home/HeroPage"));
+const VenuesHeroPage = lazy(() => import("../components/pages/venues/HeroPage"));
+const ActivitiesHeroPage = lazy(() => import("../components/pages/activities/HeroPage"));
+const DiningHeroPage = lazy(() => import("../components/pages/dining/HeroPage"));
+const ExperienceHeroPage = lazy(() => import("../components/pages/experience/HeroPage"));
+
+const RouteFallback = <div className="min-h-screen w-full bg-black" />;
 
 const AppRoutes = () => {
   return (
     <Router>
-      <Routes>
-        {/* The main path "/" now loads your actual App */}
-        <Route path="/" element={<ProjectRoot />} />
+      <Suspense fallback={RouteFallback}>
+        <Routes>
+          {/* The main path "/" now loads your actual App */}
+          <Route path="/" element={<ProjectRoot />} />
 
         {/* You can keep these if you want alternate links to the same app, 
             or delete them if they were just for testing */}
-        <Route path="/bubble" element={<ProjectRoot />} />
-        <Route path="/home" element={<HeroPage />} />
-        <Route path="/venues" element={<VenuesHeroPage />} />
-        <Route path="/activities" element={<ActivitiesHeroPage />} />
-        <Route path="/dining" element={<DiningHeroPage />} />
-        <Route path="/experience" element={<ExperienceHeroPage />} />
-        <Route path="/experince" element={<ExperienceHeroPage />} />
+          <Route path="/bubble" element={<ProjectRoot />} />
+          <Route path="/home" element={<HeroPage />} />
+          <Route path="/venues" element={<VenuesHeroPage />} />
+          <Route path="/activities" element={<ActivitiesHeroPage />} />
+          <Route path="/dining" element={<DiningHeroPage />} />
+          <Route path="/experience" element={<ExperienceHeroPage />} />
+          <Route path="/experince" element={<ExperienceHeroPage />} />
 
         {/* 404 Page for unknown routes */}
-        <Route path="*" element={<Error404 />} />
-      </Routes>
+          <Route path="*" element={<Error404 />} />
+        </Routes>
+      </Suspense>
     </Router>
   );
 };

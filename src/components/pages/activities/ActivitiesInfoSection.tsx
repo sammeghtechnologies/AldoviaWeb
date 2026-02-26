@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
-import ThreeDCube from "../../ui/ThreeDCube";
+import React, { Suspense, lazy, useEffect, useRef, useState } from "react";
 import SlidingTitleReveal from "../../ui/SlidingTitleReveal";
+
+const ThreeDCube = lazy(() => import("../../ui/ThreeDCube"));
 
 export interface ActivitySectionData {
   title: string;
@@ -97,11 +98,13 @@ const ActivitiesInfoSection: React.FC<ActivitiesInfoSectionProps> = ({
         <div className="rounded-[16px] !p-4 md:!p-6">
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:items-start lg:gap-10">
             <div className="relative !p-3 md:!p-4 lg:!p-0 lg:!mt-10">
-              <ThreeDCube
-                className="!py-2"
-                images={data.images}
-                enableScrollSpin={!hasReachedSection}
-              />
+              <Suspense fallback={<div className="h-[320px] w-full rounded-[16px] bg-black/20" />}>
+                <ThreeDCube
+                  className="!py-2"
+                  images={data.images}
+                  enableScrollSpin={!hasReachedSection}
+                />
+              </Suspense>
             </div>
 
             <div className="lg:!pt-3">
