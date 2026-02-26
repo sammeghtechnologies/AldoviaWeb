@@ -64,7 +64,12 @@ const AcitivityDetails: React.FC<AcitivityDetailsProps> = ({
           topContent={
             index === 0 ? (
               <div className="mx-auto flex w-full max-w-6xl justify-center !px-0 !pt-0 !pb-2 md:!px-0 lg:!px-0">
-                <ScrollSelectTabs items={tabs} active={activeTab} onChange={setActiveTab} />
+                <ScrollSelectTabs
+                  items={tabs}
+                  active={activeTab}
+                  onChange={setActiveTab}
+                  floatingOnScroll
+                />
               </div>
             ) : undefined
           }

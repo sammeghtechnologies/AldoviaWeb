@@ -305,8 +305,8 @@ export default function CarouselCards({
                     onPrev={() => setIndexAndScroll(activeIndex - 1)}
                     progressTrackColor="rgba(255, 255, 255, 0.22)"
                     progressFillColor="var(--color-secondary)"
-                  buttonColor="var(--color-secondary)"
-                  iconColor="var(--color-primary)"
+                    buttonColor="var(--color-secondary)"
+                    iconColor="var(--color-primary)"
                     className="!flex !mt-4 !max-w-none !px-0 !justify-center !gap-6"
                     progressBarClassName="w-[180px] max-w-[180px] shrink-0"
                   />

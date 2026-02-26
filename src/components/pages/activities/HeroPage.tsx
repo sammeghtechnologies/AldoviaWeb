@@ -1,8 +1,8 @@
 import React from "react";
 import MenuFrame from "../../MenuFrame/v2/MenuFrame";
 import AnimatedImageHero from "../../ui/AnimatedImageHero";
-import AcitivityDetails from "../activities/AcitivityDetails";
-import type { AcitivityDetailItem } from "../activities/AcitivityDetails";
+import AcitivityDetails from "./AcitivityDetails";
+import type { AcitivityDetailItem } from "./AcitivityDetails";
 
 const ActivitiesHeroPage: React.FC = () => {
   const activityImages = [

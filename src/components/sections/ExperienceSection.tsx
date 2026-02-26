@@ -407,10 +407,10 @@ const ExperienceSection: React.FC = () => {
           index={index}
           onNext={onNext}
           onPrev={onPrev}
-          progressTrackColor="rgba(255, 255, 255, 0.25)"
-          progressFillColor="#000"
-          buttonColor="#FFFFFF"
-          iconColor="#21140F"
+          progressTrackColor="rgba(255, 255, 255, 0.22)"
+          progressFillColor="var(--color-secondary)"
+          buttonColor="var(--color-secondary)"
+          iconColor="var(--color-primary)"
           progressBarClassName="!w-[100px] !max-w-[100px] shrink-0"
           progressBarWidth={100}
         />

@@ -73,11 +73,15 @@ const RestaurantSection: React.FC = () => {
   });
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    const nextIndex = Math.min(
+    const targetIndex = Math.min(
       diningSections.length - 1,
       Math.floor(latest * diningSections.length)
     );
-    setActiveIndex(nextIndex);
+    setActiveIndex((prev) => {
+      if (targetIndex > prev) return Math.min(prev + 1, diningSections.length - 1);
+      if (targetIndex < prev) return Math.max(prev - 1, 0);
+      return prev;
+    });
   });
 
   React.useEffect(() => {
@@ -91,7 +95,7 @@ const RestaurantSection: React.FC = () => {
 
   return (
     <section ref={sectionRef} className="relative h-[300vh] w-full bg-[#F4F1E8]">
-      <div className="sticky top-0 min-h-screen w-full overflow-hidden px-3 sm:px-5 md:px-10 lg:px-16 py-6 sm:py-8 md:py-16 lg:py-20 flex items-center bg-[var(--color-primary)]">
+      <div className="sticky top-0 min-h-screen w-full overflow-hidden px-3 sm:px-5 md:px-10 lg:px-16 py-6 sm:py-8 md:py-16 lg:py-20 flex items-center justify-center bg-[var(--color-primary)]">
         {/* <video
           className="absolute inset-0 h-full w-full object-cover"
           autoPlay
@@ -110,13 +114,13 @@ const RestaurantSection: React.FC = () => {
           style={{ backgroundImage: "url('/assets/rooms/background/page2bg.png')" }}
         />
 
-        <div className="max-w-[1300px] w-full mx-auto flex flex-col md:flex-row items-center justify-center gap-6 sm:gap-8 md:gap-12 lg:gap-16 relative z-10">
+        <div className="max-w-[1180px] w-full mx-auto flex flex-col md:flex-row items-center justify-center gap-6 sm:gap-8 md:gap-12 lg:gap-16 relative z-10">
           <motion.div
             key={`${section.id}-gallery`}
             initial={{ opacity: 0, x: -90 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.55, ease: "easeOut" }}
-            className="md:order-1 group flex h-[260px] sm:h-[340px] md:h-[550px] w-full md:w-[55%] gap-2 sm:gap-3 md:gap-4 shrink-0 relative mx-auto md:translate-x-6 lg:translate-x-16"
+            className="!pl-1 !pr-1 md:order-1 group flex h-[260px] sm:h-[340px] md:h-[550px] w-full md:w-[56%] gap-2 sm:gap-3 md:gap-4 shrink-0 relative mx-auto md:mx-0"
           >
             {section.gallery.slice(0, 3).map((imgSrc, index) => (
               <div
@@ -125,9 +129,9 @@ const RestaurantSection: React.FC = () => {
                 className={`
                   relative h-full overflow-hidden rounded-[2rem] shadow-lg cursor-pointer transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]
                   ${activeMobileImageIndex === index ? "w-[72%]" : "w-[14%]"}
-                  ${index === 2 ? "md:w-[60%]" : "md:w-[20%]"}
+                  ${activeMobileImageIndex === index ? "md:w-[68%]" : "md:w-[16%]"}
                   md:group-hover:w-[15%]
-                  md:hover:!w-[70%]
+                  md:hover:!w-[75%]
                 `}
               >
                 <img
@@ -144,7 +148,7 @@ const RestaurantSection: React.FC = () => {
             initial={{ opacity: 0, x: 90 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.55, ease: "easeOut" }}
-            className="md:order-2 flex flex-col relative w-full md:w-[45%] justify-center items-start text-left mt-2 sm:mt-4 md:mt-0 !px-2 sm:!px-4 md:!px-6 lg:!px-8 !py-3 sm:!py-4 md:!py-6 md:translate-x-6 lg:translate-x-10 text-[var(--color-secondary)]"
+            className="md:order-2 flex flex-col relative w-full md:w-[44%] lg:w-[44%] justify-center items-start text-left mt-2 sm:mt-4 md:mt-0 !px-2 sm:!px-4 md:!px-6 lg:!px-8 !py-3 sm:!py-4 md:!py-6 text-[var(--color-secondary)]"
           >
             <div className="relative pointer-events-none z-20 whitespace-nowrap">
               <h2 className="whitespace-nowrap text-[2.6rem] sm:text-[3rem] md:text-[3.2rem] lg:text-[3.2rem] font-serif leading-[0.9] tracking-tight text-[var(--color-secondary)]/80">
@@ -157,7 +161,7 @@ const RestaurantSection: React.FC = () => {
               {section.subtitle}
             </p>
 
-            <p className="text-[13px] sm:text-sm md:text-[15px] text-[var(--color-secondary)]/90 max-w-[460px] leading-[1.7] sm:leading-[1.8] mt-3 sm:mt-5 font-medium z-10 relative">
+            <p className="text-[13px] sm:text-sm md:text-[15px] text-[var(--color-secondary)]/90 max-w-[460px] md:max-w-[520px] lg:max-w-[560px] leading-[1.7] sm:leading-[1.8] mt-3 sm:mt-5 font-medium z-10 relative">
               {section.description}
             </p>
 

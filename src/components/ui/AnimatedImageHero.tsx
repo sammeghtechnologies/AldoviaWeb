@@ -177,7 +177,7 @@ const AnimatedImageHero: React.FC<AnimatedImageHeroProps> = ({
           type="button"
           onClick={onButtonClick}
           className={`!mt-8 !rounded-[999px] !border !border-[rgba(255,255,255,0.30)] !bg-[rgba(255,255,255,0.10)] !px-7 !py-3 text-sm font-medium backdrop-blur-md transition duration-300 hover:!bg-[rgba(255,255,255,0.18)] md:text-base ${
-            buttonLabel === "Explore Activities" || buttonLabel === "Plan Your Event"
+            buttonLabel === "Explore Activities" || buttonLabel === "Plan Your Event" || buttonLabel === "Explore Dining"
               ? "!text-[var(--color-secondary)]"
               : "text-white"
           }`}

@@ -107,7 +107,8 @@ const ActivitiesInfoSection: React.FC<ActivitiesInfoSectionProps> = ({
             <div className="lg:!pt-3">
               <SlidingTitleReveal
                 lines={[data.title]}
-                className="max-w-[14ch] text-[32px] leading-[1.05] tracking-tight text-[var(--color-secondary)] !mb-1 md:text-[46px]"
+                className="max-w-[14ch] text-[32px] leading-[1.05] tracking-tight !text-[var(--color-secondary)] !mb-1 md:text-[46px]"
+                lineClassName="!text-[var(--color-secondary)]"
               />
 
               <p className="text-[16px] !text-[var(--color-secondary)]/85 !mb-5 md:text-[20px]">

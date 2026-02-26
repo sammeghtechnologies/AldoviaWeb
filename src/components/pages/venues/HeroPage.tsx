@@ -370,7 +370,7 @@ const HeroPage: React.FC = () => {
         buttonLabel="Plan Your Event"
         onButtonClick={handleRequestProposal}
         enableTypingSubtitle
-        centerContentClassName="-translate-y-10 lg:translate-y-0 lg:!w-full lg:!mx-auto lg:text-center"
+        centerContentClassName="-translate-y-10 lg:translate-y-0 lg:!w-full lg:!mx-auto lg:text-center "
         controlsWrapperClassName="absolute bottom-[10%] left-1/2 z-30 w-[min(92%,520px)] -translate-x-1/2"
         controlsClassName="!mt-0 !px-0"
         controlsProgressBarClassName="!w-[140px] !max-w-[140px] shrink-0"
