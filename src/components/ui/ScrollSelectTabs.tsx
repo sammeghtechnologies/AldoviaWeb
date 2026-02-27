@@ -9,6 +9,7 @@ interface ScrollSelectTabsProps {
   activeClassName?: string;
   inactiveClassName?: string;
   disableDesktopShift?: boolean;
+  compactMobile?: boolean;
 }
 
 export default function ScrollSelectTabs({
@@ -19,6 +20,7 @@ export default function ScrollSelectTabs({
   activeClassName = "!bg-[#FFE694] !text-[var(--color-primary)] shadow-md",
   inactiveClassName = "!bg-transparent !text-[var(--color-secondary)] opacity-80 hover:opacity-95",
   disableDesktopShift = false,
+  compactMobile = false,
 }: ScrollSelectTabsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -82,7 +84,9 @@ export default function ScrollSelectTabs({
             type="button"
             onClick={() => scrollTabs("left")}
             disabled={!canScrollLeft}
-            className="z-10 grid h-8 w-8 shrink-0 place-items-center rounded-full border border-white/30 bg-black/35 text-white backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-35"
+            className={`z-10 grid shrink-0 place-items-center rounded-full border border-white/30 bg-black/35 text-white backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-35 ${
+              compactMobile ? "h-7 w-7 md:h-8 md:w-8" : "h-8 w-8"
+            }`}
             aria-label="Scroll tabs left"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -94,7 +98,7 @@ export default function ScrollSelectTabs({
               className={`flex gap-3 overflow-x-auto whitespace-nowrap scroll-smooth
                    lg:!w-full lg:!mx-auto lg:!justify-center
                    ${trackShiftClass}
-                   !px-4 !py-3 lg:!px-5 lg:!py-1.5
+                   ${compactMobile ? "!px-3 !py-1.5 md:!px-4 md:!py-3 lg:!px-5 lg:!py-1.5" : "!px-4 !py-3 lg:!px-5 lg:!py-1.5"}
                    [-ms-overflow-style:none] [scrollbar-width:none]
                    [&::-webkit-scrollbar]:hidden`}
             >
@@ -108,7 +112,7 @@ export default function ScrollSelectTabs({
                     ref={(node) => {
                       tabRefs.current[item] = node;
                     }}
-                    className={`!px-6 !py-2 lg:!py-1 !rounded-[10px] text-sm font-medium transition-all duration-300 flex-shrink-0
+                    className={`!px-6 ${compactMobile ? "!py-1 md:!py-2 lg:!py-1" : "!py-2 lg:!py-1"} !rounded-[10px] text-sm font-medium transition-all duration-300 flex-shrink-0
                 ${
                   isActive
                     ? activeClassName
@@ -126,7 +130,9 @@ export default function ScrollSelectTabs({
             type="button"
             onClick={() => scrollTabs("right")}
             disabled={!canScrollRight}
-            className="z-10 grid h-8 w-8 shrink-0 place-items-center rounded-full border border-white/30 bg-black/35 text-white backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-35"
+            className={`z-10 grid shrink-0 place-items-center rounded-full border border-white/30 bg-black/35 text-white backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-35 ${
+              compactMobile ? "h-7 w-7 md:h-8 md:w-8" : "h-8 w-8"
+            }`}
             aria-label="Scroll tabs right"
           >
             <ChevronRight className="h-4 w-4" />
