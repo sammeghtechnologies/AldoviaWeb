@@ -21,6 +21,7 @@ export default function ScrollSelectTabs({
   disableDesktopShift = false,
 }: ScrollSelectTabsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const trackShiftClass = disableDesktopShift ? "lg:translate-x-0" : "lg:translate-x-0";
@@ -48,6 +49,17 @@ export default function ScrollSelectTabs({
       window.removeEventListener("resize", updateScrollState);
     };
   }, [items, updateScrollState]);
+
+  useEffect(() => {
+    const activeTab = tabRefs.current[active];
+    if (!activeTab) return;
+
+    activeTab.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }, [active]);
 
   const scrollTabs = (direction: "left" | "right") => {
     const container = containerRef.current;
@@ -93,6 +105,9 @@ export default function ScrollSelectTabs({
                   <button
                     key={item}
                     onClick={() => onChange(item)}
+                    ref={(node) => {
+                      tabRefs.current[item] = node;
+                    }}
                     className={`!px-6 !py-2 lg:!py-1 !rounded-[10px] text-sm font-medium transition-all duration-300 flex-shrink-0
                 ${
                   isActive

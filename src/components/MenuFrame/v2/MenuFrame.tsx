@@ -12,7 +12,7 @@ const Logo_top = ({ introFinished }: { introFinished?: boolean }) => {
       <img
         src="assets/logo/aldovialogo.svg"
         alt="Aldovia"
-        className="logo-image w-[3em] lg:w-[6rem] h-auto object-contain block brightness-0 invert"
+        className="logo-image w-[5em] lg:w-[6rem] h-auto object-contain block brightness-0 invert"
       />
     </div>
   );
@@ -111,6 +111,7 @@ const MenuFrame = ({
   const [isOpen, setIsOpen] = useState(false);
   const [openSection, setOpenSection] = useState("stay");
   const [isTopBarVisible, setIsTopBarVisible] = useState(true);
+  const [isBeyondHero, setIsBeyondHero] = useState(false);
   const lastScrollYRef = useRef(0);
   const downScrollAccumRef = useRef(0);
 
@@ -234,6 +235,7 @@ const MenuFrame = ({
   useEffect(() => {
     const onScroll = () => {
       const currentY = window.scrollY || 0;
+      setIsBeyondHero(currentY > window.innerHeight * 0.6);
       const delta = currentY - lastScrollYRef.current;
       lastScrollYRef.current = currentY;
 
@@ -268,6 +270,7 @@ const MenuFrame = ({
     };
 
     lastScrollYRef.current = window.scrollY || 0;
+    setIsBeyondHero((window.scrollY || 0) > window.innerHeight * 0.6);
     window.addEventListener("scroll", onScroll, { passive: true });
 
     return () => {
@@ -282,9 +285,10 @@ const MenuFrame = ({
     >
       {/* TOP BAR */}
       <div
-        className={`absolute left-10 right-10 top-6 z-[2147483647] flex items-center justify-between transition-all duration-300 ${isTopBarVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "-translate-y-12 opacity-0 pointer-events-none"
+        className={`h-[10vh] !p-3 absolute left-0 right-0 top-0 z-[2147483647]  transition-all duration-300 ${isBeyondHero ? "bg-black/35 backdrop-blur-md  shadow-[0_10px_30px_rgba(0,0,0,0.35)]" : "bg-transparent border border-transparent"} ${isTopBarVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "-translate-y-12 opacity-0 pointer-events-none"
           }`}
       >
+        <div className="flex items-center justify-between px-3 py-2">
         {/* ✅ Pass introFinished here */}
         <Logo_top introFinished={introFinished} />
 
@@ -312,6 +316,7 @@ const MenuFrame = ({
               className="w-16 h-16 object-contain brightness-0 invert transition-all"
             />
           </div>
+        </div>
         </div>
       </div>
 
