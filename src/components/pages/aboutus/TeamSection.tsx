@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { ArrowDown, ArrowUp } from "lucide-react";
 
 type TeamMember = {
   role: string;
@@ -66,6 +67,19 @@ const TeamSection: React.FC = () => {
     const [displayedIndex, setDisplayedIndex] = useState(0);
     const [introProgress, setIntroProgress] = useState(0);
 
+    const scrollToMember = (targetIndex: number) => {
+      const node = sectionRef.current;
+      if (!node) return;
+
+      const normalizedIndex = Math.max(0, Math.min(members.length - 1, targetIndex));
+      const sectionTop = window.scrollY + node.getBoundingClientRect().top;
+      const maxScrollableInSection = Math.max(node.offsetHeight - window.innerHeight, 1);
+      const segment = members.length > 1 ? maxScrollableInSection / (members.length - 1) : 0;
+      const targetY = sectionTop + normalizedIndex * segment;
+
+      window.scrollTo({ top: targetY, behavior: "smooth" });
+    };
+
     useEffect(() => {
       const updateActiveMember = () => {
         const node = sectionRef.current;
@@ -109,7 +123,13 @@ const TeamSection: React.FC = () => {
           backgroundRepeat: "no-repeat",
         }}
       >
-        <div className="sticky top-0 flex h-screen w-full items-center justify-center !px-4 md:!px-8 lg:!px-12">
+        <div className="!pt-5 !pb-1 text-center">
+          <h2 className="font-lust-medium text-[2em] md:text-[3em] leading-tight text-[var(--color-primary)]">
+            The Management
+          </h2>
+         
+        </div>
+        <div className="sticky top-0 flex h-screen w-full items-center justify-center !px-4 md:!px-1 lg:items-start lg:!px-12 lg:!pt-12">
           <div
             className="relative w-full max-w-6xl min-h-[760px] md:min-h-[520px]"
             style={{
@@ -123,6 +143,25 @@ const TeamSection: React.FC = () => {
               <div className="relative h-full min-h-[700px] overflow-hidden md:min-h-[460px]">
                 <MemberCardContent member={members[displayedIndex]} />
               </div>
+            </div>
+
+            <div className="absolute right-3 top-1/2 z-20 flex -translate-y-1/2 flex-col gap-3 lg:right-5">
+              <button
+                type="button"
+                onClick={() => scrollToMember(displayedIndex - 1)}
+                className="grid h-10 w-10 place-items-center rounded-full border border-[var(--color-secondary)]/35 bg-[var(--color-primary)]/10 text-[var(--color-primary)] backdrop-blur-sm transition hover:bg-[var(--color-primary)]/20 md:h-12 md:w-12"
+                aria-label="Previous member"
+              >
+                <ArrowUp className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollToMember(displayedIndex + 1)}
+                className="grid h-10 w-10 place-items-center rounded-full border border-[var(--color-secondary)]/35 bg-[var(--color-primary)]/10 text-[var(--color-primary)] backdrop-blur-sm transition hover:bg-[var(--color-primary)]/20 md:h-12 md:w-12"
+                aria-label="Next member"
+              >
+                <ArrowDown className="h-5 w-5" />
+              </button>
             </div>
           </div>
         </div>
