@@ -139,7 +139,7 @@ const ActivitiesInfoSection: React.FC<ActivitiesInfoSectionProps> = ({
               </ul>
 
               {data.timings && (
-                <div className="!mt-6 flex w-1/2 rounded-[16px] !bg-[rgba(255,255,255,0.10)] backdrop-blur-md !p-3">
+                <div className="!mt-6 flex w-[78%] md:w-1/2 rounded-[16px] !bg-[rgba(255,255,255,0.10)] backdrop-blur-md !p-3">
                   <img src="/assets/icons/clock.svg" className="!mr-3" alt="timings" />
                   {data.timings}
                 </div>

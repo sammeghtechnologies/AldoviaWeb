@@ -164,7 +164,7 @@ const ExperienceInfoCard: React.FC<{
         </button>
       </div>
 
-      <div className="absolute !left-4 md:!left-5 !bottom-4 flex items-center gap-2 lg:hidden z-20">
+      <div className="absolute !right-4 md:!right-5 !bottom-4 flex items-center gap-2 lg:hidden z-20">
         {item.images.map((img) => (
           <button
             key={`mobile-${img.id}`}
