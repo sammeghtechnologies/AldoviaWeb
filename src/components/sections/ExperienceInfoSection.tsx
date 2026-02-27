@@ -131,10 +131,10 @@ const ExperienceInfoCard: React.FC<{
               </div>
             ) : null}
 
-            <h2 className="!mt-6 !text-[2em] lg:!text-[2em] !leading-none !font-semibold !mb-2 !text-[var(--color-secondary)]">
+            <h2 className="font-lust-medium !mt-6 !text-[34px] lg:!text-[48px] !leading-none !font-normal !mb-2 !text-[var(--color-secondary)] [text-shadow:0_2px_10px_rgba(0,0,0,0.35)]">
               {item.price}
               {item.priceNote ? (
-                <span className="!text-[16px] lg:!text-[22px] !font-normal !text-[var(--color-secondary)]">
+                <span className="!text-[20px] lg:!text-[28px] !font-normal !text-[var(--color-secondary)]">
                   {" "}
                   {item.priceNote}
                 </span>
