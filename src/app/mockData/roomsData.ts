@@ -11,7 +11,7 @@ export interface Room {
 export const roomsData: Room[] = [
   {
     id: 1,
-    image: "/assets/rooms/1BHKroom.jpg",
+    image: "/assets/pages/rooms/room1.webp",
     title: "Deluxe Room",
     description: "Contemporary comfort with garden views",
     size: "350 sq ft",
@@ -20,7 +20,7 @@ export const roomsData: Room[] = [
   },
   {
     id: 2,
-    image: "/assets/rooms/1BHKroom.jpg",
+    image: "/assets/pages/rooms/room2.webp",
     title: "Premium Suite",
     description: "Spacious elegance with premium interiors",
     size: "550 sq ft",
@@ -29,7 +29,7 @@ export const roomsData: Room[] = [
   },
   {
     id: 3,
-    image: "/assets/rooms/1BHKroom.jpg",
+    image: "/assets/pages/rooms/room3.webp",
     title: "Delux Suite",
     description: "Spacious elegance with premium interiors",
     size: "550 sq ft",
@@ -38,7 +38,7 @@ export const roomsData: Room[] = [
   },
   {
     id: 4,
-    image: "/assets/rooms/1BHKroom.jpg",
+    image: "/assets/pages/rooms/room4.webp",
     title: "Luxury Suite",
     description: "Spacious elegance with premium interiors",
     size: "550 sq ft",
@@ -47,7 +47,7 @@ export const roomsData: Room[] = [
   },
   {
     id: 5,
-    image: "/assets/rooms/1BHKroom.jpg",
+    image: "/assets/pages/rooms/room5.webp",
     title: "Luxury Suite",
     description: "Spacious elegance with premium interiors",
     size: "550 sq ft",
@@ -56,7 +56,7 @@ export const roomsData: Room[] = [
   },
   {
     id: 6,
-    image: "/assets/rooms/1BHKroom.jpg",
+    image: "/assets/pages/rooms/room1.webp",
     title: "Luxury Suite",
     description: "Spacious elegance with premium interiors",
     size: "550 sq ft",
