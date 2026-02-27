@@ -168,7 +168,7 @@ const SwanModel = ({
   transformProgress: number;
 }) => {
   const group = useRef<THREE.Group>(null);
-  const { scene, animations } = useGLTF("/models/swan09.glb");
+  const { scene, animations } = useGLTF("/models/Swan_anim_v11.glb");
   const { actions } = useAnimations(animations, group);
 
   useLayoutEffect(() => {
@@ -510,6 +510,6 @@ const LogoRevealNew = ({ onComplete }: { onComplete: () => void }) => {
   );
 };
 
-useGLTF.preload("/models/swan09.glb");
+useGLTF.preload("/models/Swan_anim_v11.glb");
 
 export default LogoRevealNew;
