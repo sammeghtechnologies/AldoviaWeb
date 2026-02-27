@@ -1,10 +1,13 @@
 import React from "react";
+import { useNavigate } from "react-router";
 import MenuFrame from "../../MenuFrame/v2/MenuFrame";
 import AnimatedImageHero from "../../ui/AnimatedImageHero";
+import HeroBreadcrumb from "../../ui/HeroBreadcrumb";
 import AcitivityDetails from "./AcitivityDetails";
 import type { AcitivityDetailItem } from "./AcitivityDetails";
 
 const ActivitiesHeroPage: React.FC = () => {
+  const navigate = useNavigate();
   const activityImages = [
     "/assets/herobackgrounds/activities/activity1.jpg",
     "/assets/herobackgrounds/activities/activity2.jpg",
@@ -199,7 +202,7 @@ const ActivitiesHeroPage: React.FC = () => {
     {
       tab: "Wellness & Spa",
       title: "Exotica Spa & Wellness",
-      subtitle: "Rejuvenate Your Senses",
+      subtitle: "Restore Your Balance",
       backgroundImage: "/assets/pages/activities/spa/spa2.jpg",
       images: [
         "/assets/pages/activities/spa/spa1.jpg",
@@ -210,11 +213,14 @@ const ActivitiesHeroPage: React.FC = () => {
         "/assets/pages/activities/spa/spa6.jpeg",
       ],
       description:
-        "Indulge in our world-class spa treatments featuring Ayurvedic therapies, aromatherapy, and modern wellness practices.",
+        "Indulge in our world-class spa treatments featuring Ayurvedic therapies, aromatherapy, and modern wellness practices. Trained therapists, authentic techniques, and treatment rooms designed to make the outside world disappear for as long as you need it to.",
+      timings: "9:00 AM - 9:00 PM",
       whatIncludes: [
         "Signature Massages",
-        "Guided Meditation Sessions",
-        "Steam, Sauna & Wellness Lounge Access",
+        "Aromatherapy Sessions",
+        "Body Scrubs & Wraps",
+        "Facial Treatments",
+        "Couples Spa Suites"
       ],
       additionalSections: [
         {
@@ -231,6 +237,7 @@ const ActivitiesHeroPage: React.FC = () => {
           ],
           description:
             "For guests who value mindful living, recovery, and premium self-care rituals in a calm, restorative environment.",
+          timings: "8:00 AM - 8:00 PM",
           whatIncludes: [
             "Personal wellness profiling",
             "Guided relaxation recommendations",
@@ -238,8 +245,8 @@ const ActivitiesHeroPage: React.FC = () => {
           ],
         },
         {
-          title: "Gym",
-          subtitle: "Strength, cardio, and functional training",
+          title: "State-of-the-Art Fitness Center",
+          subtitle: "Elevate Your Wellness Routine",
           backgroundImage: "/assets/pages/activities/gym/gym1.jpg",
           images: [
             "/assets/pages/activities/gym/gym1.jpg",
@@ -249,13 +256,17 @@ const ActivitiesHeroPage: React.FC = () => {
             "/assets/pages/activities/persona/persona4.jpg",
             "/assets/pages/activities/persona/persona4.jpg",
           ],
+          timings:'24 Hours',
           description:
-            "A modern fitness zone designed for strength, cardio, and mobility training, with a balanced focus on performance and wellness.",
+            "Stay active with our fully equipped gym featuring modern cardio equipment, free weights, and personal training. Because some people are not on holiday from their routine. They bring it with them.",
           whatIncludes: [
-            "Cardio and strength equipment",
-            "Functional training area",
-            "Stretch and recovery corner",
+            "Cardio Equipment",
+            "Free Weights & Machines",
+            "Personal Training",
+            "Group Fitness Classes",
+            "Yoga & Pilates Studio"
           ],
+          
         },
       ],
     },
@@ -264,15 +275,21 @@ const ActivitiesHeroPage: React.FC = () => {
   return (
     <section className="relative min-h-screen w-full">
       <MenuFrame showBookNow={false} />
+      <div className="absolute left-5 top-24 z-[2147483645] md:left-8 md:top-26">
+        <HeroBreadcrumb
+          label="Activities"
+          onHomeClick={() => navigate("/home")}
+        />
+      </div>
       <AnimatedImageHero
         images={activityImages}
-        title="Activities"
-        subtitle="Discover wellness, adventure, and relaxation"
-        buttonLabel="Explore Activities"
+        title="Curated Activities"
+        subtitle="Discover wellness, adventure, and relaxation across 45 acres of resort grounds."
+        buttonLabel="Plan Your Event"
         enableEntryAnimation
         entryDuration={2.1}
         enableTypingSubtitle
-        centerContentClassName="-translate-y-10 lg:translate-y-0 lg:!w-full lg:!mx-auto lg:text-center [&_h1]:!text-[var(--color-secondary)] [&_p]:!text-[var(--color-secondary)] [&_p]:!mt-3 [&_p]:!mb-10"
+        centerContentClassName="-translate-y-10 lg:translate-y-0 lg:!w-full lg:!mx-auto lg:text-center [&_h1]:!mx-auto [&_h1]:text-center [&_p]:!mx-auto [&_p]:text-center"
         controlsWrapperClassName="absolute bottom-[10%] left-1/2 z-30 w-[min(92%,520px)] -translate-x-1/2"
         controlsClassName="!mt-0 !px-0"
         controlsProgressBarClassName="!w-[140px] !max-w-[140px] shrink-0"

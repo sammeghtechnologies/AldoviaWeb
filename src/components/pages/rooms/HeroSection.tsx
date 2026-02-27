@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { roomsData, type RoomData } from '../rooms/roomsData';
+import ScrollSelectTabs from '../../ui/ScrollSelectTabs';
 
 interface Props {
   activeRoom: RoomData;
@@ -9,6 +10,13 @@ interface Props {
 }
 
 const HeroSection = ({ activeRoom, setActiveRoom }: Props) => {
+  const roomItems = roomsData.map((room) => room.navLabel || room.title);
+
+  const handleRoomTabChange = (label: string) => {
+    const selected = roomsData.find((room) => (room.navLabel || room.title) === label);
+    if (selected) setActiveRoom(selected);
+  };
+
   const getInitialPosition = (direction: string) => {
     switch (direction) {
       case 'bottom': return { y: '120vh', opacity: 0 };
@@ -24,26 +32,16 @@ const HeroSection = ({ activeRoom, setActiveRoom }: Props) => {
       
       {/* --- DESKTOP ONLY MENU: Hidden on mobile (hidden md:flex) --- */}
       <div className="hidden md:flex absolute bottom-8 w-full z-40 px-8 justify-center pointer-events-auto">
-        <div 
-          className="flex items-center gap-6 bg-[#00000000] backdrop-blur-xl/1 !p-2 rounded-full border-2 border-white/20 shadow-[0_30px_70px_rgba(0,0,0,0.7)] overflow-x-auto max-w-max !min-h-[60px]"
-          style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}
-        >
-          <style>{`div::-webkit-scrollbar { display: none !important; }`}</style>
-          {roomsData.map((room) => (
-            <button
-              key={room.id}
-              onClick={() => setActiveRoom(room)}
-              className={`!px-7 !py-3 rounded-full text-[14px] whitespace-nowrap transition-all duration-300 ${
-                activeRoom.id === room.id 
-                  ? 'bg-[#F3EFE6] text-[#4c3628] font-bold shadow-md' // Client change: Beige bg, Brown text
-                  : 'text-[#F3EFE6]/90 hover:text-[#F3EFE6] hover:bg-white/10 font-semibold' // Client change: Beige text for inactive
-              }`}
-            >
-              {room.navLabel || room.title}
-            </button>
-          ))}
+       
+          <ScrollSelectTabs
+            items={roomItems}
+            active={activeRoom.navLabel || activeRoom.title}
+            onChange={handleRoomTabChange}
+            disableDesktopShift
+            activeClassName="bg-[#F3EFE6] !text-[#4c3628] !font-bold shadow-md"
+            inactiveClassName="bg-transparent !text-[#F3EFE6]/90 hover:!text-[#F3EFE6] hover:bg-white/10 !font-semibold"
+          />
         </div>
-      </div>
 
       <div className="absolute inset-0 w-full h-full z-0">
         

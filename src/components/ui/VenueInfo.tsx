@@ -137,7 +137,7 @@ export default function VenueInfo({
       />
       <div className="absolute" />
 
-      <div className="relative z-10 max-h-[56vh] overflow-y-auto overflow-x-hidden overscroll-y-auto !px-4 !pt-6 !pb-24 md:!px-7 md:!pt-8 md:!pb-28 lg:max-h-[72vh] lg:!pt-6 text-white [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className="relative z-10 mx-auto max-h-[56vh] max-w-3xl overflow-y-auto overflow-x-hidden overscroll-y-auto !px-4 !pt-6 !pb-24 md:!px-7 md:!pt-8 md:!pb-28 lg:max-h-[72vh] lg:!pt-6 text-white [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={animationKey}
@@ -148,7 +148,7 @@ export default function VenueInfo({
           >
             <SlidingTitleReveal
               lines={[title]}
-              className="[font-family:'Playfair_Display'] text-[50px] md:text-[56px] leading-[0.95] tracking-tight text-white !pb-4"
+              className="[font-family:'Playfair_Display'] text-[50px] md:text-[2em] leading-[0.95] tracking-tight text-white !pb-4"
               lineClassName="!pb-2"
             />
 
@@ -164,12 +164,12 @@ export default function VenueInfo({
 
             <TypewriterText
               text={description}
-              className="!mt-8 text-[17px] leading-8 text-white/90 max-w-[95%]"
+              className="!mt-8 text-[1em] leading-8 text-white/90 max-w-[100%] lg:mx-auto"
               speed={15}
               startDelay={220}
             />
 
-            <div className="!mt-8 flex items-center gap-6 text-sm md:text-base text-white/92">
+            <div className="!mt-8 flex items-center justify-right gap-6 text-sm md:text-base text-white/92">
               <div className="flex items-center gap-2">
                 <span className="text-[#CFAB57] text-base">↗</span>
                 <span>{dimensions.area}</span>
@@ -185,8 +185,9 @@ export default function VenueInfo({
                 <span>{capacity}</span>
               </div>
             </div>
+            <h3 className="!mt-7  text-xl font-semibold !text-[var(--color-secondary)]">Dimensions</h3>
 
-            <div className="!mt-6 grid grid-cols-3 gap-3 text-center text-white/90">
+            <div className="!mt-6 mx-auto grid w-full max-w-[520px] grid-cols-3 gap-3 text-center text-white/90">
               <div className="rounded-lg bg-white/10 !py-2">
                 <p className="text-xs text-white/65">Height</p>
                 <p className="text-sm font-medium">{dimensions.height}</p>
@@ -201,8 +202,8 @@ export default function VenueInfo({
               </div>
             </div>
 
-            <h3 className="!mt-7 !mb-1 text-xl font-semibold !text-[var(--color-secondary)]">Seating Layout</h3>
-            <div className="mt-4 grid grid-cols-2 gap-3 bg-transparent sm:grid-cols-3 lg:grid-cols-4">
+            <h3 className="!mt-7 !mb-5 text-xl font-semibold !text-[var(--color-secondary)]">Seating Layout</h3>
+            <div className="mt-4 mx-auto grid w-full max-w-[520px] grid-cols-2 gap-2 bg-transparent sm:grid-cols-3 lg:grid-cols-3">
               {layoutItems.map((item) => (
                 <div
                   key={item.key}
