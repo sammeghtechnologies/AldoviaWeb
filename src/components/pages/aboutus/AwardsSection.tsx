@@ -150,7 +150,7 @@ const AwardsSection: React.FC = () => {
   const [isInitialPosition, setIsInitialPosition] = React.useState(true);
   const [isAnimating, setIsAnimating] = React.useState(false);
   const cardsRowRef = React.useRef<HTMLDivElement | null>(null);
-  const cardRefs = React.useRef<Array<HTMLDivElement | null>>([]);
+  const cardRefs = React.useRef<Array<HTMLElement | null>>([]);
   const cardWidth = "clamp(280px, 72vw, 460px)";
   const animateRowScroll = React.useCallback((targetLeft: number, duration = 1400) => {
     const row = cardsRowRef.current;
