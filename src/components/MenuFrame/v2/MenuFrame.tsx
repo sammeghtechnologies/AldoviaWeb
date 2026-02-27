@@ -91,10 +91,12 @@ const MenuFrame = ({
   masterTl,
   introFinished,
   showBookNow = true,
+  forceTopBarBackground = false,
 }: {
   masterTl?: any;
   introFinished?: boolean;
   showBookNow?: boolean;
+  forceTopBarBackground?: boolean;
 }) => {
   const { icons } = useAssets();
   const navigate = useNavigate();
@@ -112,6 +114,7 @@ const MenuFrame = ({
   const [openSection, setOpenSection] = useState("stay");
   const [isTopBarVisible, setIsTopBarVisible] = useState(true);
   const [isBeyondHero, setIsBeyondHero] = useState(false);
+  const shouldShowTopBarBackground = forceTopBarBackground || isBeyondHero;
   const lastScrollYRef = useRef(0);
   const downScrollAccumRef = useRef(0);
 
@@ -306,7 +309,7 @@ const MenuFrame = ({
     >
       {/* TOP BAR */}
       <div
-        className={`h-[10vh] !p-3 absolute left-0 right-0 top-0 z-[2147483647]  transition-all duration-300 ${isBeyondHero ? "bg-black/35 backdrop-blur-md  shadow-[0_10px_30px_rgba(0,0,0,0.35)]" : "bg-transparent border border-transparent"} ${isTopBarVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "-translate-y-12 opacity-0 pointer-events-none"
+        className={`h-[10vh] !p-3 absolute left-0 right-0 top-0 z-[2147483647]  transition-all duration-300 ${shouldShowTopBarBackground ? " backdrop-blur-xl  shadow-[0_10px_30px_rgba(0,0,0,0.45)]" : "bg-transparent border border-transparent"} ${isTopBarVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "-translate-y-12 opacity-0 pointer-events-none"
           }`}
       >
         <div className="flex items-center justify-between px-3 py-2">

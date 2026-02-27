@@ -117,7 +117,7 @@ const RoomsPage = () => {
 
   return (
     <div ref={containerRef} className="relative w-full h-screen overflow-hidden bg-black" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-      <MenuFrame showBookNow={false} />
+      <MenuFrame showBookNow={false} forceTopBarBackground={view !== 'hero'} />
       <AnimatePresence initial={false} custom={direction}>
         <motion.div
           key={view}
