@@ -9,6 +9,7 @@ export interface ActivitySectionData {
   images: string[];
   description: string;
   whatIncludes: string[];
+  timings?: string;
   backgroundImage?: string;
 }
 
@@ -18,6 +19,7 @@ export interface ActivityInfoData {
   images: ActivitySectionData["images"];
   description: ActivitySectionData["description"];
   whatIncludes: ActivitySectionData["whatIncludes"];
+  timings?: ActivitySectionData["timings"];
   backgroundImage?: ActivitySectionData["backgroundImage"];
   additionalSections?: ActivitySectionData[];
 }
@@ -113,20 +115,21 @@ const ActivitiesInfoSection: React.FC<ActivitiesInfoSectionProps> = ({
                 className="max-w-[14ch] text-[32px] leading-[1.05] tracking-tight !text-[var(--color-secondary)] !mb-1 md:text-[46px]"
                 lineClassName="!text-[var(--color-secondary)]"
               />
+            <span className="block !mt-3 h-[3px] w-16 rounded-full bg-[#CFAB57]" />
 
-              <p className="text-[16px] !text-[var(--color-secondary)]/85 !mb-5 md:text-[20px]">
+              <p className="text-[16px] !text-[var(--color-secondary)]/85 !mb-5 md:text-[1em]">
                 {typedSubtitle}
               </p>
 
-              <p className="max-w-[42ch] text-[16px] leading-8 !text-[var(--color-secondary)]/90 md:text-[18px]">
+              <p className="max-w-[44ch] text-[1em] leading-8 !text-[var(--color-secondary)]/90 md:text-[1em]">
                 {data.description}
               </p>
 
-              <p className="!mt-4 text-[12px] tracking-[0.16em] uppercase !text-[var(--color-secondary)]/80">
+              <p className="!mt-4 text-[.8em] tracking-[0.16em] uppercase !text-[var(--color-secondary)]/80">
                 What&apos;s Included
               </p>
 
-              <ul className="!mt-3 space-y-2 text-[16px] !text-[var(--color-secondary)]/92 md:text-[18px]">
+              <ul className="!mt-3 space-y-2 text-[1em] !text-[var(--color-secondary)]/92 md:text-[1em]">
                 {data.whatIncludes.map((item) => (
                   <li key={`${data.title}-${item}`} className="flex items-start gap-2">
                     <span className="!text-[#CFAB57]">*</span>
@@ -134,6 +137,13 @@ const ActivitiesInfoSection: React.FC<ActivitiesInfoSectionProps> = ({
                   </li>
                 ))}
               </ul>
+
+              {data.timings && (
+                <div className="!mt-6 flex w-[78%] md:w-1/2 rounded-[16px] !bg-[rgba(255,255,255,0.10)] backdrop-blur-md !p-3">
+                  <img src="/assets/icons/clock.svg" className="!mr-3" alt="timings" />
+                  {data.timings}
+                </div>
+              )}
             </div>
           </div>
         </div>
