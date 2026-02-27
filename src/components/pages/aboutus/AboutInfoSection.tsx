@@ -83,7 +83,7 @@ const AboutInfoSection = () => {
               <div className="flex w-full flex-col gap-6 text-left md:flex-row md:items-end md:justify-between md:gap-8">
                 {impactStats.map((item, index) => (
                   <div key={item.label} className="min-w-0">
-                    <p className="text-[56px] leading-none text-[#cfab57] md:text-[42px]">
+                    <p className="font-lust text-[56px] leading-none !text-[#FFE694] md:text-[42px]">
                       {counts[index]}
                       {item.suffix}
                     </p>
