@@ -5,19 +5,19 @@ import LuxuryCard from "../ui/LuxuryCard";
 
 const cards = [
   {
-    image: "/assets/hero/hero.jpg",
+    image: "/assets/herobackgrounds/home/stay.webp",
     category: "Stay & Leisure",
     title: "Escape",
     description: "Rejuvenate in nature’s lap with premium luxury."
   },
   {
-    image: "/assets/hero/hero.jpg",
+    image: "/assets/herobackgrounds/home/wedding.webp",
     category: "Wedding & Social Events",
     title: "Celebrate",
     description: "Grand lawns and ballrooms for your timeless moments."
   },
   {
-    image: "/assets/hero/hero.jpg",
+    image: "/assets/herobackgrounds/home/corporate.webp",
     category: "Corporate & Conventions",
     title: "Gather",
     description: "World-class venues for impactful gatherings."
