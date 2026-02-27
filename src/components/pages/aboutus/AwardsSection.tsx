@@ -236,12 +236,12 @@ const AwardsSection: React.FC = () => {
       className="relative w-full overflow-hidden !py-10 md:!py-12"
       style={{
         backgroundImage:
-          "linear-gradient(90deg, rgba(48,17,10,0.95) 0%, rgba(34,12,7,0.98) 50%, rgba(48,17,10,0.95) 100%)",
+          "linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary) 50%, var(--color-primary) 100%)",
       }}
     >
       <div className="mx-auto w-full max-w-[100%] !px-4 md:!px-8 lg:!px-10">
         <div className="!mb-6 md:!mb-8 text-center">
-          <h2 className="font-lust-medium text-[32px] md:text-[42px] leading-tight text-[var(--color-secondary)]">
+          <h2 className="font-lust-medium text-[2em] md:text-[2em] leading-tight text-[var(--color-secondary)]">
             Awards & Recognisiton
           </h2>
          

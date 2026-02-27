@@ -151,7 +151,7 @@ const CarouselSection: React.FC = () => {
             progressTrackColor="rgba(255, 255, 255, 0.25)"
             progressFillColor="#FFFFFF"
             buttonColor="#FFFFFF"
-            iconColor="#21140F"
+            iconColor="var(--color-secondary)"
             className="!mt-24"
             progressBarClassName="!w-[100px] !max-w-[100px] shrink-0"
             progressBarWidth={100}

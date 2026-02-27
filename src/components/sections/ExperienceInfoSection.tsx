@@ -38,6 +38,7 @@ const ExperienceInfoCard: React.FC<{
   const [prevImage, setPrevImage] = useState<string | null>(null);
   const [imageScale, setImageScale] = useState(1);
   const [typedDescription, setTypedDescription] = useState("");
+  const [typedIncludes, setTypedIncludes] = useState<string[]>([]);
 
   useEffect(() => {
     setImageScale(1.08);
@@ -60,6 +61,37 @@ const ExperienceInfoCard: React.FC<{
 
     return () => window.clearInterval(timer);
   }, [item.description]);
+
+  useEffect(() => {
+    const includeLines = item.includes ?? [];
+    setTypedIncludes(includeLines.map(() => ""));
+    if (!includeLines.length) return;
+
+    let lineIndex = 0;
+    let charIndex = 0;
+
+    const timer = window.setInterval(() => {
+      const currentLine = includeLines[lineIndex] ?? "";
+      charIndex += 1;
+
+      setTypedIncludes((prev) => {
+        const next = [...prev];
+        next[lineIndex] = currentLine.slice(0, charIndex);
+        return next;
+      });
+
+      if (charIndex >= currentLine.length) {
+        lineIndex += 1;
+        charIndex = 0;
+      }
+
+      if (lineIndex >= includeLines.length) {
+        window.clearInterval(timer);
+      }
+    }, 20);
+
+    return () => window.clearInterval(timer);
+  }, [item.includes]);
 
   const handleImageChange = (newImage: string) => {
     if (!newImage || newImage === activeImage) return;
@@ -146,10 +178,10 @@ const ExperienceInfoCard: React.FC<{
             </p>
 
             <ul className="!mt-6 !space-y-1.5 !text-[.9em] lg:!text-[18px] !leading-[1.4] !text-[var(--color-secondary)] lg:grid lg:grid-cols-2 lg:gap-x-6">
-              {item.includes.map((includeLine) => (
+              {item.includes.map((includeLine, includeIndex) => (
                 <li key={`${item.id}-${includeLine}`} className="flex items-center gap-2 !text-[var(--color-secondary)]">
                   <span className="!text-[var(--color-secondary)]">✔</span>
-                  {includeLine}
+                  {typedIncludes[includeIndex] ?? ""}
                 </li>
               ))}
             </ul>
