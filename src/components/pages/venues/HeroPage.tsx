@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import MenuFrame from "../../MenuFrame/v2/MenuFrame";
 import AnimatedImageHero from "../../ui/AnimatedImageHero";
 import HeroBreadcrumb from "../../ui/HeroBreadcrumb";
 import CarouselCards from "../../ui/CarouselCardEvents";
-import SplitActionButtons from "../../ui/SplitActionButtons";
 import StartPlanEventModal from "../../ui/StartPlanEventModal";
 import EventDetailsModal from "../../ui/EventDetailsModal";
 import Footer from "../../sections/Footer";
@@ -54,36 +53,43 @@ const herobackgroundsSectionBg = "/assets/backgrounds/swanbrown.png";
 
 const venueTabs = [
   "Galaxy Grand Ballroom",
-  "Emerald Hall",
-  "Royal Pavilion",
-  "Sapphire Lounge",
-  "Crystal Court",
-  "Diamond Arena",
+  "Galaxy Grand Courtyard",
+  "Eden Garden",
+  "Galaxy Grand Dining",
+  "Lotus",
+  "Sunflower",
+  "Rose",
+  "Orchid",
+  "Jasmine",
+  "Tulip",
+  "Lily",
+  "Geneva Boardroom",
 ] as const;
 
 type VenueTab = (typeof venueTabs)[number];
 type VenueDimensions = {
-  area: string;
-  height: string;
-  width: string;
-  length: string;
+  area?: string;
+  height?: string;
+  width?: string;
+  length?: string;
 };
 
-type herobackgroundseating = {
-  theater: string;
-  ushape: string;
-  classroom: string;
-  boardroom: string;
-  cluster: string;
-  cocktails: string;
-  round: string;
+type VenueSeating = {
+  theater?: string;
+  ushape?: string;
+  classroom?: string;
+  boardroom?: string;
+  cluster?: string;
+  cocktails?: string;
+  round?: string;
+  seater?: string;
 };
 
 type VenueTabContent = {
   subtitle: string;
   description: string;
-  dimensions: VenueDimensions;
-  seating: herobackgroundseating;
+  dimensions?: VenueDimensions;
+  seating?: VenueSeating;
 };
 
 const parseSeaterCount = (value: string) => {
@@ -95,7 +101,7 @@ const venueContentByTab: Record<VenueTab, VenueTabContent> = {
   "Galaxy Grand Ballroom": {
     subtitle: "Opulent Celebrations & Galas",
     description:
-      "Spacious and versatile venue is ideal for large-scale events, from glamorous weddings to corporate galas.",
+      "The flagship venue at Aldovia. Spacious and versatile, the Galaxy Grand Ballroom is built for events that demand grandeur without compromise. From large-scale weddings to high-profile corporate galas, the space adapts to the scale of your ambition. Soaring ceilings, state-of-the-art AV, and a service team experienced in both grand celebrations and intimate dinners.",
 
     dimensions: {
       area: "1,29,065 sq.ft",
@@ -106,180 +112,265 @@ const venueContentByTab: Record<VenueTab, VenueTabContent> = {
 
     seating: {
       theater: "3000",
-      ushape: "450",
-      classroom: "1800",
-      boardroom: "250",
-      cluster: "1200",
-      cocktails: "3500",
-      round: "2000",
+      classroom: "1200",
     },
   },
 
-  "Emerald Hall": {
-    subtitle: "Elegant Receptions & Ceremonies",
+  "Galaxy Grand Courtyard": {
+    subtitle: "Elegant Outdoor Settings",
     description:
-      "A luxurious venue crafted for high-style receptions, engagement ceremonies, and timeless social evenings.",
+      "Beautiful outdoor space perfect for cocktail receptions, garden parties, and al fresco dining experiences.",
 
     dimensions: {
-      area: "95,400 sq.ft",
-      height: "18 ft",
-      width: "240 ft",
-      length: "330 ft",
+      area: "7,000 sq.ft",
     },
 
     seating: {
-      theater: "2200",
-      ushape: "320",
-      classroom: "1400",
-      boardroom: "180",
-      cluster: "950",
-      cocktails: "2600",
-      round: "1500",
+      round: "400",
     },
   },
 
-  "Royal Pavilion": {
-    subtitle: "Grand Banquets & Conferences",
+  "Eden Garden": {
+    subtitle: "Natural Beauty & Serenity",
     description:
-      "Designed for premium banquets and business events with expansive floor space and refined architecture.",
-
-    dimensions: {
-      area: "78,250 sq.ft",
-      height: "20 ft",
-      width: "210 ft",
-      length: "280 ft",
-    },
+      "Intimate garden venue surrounded by lush greenery, perfect for ceremonies and small gatherings.",
 
     seating: {
-      theater: "1800",
-      ushape: "280",
-      classroom: "1100",
-      boardroom: "160",
-      cluster: "800",
-      cocktails: "2100",
-      round: "1200",
+      round: "300",
     },
   },
 
-  "Sapphire Lounge": {
-    subtitle: "Intimate Premium Events",
+  "Galaxy Grand Dining": {
+    subtitle: "Exclusive Dining Experiences",
     description:
-      "A polished space for private events, curated parties, and executive social evenings.",
+      "Sophisticated dining venue for intimate celebrations, private dinners, and exclusive gatherings.",
 
     dimensions: {
-      area: "38,900 sq.ft",
-      height: "14 ft",
-      width: "150 ft",
-      length: "210 ft",
+      area: "3,463 sq.ft",
     },
 
     seating: {
-      theater: "850",
-      ushape: "120",
-      classroom: "500",
-      boardroom: "90",
-      cluster: "350",
-      cocktails: "1100",
-      round: "600",
+      round: "40",
     },
   },
 
-  "Crystal Court": {
-    subtitle: "Refined Mid-Scale Gatherings",
+  "Lotus": {
+    subtitle: "Versatile Mid-Size Events",
     description:
-      "Elegant design and adaptable seating create an ideal setting for refined social and corporate events.",
+      "Multi-purpose venue ideal for corporate meetings, medium-sized celebrations, and conferences.",
 
     dimensions: {
-      area: "45,700 sq.ft",
-      height: "16 ft",
-      width: "170 ft",
-      length: "230 ft",
+      area: "5,974 sq.ft",
     },
 
     seating: {
-      theater: "1050",
-      ushape: "160",
-      classroom: "650",
-      boardroom: "120",
-      cluster: "450",
-      cocktails: "1300",
-      round: "750",
+      seater: "400",
     },
   },
 
-  "Diamond Arena": {
-    subtitle: "Large-Format Productions",
+  "Sunflower": {
+    subtitle: "Bright & Welcoming Space",
     description:
-      "Built for massive productions, entertainment showcases, and full-scale wedding spectacles.",
+      "Well-appointed hall perfect for seminars, workshops, and social gatherings.",
 
     dimensions: {
-      area: "1,42,500 sq.ft",
-      height: "28 ft",
-      width: "350 ft",
-      length: "450 ft",
+      area: "2,837 sq.ft",
     },
 
     seating: {
-      theater: "4200",
-      ushape: "600",
-      classroom: "2500",
-      boardroom: "400",
-      cluster: "1800",
-      cocktails: "5000",
-      round: "3000",
+      seater: "200",
+    },
+  },
+
+  "Rose": {
+    subtitle: "Elegant & Refined",
+    description:
+      "Sophisticated venue for corporate events, training sessions, and intimate celebrations.",
+
+    dimensions: {
+      area: "2,540 sq.ft",
+    },
+
+    seating: {
+      seater: "160",
+    },
+  },
+
+  "Orchid": {
+    subtitle: "Boutique Event Space",
+    description:
+      "Intimate setting ideal for board meetings, private functions, and exclusive events.",
+
+    dimensions: {
+      area: "2,153 sq.ft",
+    },
+
+    seating: {
+      seater: "150",
+    },
+  },
+
+  "Jasmine": {
+    subtitle: "Cozy & Professional",
+    description:
+      "Perfect for small meetings, workshops, and intimate gatherings with professional amenities.",
+
+    dimensions: {
+      area: "1,026 sq.ft",
+    },
+
+    seating: {
+      seater: "70",
+    },
+  },
+
+  "Tulip": {
+    subtitle: "Intimate Meetings",
+    description:
+      "Sophisticated venue ideal for corporate events, training sessions, and intimate events.",
+
+    dimensions: {
+      area: "2,540 sq.ft",
+    },
+
+    seating: {
+      seater: "160",
+    },
+  },
+
+  "Lily": {
+    subtitle: "Exclusive Small Gatherings",
+    description:
+      "Intimate setting ideal for board meetings, private functions, and exclusive events.",
+
+    dimensions: {
+      area: "2,153 sq.ft",
+    },
+
+    seating: {
+      seater: "150",
+    },
+  },
+
+  "Geneva Boardroom": {
+    subtitle: "Executive Boardroom",
+    description:
+      "Perfect for small meetings, workshops, and intimate gatherings with professional amenities.",
+
+    dimensions: {
+      area: "1,026 sq.ft",
+    },
+
+    seating: {
+      seater: "70",
     },
   },
 };
 
-const venueImagesByTab: Record<VenueTab, string[]> = {
+const venueImagesByTab: Partial<Record<VenueTab, string[]>> = {
   "Galaxy Grand Ballroom": [
     "/assets/herobackgrounds/herobanner/galaxy.jpg",
     "/assets/herobackgrounds/herobanner/galaxy1.jpg",
     "/assets/herobackgrounds/herobanner/corridor.jpg",
   ],
-  "Emerald Hall": [
+  "Galaxy Grand Courtyard": [
+    "/assets/herobackgrounds/herobanner/corridor.jpg",
+    "/assets/herobackgrounds/herobanner/galaxy.jpg",
+    "/assets/herobackgrounds/herobanner/lotus.jpg",
+  ],
+  "Eden Garden": [
+    "/assets/herobackgrounds/herobanner/lotus.jpg",
+    "/assets/herobackgrounds/herobanner/corridor.jpg",
+    "/assets/herobackgrounds/herobanner/galaxy1.jpg",
+  ],
+  "Galaxy Grand Dining": [
     "/assets/herobackgrounds/herobanner/orchid.jpg",
     "/assets/herobackgrounds/herobanner/rose.jpg",
     "/assets/herobackgrounds/herobanner/tulip.jpg",
-    "/assets/herobackgrounds/herobanner/galaxy.jpg",
-    "/assets/herobackgrounds/herobanner/galaxy1.jpg",
-    "/assets/herobackgrounds/herobanner/corridor.jpg"
   ],
-  "Royal Pavilion": [
+  "Lotus": [
     "/assets/herobackgrounds/herobanner/lotus.jpg",
     "/assets/herobackgrounds/herobanner/galaxy.jpg",
     "/assets/herobackgrounds/herobanner/galaxy1.jpg",
   ],
-  "Sapphire Lounge": [
+  "Sunflower": [
+    "/assets/herobackgrounds/herobanner/tulip.jpg",
+    "/assets/herobackgrounds/herobanner/rose.jpg",
+    "/assets/herobackgrounds/herobanner/orchid.jpg",
+  ],
+  "Rose": [
+    "/assets/herobackgrounds/herobanner/rose.jpg",
+    "/assets/herobackgrounds/herobanner/tulip.jpg",
+    "/assets/herobackgrounds/herobanner/orchid.jpg",
+  ],
+  "Orchid": [
+    "/assets/herobackgrounds/herobanner/orchid.jpg",
+    "/assets/herobackgrounds/herobanner/rose.jpg",
+    "/assets/herobackgrounds/herobanner/tulip.jpg",
+  ],
+  "Jasmine": [
+    "/assets/herobackgrounds/herobanner/tulip.jpg",
+    "/assets/herobackgrounds/herobanner/orchid.jpg",
+    "/assets/herobackgrounds/herobanner/rose.jpg",
+  ],
+  "Tulip": [
+    "/assets/herobackgrounds/herobanner/tulip.jpg",
+    "/assets/herobackgrounds/herobanner/rose.jpg",
+    "/assets/herobackgrounds/herobanner/orchid.jpg",
+  ],
+  "Lily": [
+    "/assets/herobackgrounds/herobanner/orchid.jpg",
+    "/assets/herobackgrounds/herobanner/tulip.jpg",
+    "/assets/herobackgrounds/herobanner/rose.jpg",
+  ],
+  "Geneva Boardroom": [
     "/assets/herobackgrounds/herobanner/corridor.jpg",
     "/assets/herobackgrounds/herobanner/lotus.jpg",
     "/assets/herobackgrounds/herobanner/galaxy1.jpg",
-  ],
-  "Crystal Court": [
-    "/assets/herobackgrounds/herobanner/galaxy.jpg",
-    "/assets/herobackgrounds/herobanner/corridor.jpg",
-    "/assets/herobackgrounds/herobanner/lotus.jpg",
-  ],
-  "Diamond Arena": [
-    "/assets/herobackgrounds/herobanner/galaxy1.jpg",
-    "/assets/herobackgrounds/herobanner/galaxy.jpg",
-    "/assets/herobackgrounds/herobanner/lotus.jpg",
   ],
 };
 
 const venueCardsByTab: Record<VenueTab, VenueCard[]> = venueTabs.reduce(
   (acc, tab) => {
-    const content = venueContentByTab[tab];
+    const content =
+      venueContentByTab[tab] ??
+      venueContentByTab["Galaxy Grand Ballroom"];
+    const fallbackDimensions = {
+      area: "N/A",
+      height: "N/A",
+      width: "N/A",
+      length: "N/A",
+    };
+    const dimensions = {
+      ...fallbackDimensions,
+      ...(content?.dimensions ?? {}),
+    };
+    const seating = {
+      theater: "0",
+      ushape: "0",
+      classroom: "0",
+      boardroom: "0",
+      cluster: "0",
+      cocktails: "0",
+      round: "0",
+      ...(content?.seating ?? {}),
+    };
+    const maxSeating =
+      content?.seating?.theater ??
+      content?.seating?.seater ??
+      content?.seating?.round ??
+      "0";
     const idPrefix = tab.toLowerCase().replace(/\s+/g, "-");
-    acc[tab] = venueImagesByTab[tab].map((image, index) => ({
+    const tabImages = venueImagesByTab[tab] ?? defaultVenueImages;
+    acc[tab] = tabImages.map((image, index) => ({
       id: `${idPrefix}-${index + 1}`,
       image,
       title: tab,
-      subtitle: content.subtitle,
-      description: content.description,
-      dimensions: content.dimensions,
-      seating: content.seating,
-      capacity: `${content.seating.theater} seater`,
+      subtitle: content?.subtitle ?? "Venue Details",
+      description: content?.description ?? "Venue details will be updated soon.",
+      dimensions,
+      seating,
+      capacity: `${maxSeating} seater`,
     }));
     return acc;
   },
@@ -299,16 +390,16 @@ const HeroPage: React.FC = () => {
     pageMode === "wedding" ? weddingImages : pageMode === "corporate" ? corporateImages : defaultVenueImages;
   const heroTitle =
     pageMode === "wedding"
-      ? "Crafted Around Your Love Story."
+      ? "Your Wedding, Your Way"
       : pageMode === "corporate"
         ? "Your professional Event Destination"
-        : "Our Venues";
+        : "Opulent Celebrations & Galas";
   const heroSubtitle =
     pageMode === "wedding"
-      ? "Savour the finest flavours in our curated dining destination"
+      ? "Forty-five acres of grounds, twelve curated venues, and a team that understands that no two weddings should look the same. At Aldovia, we do not offer packages. We offer possibilities."
       : pageMode === "corporate"
-        ? "state-of-the-art facilities for conferences, offsites, and team building"
-      : "Savor the finest flavors in our curated dining destinations.";
+        ? "State-of-the-art facilities for conferences, offsites, and team building. Forty minutes from Bangalore, but far enough to think clearly."
+      : "Spacious and versatile venue is ideal for large-scale events, from glamorous weddings to corporate galas.";
   const breadcrumbLabel =
     pageMode === "wedding" ? "Weddings" : pageMode === "corporate" ? "Corporate Events" : "Venues";
   const handleRequestProposal = () => {
@@ -324,6 +415,9 @@ const HeroPage: React.FC = () => {
     }
     setOpen(true);
   };
+  const handlePlanEvent = () => {
+    setOpen(true);
+  };
   const [active, setActive] = useState<(typeof venueTabs)[number]>(
     "Galaxy Grand Ballroom"
   );
@@ -337,21 +431,16 @@ const HeroPage: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [selectedEventType, setSelectedEventType] = useState("Wedding");
-  const [showSplitActions, setShowSplitActions] = useState(false);
   const venueMaxGuestsByTab = venueTabs.reduce<Record<string, number>>((acc, tab) => {
-    acc[tab] = parseSeaterCount(venueContentByTab[tab].seating.theater);
+    const maxSeats =
+      venueContentByTab[tab]?.seating?.theater ??
+      venueContentByTab[tab]?.seating?.seater ??
+      venueContentByTab[tab]?.seating?.round ??
+      venueContentByTab["Galaxy Grand Ballroom"]?.seating?.theater ??
+      "100";
+    acc[tab] = parseSeaterCount(maxSeats);
     return acc;
   }, {});
-
-  useEffect(() => {
-    const onScroll = () => {
-      setShowSplitActions(window.scrollY > window.innerHeight * 0.9);
-    };
-
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
 
 
@@ -368,8 +457,10 @@ const HeroPage: React.FC = () => {
         images={heroImages}
         title={heroTitle}
         subtitle={heroSubtitle}
-        buttonLabel="Plan Your Event"
+        buttonLabel={pageMode === "wedding" || pageMode === "corporate" ? "Request Proposal" : "Plan Your Event"}
         onButtonClick={handleRequestProposal}
+        secondaryButtonLabel={pageMode === "wedding" || pageMode === "corporate" ? "Download Brochure" : undefined}
+        onSecondaryButtonClick={pageMode === "wedding" || pageMode === "corporate" ? handlePlanEvent : undefined}
         enableTypingSubtitle
         centerContentClassName="-translate-y-10 lg:translate-y-0 lg:!w-full lg:!mx-auto lg:text-center "
         controlsWrapperClassName="absolute bottom-[10%] left-1/2 z-30 w-[min(92%,520px)] -translate-x-1/2"
@@ -386,15 +477,6 @@ const HeroPage: React.FC = () => {
           onTabChange={handleTabChange}
         />
       </section>
-      {!open && !detailsOpen && showSplitActions && (
-        <SplitActionButtons
-          primaryLabel="Request Proposal"
-          secondaryLabel="Download Brochure"
-          onPrimaryClick={handleRequestProposal}
-          className="!fixed !bottom-0 !left-0 !right-0 !z-[2147483645] !mx-auto lg:!hidden"
-        />
-      )}
-
       <StartPlanEventModal
         open={open}
         onClose={() => setOpen(false)}
@@ -420,7 +502,14 @@ const HeroPage: React.FC = () => {
         venue={active}
         venueOptions={[...venueTabs]}
         venueMaxGuestsByTab={venueMaxGuestsByTab}
-        eventTypeOptions={["Wedding", "Corporate"]}
+        eventTypeOptions={[
+          "Wedding",
+          "Corporate Event",
+          "Social Gathering",
+          "Birthday",
+          "Anniversary",
+          "Other",
+        ]}
         onDone={(payload) => {
           console.log("Event inquiry payload:", payload);
           setDetailsOpen(false);

@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from "react";
+import { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router";
 import RoomsPage from "../components/pages/rooms/RoomsPage";
 
@@ -9,6 +9,7 @@ const VenuesHeroPage = lazy(() => import("../components/pages/venues/HeroPage"))
 const ActivitiesHeroPage = lazy(() => import("../components/pages/activities/HeroPage"));
 const DiningHeroPage = lazy(() => import("../components/pages/dining/HeroPage"));
 const ExperienceHeroPage = lazy(() => import("../components/pages/experience/HeroPage"));
+const AboutUsHeroPage = lazy(() => import("../components/pages/aboutus/HeroPage"));
 
 const RouteFallback = <div className="min-h-screen w-full bg-black" />;
 
@@ -30,6 +31,7 @@ const AppRoutes = () => {
           <Route path="/dining" element={<DiningHeroPage />} />
           <Route path="/experience" element={<ExperienceHeroPage />} />
           <Route path="/experince" element={<ExperienceHeroPage />} />
+          <Route path="/aboutus" element={<AboutUsHeroPage />} />
 
         {/* 404 Page for unknown routes */}
           <Route path="*" element={<Error404 />} />

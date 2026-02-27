@@ -1,12 +1,15 @@
 import React from "react";
+import { useNavigate } from "react-router";
 import MenuFrame from "../../MenuFrame/v2/MenuFrame";
 import AnimatedImageHero from "../../ui/AnimatedImageHero";
+import HeroBreadcrumb from "../../ui/HeroBreadcrumb";
 import ExperienceInfoSection, { type ExperienceInfoItem } from "../../sections/ExperienceInfoSection";
 import Footer from "../../sections/Footer";
 
 const ExperienceHeroPage: React.FC = () => {
+  const navigate = useNavigate();
   const experienceImages = [
-    "/assets/herobackgrounds/dining/ambrosia.jpg",
+    "/assets/herobackgrounds/dining/ambrosia.webp",
     "/assets/herobackgrounds/dining/Buvette.jpg",
     "/assets/herobackgrounds/activities/activity2.jpg",
   ];
@@ -16,21 +19,25 @@ const ExperienceHeroPage: React.FC = () => {
       packageTab: "Day out package",
       title: "Gold Package",
       subtitle: "Curated Day-out experience",
+      duration: "Full Day",
       price: "₹4,800",
       priceNote: "+ taxes",
       description:
-        "Enjoy a complete day retreat with curated meals, recreation access, and premium hospitality throughout your stay.",
+        "Indulge in a luxurious couples spa experience with aromatherapy and relaxation techniques.",
       includes: [
         "Welcome drink, Buffet Lunch, Hi-tea, Dinner",
         "All Indoor and Outdoor Activities",
         "Pool and wellness access",
+        "Steam & Sauna access",
+        "Herbal tea & refreshments",
+        "Private treatment room"
       ],
       ctaLabel: "Book Gold",
       images: [
         {
           id: 1,
-          src: "/assets/herobackgrounds/dining/ambrosia.jpg",
-          thumb: "/assets/herobackgrounds/dining/ambrosia.jpg",
+          src: "/assets/herobackgrounds/dining/ambrosia.webp",
+          thumb: "/assets/herobackgrounds/dining/ambrosia.webp",
         },
         {
           id: 2,
@@ -45,24 +52,26 @@ const ExperienceHeroPage: React.FC = () => {
       ],
     },
     {
-      id: "silver-dayout-package",
+      id: "Candlelight Dinner",
       packageTab: "Day out package",
-      title: "Silver Day-out",
-      subtitle: "Relaxed daytime escape",
+      title: "Candlelight Dinner",
+      subtitle: "Romance Under Soft Candlelight",
+      duration: "3-4 Hours",
       price: "₹3,600",
       priceNote: "+ taxes",
       description:
-        "A value day-out plan with curated meals and access to key leisure amenities across the property.",
+        "An intimate dining experience designed for unforgettable moments. Surrounded by soft candlelight, elegant décor, and personalized service, the setting creates the perfect atmosphere for romantic evenings, celebrations, and cherished conversations over exquisite cuisine.",
       includes: [
-        "Welcome drink and lunch",
-        "Indoor activities access",
-        "Poolside leisure time",
+        "Candlelight private setup",
+        "5-course gourmet menu",
+        "Live music on select nights",
+        "Complimentary wine pairing"
       ],
-      ctaLabel: "Book Silver",
+      ctaLabel: "Book Candlelight",
       images: [
         { id: 1, src: "/assets/herobackgrounds/dining/Buvette.jpg", thumb: "/assets/herobackgrounds/dining/Buvette.jpg" },
         { id: 2, src: "/assets/herobackgrounds/activities/activity1.jpg", thumb: "/assets/herobackgrounds/activities/activity1.jpg" },
-        { id: 3, src: "/assets/herobackgrounds/dining/ambrosia.jpg", thumb: "/assets/herobackgrounds/dining/ambrosia.jpg" },
+        { id: 3, src: "/assets/herobackgrounds/dining/ambrosia.webp", thumb: "/assets/herobackgrounds/dining/ambrosia.webp" },
       ],
     },
     {
@@ -70,37 +79,43 @@ const ExperienceHeroPage: React.FC = () => {
       packageTab: "Day out package",
       title: "Diamond Day-out",
       subtitle: "Premium all-day indulgence",
+      duration: "Full Day",
       price: "₹6,200",
       priceNote: "+ taxes",
       description:
         "Elevated day-out with premium dining benefits, wellness access, and added curated experiences.",
       includes: [
-        "Breakfast, lunch, hi-tea, dinner",
-        "Indoor + outdoor activities",
-        "Wellness and spa credits",
+        "Welcome drink, Breakfast, lunch, hi-tea, dinner",
+        "All Indoor and Outdoor Activities",
+        "Pool and wellness access",
+        "Steam & Sauna access",
+        "Herbal tea & refreshments",
+        "Private treatment room"
       ],
       ctaLabel: "Book Diamond",
       images: [
-        { id: 1, src: "/assets/herobackgrounds/dining/ambrosia.jpg", thumb: "/assets/herobackgrounds/dining/ambrosia.jpg" },
+        { id: 1, src: "/assets/herobackgrounds/dining/ambrosia.webp", thumb: "/assets/herobackgrounds/dining/ambrosia.webp" },
         { id: 2, src: "/assets/herobackgrounds/dining/Buvette1.jpg", thumb: "/assets/herobackgrounds/dining/Buvette1.jpg" },
         { id: 3, src: "/assets/herobackgrounds/activities/activity2.jpg", thumb: "/assets/herobackgrounds/activities/activity2.jpg" },
       ],
     },
     {
-      id: "platinum-package",
+      id: "urban-getaway",
       packageTab: "Rooms package",
-      title: "Platinum Package",
-      subtitle: "Luxury stay and celebration bundle",
+      title: "Urban Getaway",
+      subtitle: "The City Escape",
+      duration: "1 Night / 2 Days",
       price: "₹8,900",
       priceNote: "+ taxes",
       description:
-        "Upgrade to premium inclusions with exclusive dining moments, spa sessions, and elevated accommodation benefits.",
+        "One night at Aldovia. That is all it takes to reset. The Urban Getaway is built for couples and solo travelers who need distance from the city without the logistics of a long trip. Check in, slow down, check out different.",
       includes: [
-        "Premium room stay benefits",
-        "Chef-curated dining experience",
-        "Spa and wellness therapies",
+        "1 night luxury accommodation",
+        "Breakfast for two",
+        "Access to pool and fitness center",
+        "Late checkout (subject to availability)"
       ],
-      ctaLabel: "Book Platinum",
+      ctaLabel: "Book Urban",
       images: [
         {
           id: 1,
@@ -109,8 +124,8 @@ const ExperienceHeroPage: React.FC = () => {
         },
         {
           id: 2,
-          src: "/assets/herobackgrounds/dining/ambrosia.jpg",
-          thumb: "/assets/herobackgrounds/dining/ambrosia.jpg",
+          src: "/assets/herobackgrounds/dining/ambrosia.webp",
+          thumb: "/assets/herobackgrounds/dining/ambrosia.webp",
         },
         {
           id: 3,
@@ -122,18 +137,21 @@ const ExperienceHeroPage: React.FC = () => {
     {
       id: "deluxe-rooms-package",
       packageTab: "Rooms package",
-      title: "Deluxe Stay Package",
-      subtitle: "Comfort-first room experience",
+      title: "Family Funtastic",
+      subtitle: "The Weekend They Will Remember",
+      duration: "2 Nights / 3 Days",
       price: "₹7,400",
       priceNote: "+ taxes",
       description:
-        "A balanced stay package with elegant rooms, breakfast inclusions, and access to resort facilities.",
+        "A weekend package that gives the children everything they want and the parents everything they need. Activities, dining, pool time, and enough space to let everyone find their own rhythm.",
       includes: [
-        "Deluxe room accommodation",
-        "Daily breakfast",
-        "Access to leisure amenities",
+        "2 nights family accommodation",
+        "Breakfast and dinner daily",
+        "Kids Club access",
+        "Pool and activity access",
+        "One complimentary spa session for adults"
       ],
-      ctaLabel: "Book Deluxe",
+      ctaLabel: "Book Funtastic",
       images: [
         { id: 1, src: "/assets/herobackgrounds/dining/Buvette1.jpg", thumb: "/assets/herobackgrounds/dining/Buvette1.jpg" },
         { id: 2, src: "/assets/herobackgrounds/activities/activity1.jpg", thumb: "/assets/herobackgrounds/activities/activity1.jpg" },
@@ -143,20 +161,22 @@ const ExperienceHeroPage: React.FC = () => {
     {
       id: "royal-rooms-package",
       packageTab: "Rooms package",
-      title: "Royal Suite Package",
-      subtitle: "Signature luxury retreat",
+      title: "Weekend Escape",
+      subtitle: "48 Hours of Nothing You Have To Do",
+      duration: "2 Nights / 3 Days",
       price: "₹11,800",
       priceNote: "+ taxes",
       description:
-        "A premium suite package with luxury room benefits, curated dining, and enhanced personalized service.",
+        "No itinerary. No meetings. No obligations. The Weekend Escape is two nights of doing exactly what you want, whether that is sitting by the pool, eating three different meals at three different restaurants, or simply sleeping in a bed that someone else makes.",
       includes: [
-        "Suite category stay",
-        "Curated dinner experience",
-        "Priority concierge support",
+        "2 nights luxury accommodation",
+        "All meals included",
+        "Spa credit",
+        "Activitu access"
       ],
-      ctaLabel: "Book Royal",
+      ctaLabel: "Book Weekend",
       images: [
-        { id: 1, src: "/assets/herobackgrounds/dining/ambrosia.jpg", thumb: "/assets/herobackgrounds/dining/ambrosia.jpg" },
+        { id: 1, src: "/assets/herobackgrounds/dining/ambrosia.webp", thumb: "/assets/herobackgrounds/dining/ambrosia.webp" },
         { id: 2, src: "/assets/herobackgrounds/activities/activity2.jpg", thumb: "/assets/herobackgrounds/activities/activity2.jpg" },
         { id: 3, src: "/assets/herobackgrounds/dining/Buvette1.jpg", thumb: "/assets/herobackgrounds/dining/Buvette1.jpg" },
       ],
@@ -164,16 +184,20 @@ const ExperienceHeroPage: React.FC = () => {
     {
       id: "festive-package",
       packageTab: "Festive package",
-      title: "Festive Package",
+      title: "Rock the Season",
       subtitle: "Celebration-ready seasonal package",
+      duration: "2 Nights / 3 Days",
       price: "₹12,500",
       priceNote: "+ taxes",
       description:
-        "Celebrate special occasions with festive decor, curated feasts, and event-ready hospitality tailored for family and group gatherings.",
+        "Celebrate the festive season with specially curated experiences, themed decorations, and exclusive events. The kind of holiday where the resort does all the planning and you do all the living.",
       includes: [
-        "Decor and festive setup assistance",
-        "Curated lunch and dinner menus",
-        "Indoor-outdoor recreation access",
+        "2 nights luxury accommodation",
+        "Festive themed dinner",
+        "Live entertainment",
+        "Welcome drinks & amenities",
+        "Exclusive festive activities",
+        "Access to all resort facilities"
       ],
       ctaLabel: "Book Festive",
       images: [
@@ -199,6 +223,7 @@ const ExperienceHeroPage: React.FC = () => {
       packageTab: "Festive package",
       title: "Celebration Package",
       subtitle: "Family and group celebrations",
+      duration: "1 Day",
       price: "₹9,900",
       priceNote: "+ taxes",
       description:
@@ -220,6 +245,7 @@ const ExperienceHeroPage: React.FC = () => {
       packageTab: "Festive package",
       title: "Grand Festive Package",
       subtitle: "Large-scale festive hosting",
+      duration: "2 Nights / 3 Days",
       price: "₹15,500",
       priceNote: "+ taxes",
       description:
@@ -231,7 +257,7 @@ const ExperienceHeroPage: React.FC = () => {
       ],
       ctaLabel: "Book Grand",
       images: [
-        { id: 1, src: "/assets/herobackgrounds/dining/ambrosia.jpg", thumb: "/assets/herobackgrounds/dining/ambrosia.jpg" },
+        { id: 1, src: "/assets/herobackgrounds/dining/ambrosia.webp", thumb: "/assets/herobackgrounds/dining/ambrosia.webp" },
         { id: 2, src: "/assets/herobackgrounds/dining/Buvette1.jpg", thumb: "/assets/herobackgrounds/dining/Buvette1.jpg" },
         { id: 3, src: "/assets/herobackgrounds/activities/activity2.jpg", thumb: "/assets/herobackgrounds/activities/activity2.jpg" },
       ],
@@ -241,6 +267,12 @@ const ExperienceHeroPage: React.FC = () => {
   return (
     <section className="relative min-h-screen w-full">
       <MenuFrame showBookNow={false} />
+      <div className="absolute left-5 top-24 z-[2147483645] md:left-8 md:top-26">
+        <HeroBreadcrumb
+          label="Experience"
+          onHomeClick={() => navigate("/home")}
+        />
+      </div>
       <AnimatedImageHero
         images={experienceImages}
         title="Experiences & Packages"

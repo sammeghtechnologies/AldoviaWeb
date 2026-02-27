@@ -12,7 +12,7 @@ const Logo_top = ({ introFinished }: { introFinished?: boolean }) => {
       <img
         src="assets/logo/aldovialogo.svg"
         alt="Aldovia"
-        className="logo-image w-[56px] h-auto object-contain block brightness-0 invert"
+        className="logo-image w-[3em] lg:w-[6rem] h-auto object-contain block brightness-0 invert"
       />
     </div>
   );
@@ -333,7 +333,12 @@ const MenuFrame = ({
           <div className="h-14 md:h-16 lg:h-14" />
 
           {/* HOME */}
-          <div className="!p-1  !mt-5 flex items-center gap-5 mb-12 shadow-xl">
+          <div className="!p-1  !mt-5 flex items-center gap-5 mb-12 shadow-xl"
+          onClick={() => {
+            setIsOpen(false);
+            navigate("/home");
+          }} 
+          >
             <img
               src={icons.home || "/assets/icons/home.svg"}
               alt=""
@@ -463,7 +468,14 @@ const MenuFrame = ({
               className="!mt-5 lg:!mt-3 space-y-8 lg:space-y-4 !pl-2 overflow-hidden"
               style={{ height: openSection === "discover" ? "auto" : 0 }}
             >
-              <MenuIcon icon={icons.about || "/assets/icons/about.svg"} title="About Us" />
+              <MenuIcon
+                icon={icons.about || "/assets/icons/about.svg"}
+                title="About Us"
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate("/aboutus");
+                }}
+              />
               <MenuIcon icon={icons.contact || "/assets/icons/contact.svg"} title="Get in Touch" />
             </ul>
           </div>

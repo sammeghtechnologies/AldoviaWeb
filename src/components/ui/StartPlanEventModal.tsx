@@ -46,7 +46,7 @@ export default function StartPlanEventModal({ open, onClose, onSubmit }: StartPl
                              />
                    
                              <motion.div
-                               className="fixed bottom-0 left-0 right-0 z-[2147483647] rounded-t-[24px] bg-[#F5F5F5] shadow-2xl will-change-transform [transform:translate3d(0,0,0)]"
+                               className="fixed bottom-0 left-0 right-0 z-[2147483647] rounded-t-[24px] bg-[#F5F5F5] shadow-2xl will-change-transform [transform:translate3d(0,0,0)] lg:left-1/2 lg:right-auto lg:w-1/2 lg:-translate-x-1/2"
                                initial={{ y: "105%" }}
                                animate={{ y: 0 }}
                                exit={{ y: "105%" }}
@@ -69,7 +69,7 @@ export default function StartPlanEventModal({ open, onClose, onSubmit }: StartPl
                                    </h2>
 
                                    <p className="font-area text-center !text-[var(--color-primary)] !mb-6">
-                                        Create unforgettable memories in our stunning venues
+                                   Grand venues, flawless execution, memories that last forever.
                                    </p>
 
                                    {/* Selectable Images */}
