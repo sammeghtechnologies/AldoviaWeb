@@ -152,3 +152,25 @@ button span {
 .transform-style-3d {
   transform-style: preserve-3d;
 }
+
+/* ✅ Hides scrollbar globally while maintaining scroll functionality */
+
+/* Chrome, Safari, and Opera */
+html::-webkit-scrollbar {
+  display: none;
+}
+
+/* IE, Edge, and Firefox */
+html {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Optional: Apply to body as well to ensure total coverage */
+body {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+body::-webkit-scrollbar {
+  display: none;
+}

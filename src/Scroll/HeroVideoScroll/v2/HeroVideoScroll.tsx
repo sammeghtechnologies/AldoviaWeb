@@ -9,13 +9,14 @@ export default function HeroVideoScroll({ masterTl }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const TOTAL_FRAMES = 499;
+  const BLUR_START_FRAME = TOTAL_FRAMES - 25; 
 
   const FRAME_PATH = (i: number) =>
     `/assets/swarn_60/frame_${String(i).padStart(4, "0")}.jpg`;
 
   const [images, setImages] = useState<HTMLImageElement[]>([]);
 
-  // 🔥 Preload Frames
+  // Preload Frames
   useEffect(() => {
     const loaded: HTMLImageElement[] = [];
     let loadedCount = 0;
@@ -36,11 +37,11 @@ export default function HeroVideoScroll({ masterTl }: Props) {
   }, []);
 
   useEffect(() => {
-    if (!images.length || !masterTl?.current) return;
+    if (!images.length || !masterTl?.current || !canvasRef.current) return;
 
     const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-    if (!canvas || !context) return;
+    const context = canvas.getContext("2d", { alpha: false }); 
+    if (!context) return;
 
     canvas.width = 1920;
     canvas.height = 1080;
@@ -52,7 +53,20 @@ export default function HeroVideoScroll({ masterTl }: Props) {
       const img = images[frameIndex];
       if (!img) return;
 
-      context.clearRect(0, 0, canvas.width, canvas.height);
+      // ✅ BALANCED SMOOTH BLUR
+      if (frameIndex >= BLUR_START_FRAME) {
+        const linearProgress = (frameIndex - BLUR_START_FRAME) / 25;
+        const smoothProgress = linearProgress * linearProgress;
+
+        // ✅ REDUCED: Set to 100px for a cleaner transition
+        const blurValue = smoothProgress * 100; 
+
+        context.filter = `blur(${blurValue}px)`;
+      } else {
+        context.filter = "none";
+      }
+
+      // ✅ GLITCH FIX: No clearRect
       context.drawImage(img, 0, 0, canvas.width, canvas.height);
     };
 
@@ -68,13 +82,8 @@ export default function HeroVideoScroll({ masterTl }: Props) {
       onComplete: () => render(TOTAL_FRAMES - 1),
     });
 
-    // IMPORTANT: add heroTl first
     masterTl.current.add(heroTl);
-
-    // IMPORTANT: add label in master timeline AFTER heroTl is added
     masterTl.current.addLabel("hero-end");
-
-    console.log("Hero timeline added + label set");
 
   }, [images]);
 
@@ -83,6 +92,7 @@ export default function HeroVideoScroll({ masterTl }: Props) {
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full object-cover"
+        style={{ display: "block" }} 
       />
     </section>
   );

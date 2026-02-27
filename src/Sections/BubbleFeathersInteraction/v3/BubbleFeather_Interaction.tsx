@@ -1,7 +1,7 @@
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import * as THREE from "three";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, Suspense } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { Environment, Lightformer } from "@react-three/drei";
 import ScrollTrigger from "gsap/ScrollTrigger";
@@ -45,39 +45,55 @@ const BubbleFeather_Interaction = () => {
   const [fallProgress, setFallProgress] = useState(0); 
   const feather3Ref = useRef<any>(null);
   const [swanProgress, setSwanProgress] = useState(0);
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
+ const getResponsivePos = (desktopPos: [number, number, number]) => {
+  if (!isMobile) return desktopPos;
+  
+  // On mobile: 
+  // 1. Bring X closer to center (multiply by 0.4)
+  // 2. Spread Y further apart to fill vertical space (multiply by 1.3)
+  return [desktopPos[0] * 0.4, desktopPos[1] * 1.3, desktopPos[2]] as [number, number, number];
+};
 
   useStepScroll();
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.classList.add('hide-scrollbar');
+
+   
     const handleScroll = () => {
       const scrollY = window.scrollY;
+      
       if (scrollY > 750) setBurstAll(true);
       else setBurstAll(false);
 
       if (scrollY > 850) setZoomActive(true);
       else setZoomActive(false);
 
-      const startRise = 1000; 
+      const startRise = 800; 
       const endRise = 1500;   
       const progress = THREE.MathUtils.clamp((scrollY - startRise) / (endRise - startRise), 0, 1);
       setFallProgress(progress);
 
       const startSwan = 1500; 
-const endSwan = 2200;   
-const swanProg = THREE.MathUtils.clamp((scrollY - startSwan) / (endSwan - startSwan), 0, 1);
-setSwanProgress(swanProg);
-   
+      const endSwan = 2200;   
+      const swanProg = THREE.MathUtils.clamp((scrollY - startSwan) / (endSwan - startSwan), 0, 1);
+      setSwanProgress(swanProg);
     };
 
-    document.body.style.height = "4000px";
-    document.documentElement.style.overflow = "hidden";
     window.addEventListener("scroll", handleScroll);
+    handleScroll(); 
 
     setStarted(true);
     if (canvasContainerRef.current) gsap.set(canvasContainerRef.current, { autoAlpha: 1, top: 0 });
 
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      document.documentElement.classList.remove('hide-scrollbar');
+    };
+  }, []); 
 
   const handleBubbleClick = (id: number, target: THREE.Vector3) => {
     setActiveId(id);
@@ -87,39 +103,40 @@ setSwanProgress(swanProg);
 
   return (
     <>
-      <div ref={canvasContainerRef} className="fixed inset-0 z-30 bg-[#49261c] overflow-hidden">
+      <div ref={canvasContainerRef} className="fixed inset-0 z-30 overflow-hidden bg-black">
         <Canvas dpr={[1, 2]} camera={{ position: [0, -1, 18], fov: 45 }} 
           onCreated={({ camera }) => camera.lookAt(0, -1, 0)}
           onPointerMissed={() => { setActiveId(null); setFocusTarget(null); }}>
           
-          <color attach="background" args={["#49261c"]} />
-          <ScrollZoomLogic isActive={zoomActive} isClicked={!!activeId} />
-          <CameraFocusController target={focusTarget} enabled={!!focusTarget} />
-          
-          <Environment resolution={1024}>
-            <Lightformer intensity={2} rotation-x={Math.PI / 2} position={[0, 5, -9]} scale={[10, 10, 1]} />
-            <Lightformer intensity={2} rotation-y={Math.PI / 2} position={[-5, 1, -1]} scale={[10, 2, 1]} />
-            <Lightformer form="rect" intensity={80} position={[0, -36, -74]} scale={[100, 1, 1]} target={[0, 0, 0]} />
-          </Environment>
-          <ambientLight intensity={1.5} /><directionalLight position={[10, 10, 10]} intensity={4} />
-          
-          <group>
-           <WaterSurface 
-  fallProgress={fallProgress} 
-  swanProgress={swanProgress} // PASS THE NEW PROP HERE
-  id3Ref={feather3Ref} 
-/>        
-            {/* ✅ HARDCODED allBubblesReady={true} restored */}
-            <NaturalFeather id={1} variant="main" startPos={[0, 2, 0]} targetPos={[1.5, -4.5, 0]} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
-            <NaturalFeather id={2} variant="small-drag" startPos={[-2, 3, -2]} targetPos={[-3.5, -5.5, -1]} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
-            <NaturalFeather ref={feather3Ref} id={3} variant="upper-pendulum" startPos={[4, 5, -3]} targetPos={[-1, 1.5, -2]} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
-            <NaturalFeather id={4} variant="side-roll-upper" startPos={[1.5, 6, -1]} targetPos={[4.5, 2.2, -1.5]} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
-            <NaturalFeather id={5} variant="mid-drift" startPos={[-1, 5, 2]} targetPos={[-6.5, 0.5, 1.0]} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
-            <NaturalFeather id={6} variant="high-drag-zig" startPos={[4, 5, 0]} targetPos={[7.5, -4.5, -0.5]} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
-          </group>
+          <color attach="background" args={["#000000"]} />
+
+          <Suspense fallback={null}>
+            <ScrollZoomLogic isActive={zoomActive} isClicked={!!activeId} />
+            <CameraFocusController target={focusTarget} enabled={!!focusTarget} />
+            
+            <Environment resolution={1024}>
+              <Lightformer intensity={2} rotation-x={Math.PI / 2} position={[0, 5, -9]} scale={[10, 10, 1]} />
+              <Lightformer intensity={2} rotation-y={Math.PI / 2} position={[-5, 1, -1]} scale={[10, 2, 1]} />
+              <Lightformer form="rect" intensity={80} position={[0, -36, -74]} scale={[100, 1, 1]} target={[0, 0, 0]} />
+            </Environment>
+            <ambientLight intensity={1.5} /><directionalLight position={[10, 10, 10]} intensity={4} />
+            
+            <group>
+              <WaterSurface fallProgress={fallProgress} swanProgress={swanProgress} id3Ref={feather3Ref} />        
+              <NaturalFeather id={1} variant="main" startPos={[0, 2, 0]} targetPos={getResponsivePos([1.5, -4.5, 0])} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
+              <NaturalFeather id={2} variant="small-drag" startPos={[-2, 3, -2]} targetPos={getResponsivePos([-3.5, -5.5, -1])} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
+              <NaturalFeather ref={feather3Ref} id={3} variant="upper-pendulum" startPos={[4, 5, -3]} targetPos={getResponsivePos([-1.2, 1.8, -2])} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
+              <NaturalFeather id={4} variant="side-roll-upper" startPos={[1.5, 6, -1]} targetPos={getResponsivePos([3.5, 2.5, -1.5])} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
+              <NaturalFeather id={5} variant="mid-drift" startPos={[-1, 5, 2]} targetPos={getResponsivePos([-4.5, 0.8, 1.0])} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
+              <NaturalFeather id={6} variant="high-drag-zig" startPos={[4, 5, 0]} targetPos={getResponsivePos([5.5, -4.5, -0.5])} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
+            </group>
+          </Suspense>
         </Canvas>
       </div>
+
       <RoomDetailsPanel activeId={activeId} content={activeId ? roomData[activeId] : null} onClose={() => { setActiveId(null); setFocusTarget(null); }} />
+
+      <div style={{ height: "2300px", width: "100%", position: "absolute", top: 0, zIndex: -1 }} />
     </>
   );
 };

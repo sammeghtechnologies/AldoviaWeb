@@ -172,9 +172,9 @@ const WaterSurface = ({
       if (swanGroupRef.current) {
         swanGroupRef.current.visible = true;
 
-        const baseX = worldPos.x - 0.2;
-        const baseY = currentWaterY - 1.1;
-        const baseZ = worldPos.z;
+        const baseX = worldPos.x - -0.5;
+        const baseY = currentWaterY - 1.0;
+        const baseZ = worldPos.z-1;
 
         const time = state.clock.getElapsedTime();
 
