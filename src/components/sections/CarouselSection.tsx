@@ -5,19 +5,19 @@ import LuxuryCard from "../ui/LuxuryCard";
 
 const cards = [
   {
-    image: "/assets/hero/hero.jpg",
+    image: "/assets/herobackgrounds/home/stay.webp",
     category: "Stay & Leisure",
     title: "Escape",
     description: "Rejuvenate in nature’s lap with premium luxury."
   },
   {
-    image: "/assets/hero/hero.jpg",
+    image: "/assets/herobackgrounds/home/wedding.webp",
     category: "Wedding & Social Events",
     title: "Celebrate",
     description: "Grand lawns and ballrooms for your timeless moments."
   },
   {
-    image: "/assets/hero/hero.jpg",
+    image: "/assets/herobackgrounds/home/corporate.webp",
     category: "Corporate & Conventions",
     title: "Gather",
     description: "World-class venues for impactful gatherings."
@@ -151,7 +151,7 @@ const CarouselSection: React.FC = () => {
             progressTrackColor="rgba(255, 255, 255, 0.25)"
             progressFillColor="#FFFFFF"
             buttonColor="#FFFFFF"
-            iconColor="#21140F"
+            iconColor="var(--color-secondary)"
             className="!mt-24"
             progressBarClassName="!w-[100px] !max-w-[100px] shrink-0"
             progressBarWidth={100}

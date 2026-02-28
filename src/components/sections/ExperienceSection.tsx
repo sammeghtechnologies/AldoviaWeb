@@ -12,8 +12,7 @@ const experiences = [
     title: "Ambrosia",
     tag: "Dining Experience",
     subtitle: "Crafted cuisine",
-    image:
-      "https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=1200",
+    image: "/assets/pages/dining/ambrosia.jpg",
   },
   {
     id: 2,
@@ -21,35 +20,119 @@ const experiences = [
     title: "Illusion Bar",
     tag: "Dining Experience",
     subtitle: "Luxury bar",
-    image:
-      "https://images.unsplash.com/photo-1523906630133-f6934a1ab3c8?q=80&w=1200",
+    image: "/assets/pages/dining/illusion.webp",
   },
   {
     id: 3,
+    category: "Dining",
+    title: "Buvette",
+    tag: "Dining Experience",
+    subtitle: "Elegant dining moments",
+    image: "/assets/pages/dining/Buvette.jpg",
+  },
+  {
+    id: 4,
+    category: "Dining",
+    title: "Buvette Lounge",
+    tag: "Dining Experience",
+    subtitle: "Refined social evenings",
+    image: "/assets/pages/dining/Buvette1.jpg",
+  },
+  {
+    id: 5,
     category: "Hall",
     title: "Grand Ballroom",
     tag: "Hall Experience",
     subtitle: "Elegant event space",
-    image:
-      "https://images.unsplash.com/photo-1519167758481-83f29c8cc27f?q=80&w=1200",
+    image: "/assets/pages/hall/corporate1.jpg",
   },
   {
-    id: 4,
+    id: 6,
+    category: "Hall",
+    title: "Emerald Hall",
+    tag: "Hall Experience",
+    subtitle: "Premium celebrations",
+    image: "/assets/pages/hall/corporate2.jpg",
+  },
+  {
+    id: 7,
+    category: "Hall",
+    title: "Royal Conference Hall",
+    tag: "Hall Experience",
+    subtitle: "Business-ready venue",
+    image: "/assets/herobackgrounds/corporate/corporate1.jpg",
+  },
+  {
+    id: 8,
+    category: "Hall",
+    title: "Diamond Event Hall",
+    tag: "Hall Experience",
+    subtitle: "Spacious gathering venue",
+    image: "/assets/herobackgrounds/corporate/corporate2.jpg",
+  },
+  {
+    id: 9,
     category: "Rooms",
     title: "Premium Suite",
     tag: "Room Experience",
     subtitle: "Comfort with a view",
-    image:
-      "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1200",
+    image: "/assets/pages/rooms/room1.webp",
   },
   {
-    id: 5,
+    id: 10,
+    category: "Rooms",
+    title: "Executive Room",
+    tag: "Room Experience",
+    subtitle: "Contemporary comfort",
+    image: "/assets/pages/rooms/room2.webp",
+  },
+  {
+    id: 11,
+    category: "Rooms",
+    title: "Luxury Suite",
+    tag: "Room Experience",
+    subtitle: "Spacious and refined",
+    image: "/assets/pages/rooms/room3.webp",
+  },
+  {
+    id: 12,
+    category: "Rooms",
+    title: "Family Suite",
+    tag: "Room Experience",
+    subtitle: "Perfect for group stays",
+    image: "/assets/pages/rooms/room4.webp",
+  },
+  {
+    id: 13,
     category: "Activities",
     title: "Poolside Retreat",
     tag: "Activity Experience",
     subtitle: "Relax and unwind",
-    image:
-      "https://images.unsplash.com/photo-1575429198097-0414ec08e8cd?q=80&w=1200",
+    image: "/assets/pages/activities/swimming/swim1.jpg",
+  },
+  {
+    id: 14,
+    category: "Activities",
+    title: "Lawn Tennis",
+    tag: "Activity Experience",
+    subtitle: "Precision and pace",
+    image: "/assets/pages/activities/lawn/lawn1.jpg",
+  },
+  {
+    id: 15,
+    category: "Activities",
+    title: "Cycling Trails",
+    tag: "Activity Experience",
+    subtitle: "Scenic outdoor rides",
+    image: "/assets/pages/activities/cycling/cycling1.jpg",
+  },
+  {
+    id: 16,
+    category: "Activities",
+    title: "Wellness Spa",
+    tag: "Activity Experience",
+    subtitle: "Rejuvenate your senses",
+    image: "/assets/pages/activities/spa/spa2.jpg",
   },
 ];
 
@@ -249,14 +332,14 @@ const ExperienceSection: React.FC = () => {
           <div className="lg:hidden">
             <SlidingTitleReveal
               eyebrowClassName="!mb-1 text-[11px] tracking-[0.35em] uppercase text-[#78716C]"
-              lines={["Experience Alvodia", "Visually"]}
+              lines={["Experience Aldovia", "Visually"]}
               className="text-white text-[34px] md:text-[42px] leading-[1.1] font-medium [font-family:'Playfair_Display']"
               />
           </div>
           <div className="w-full hidden lg:flex justify-center">
             <SlidingTitleReveal
               eyebrowClassName="!mb-1 text-[11px] tracking-[0.35em] uppercase text-[#78716C]"
-              lines={["Experience Alvodia Visually"]}
+              lines={["Experience Aldovia Visually"]}
               className="text-white text-[34px] md:text-[42px] leading-[1.1] font-medium [font-family:'Playfair_Display'] text-center"
               />
           </div>
@@ -349,7 +432,7 @@ const ExperienceSection: React.FC = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
-            className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth !pb-4 !pr-12 md:!pr-2 [scroll-padding-inline:12vw] md:[scroll-padding-inline:6rem]"
+            className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth !pb-4 !pr-12 md:!pr-2 [scroll-padding-inline:12vw] md:[scroll-padding-inline:6rem] scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           >
 
             {filteredExperiences.map((item, cardIndex) => (
@@ -410,7 +493,7 @@ const ExperienceSection: React.FC = () => {
           progressTrackColor="rgba(255, 255, 255, 0.22)"
           progressFillColor="var(--color-secondary)"
           buttonColor="var(--color-secondary)"
-          iconColor="var(--color-primary)"
+          iconColor="var(--color-secondary)"
           progressBarClassName="!w-[100px] !max-w-[100px] shrink-0"
           progressBarWidth={100}
         />

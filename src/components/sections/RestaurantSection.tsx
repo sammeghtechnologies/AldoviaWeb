@@ -24,7 +24,7 @@ const diningSections: DiningSection[] = [
     timings: "7:00 AM - 11:00 PM",
     capacity: "120 guests",
     gallery: [
-      "/assets/herobackgrounds/dining/ambrosia.jpg",
+      "/assets/herobackgrounds/dining/ambrosia.webp",
       "/assets/herobackgrounds/dining/Buvette.jpg",
       "/assets/herobackgrounds/dining/Buvette1.jpg",
     ],
@@ -39,7 +39,7 @@ const diningSections: DiningSection[] = [
     timings: "5:00 PM - 1:00 AM",
     capacity: "80 guests",
     gallery: [
-      "/assets/herobackgrounds/dining/illusion.jpg",
+      "/assets/herobackgrounds/dining/illusion.webp",
       "/assets/herobackgrounds/dining/Buvette.jpg",
       "/assets/herobackgrounds/dining/Buvette1.jpg",
     ],
@@ -56,7 +56,7 @@ const diningSections: DiningSection[] = [
     gallery: [
       "/assets/herobackgrounds/dining/Buvette1.jpg",
       "/assets/herobackgrounds/dining/Buvette.jpg",
-      "/assets/herobackgrounds/dining/ambrosia.jpg",
+      "/assets/herobackgrounds/dining/ambrosia.webp",
     ],
   },
 ];
@@ -122,21 +122,34 @@ const RestaurantSection: React.FC = () => {
           <motion.div
             key={`full-scene-${section.id}`}
             initial={{
-              opacity: 0.15,
-              rotateY: transitionDirection > 0 ? -16 : 16,
-              rotateX: transitionDirection > 0 ? 3 : -3,
-              scale: 0.965,
+              opacity: 0,
+              rotateY: transitionDirection > 0 ? -68 : 68,
+              rotateX: transitionDirection > 0 ? 5 : -5,
+              x: transitionDirection > 0 ? 120 : -120,
+              scale: 0.92,
+              filter: "brightness(0.72) saturate(0.86)",
             }}
-            animate={{ opacity: 1, rotateY: 0, rotateX: 0, scale: 1 }}
+            animate={{
+              opacity: 1,
+              rotateY: 0,
+              rotateX: 0,
+              x: 0,
+              scale: 1,
+              filter: "brightness(1) saturate(1)",
+            }}
             exit={{
-              opacity: 0.15,
-              rotateY: transitionDirection > 0 ? 12 : -12,
-              rotateX: transitionDirection > 0 ? -2 : 2,
-              scale: 0.98,
+              opacity: 0,
+              rotateY: transitionDirection > 0 ? 62 : -62,
+              rotateX: transitionDirection > 0 ? -3 : 3,
+              x: transitionDirection > 0 ? -80 : 80,
+              scale: 0.96,
+              filter: "brightness(0.7) saturate(0.88)",
             }}
-            transition={{ duration: 1.25, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 1.05, ease: [0.2, 0.84, 0.22, 1] }}
             style={{
-              transformPerspective: 1800,
+              transformPerspective: 2200,
+              transformStyle: "preserve-3d",
+              backfaceVisibility: "hidden",
               transformOrigin: transitionDirection > 0 ? "left center" : "right center",
             }}
             className="absolute inset-0 px-3 sm:px-5 md:px-10 lg:px-16 py-6 sm:py-8 md:py-16 lg:py-20 flex items-center justify-center"
@@ -153,12 +166,36 @@ const RestaurantSection: React.FC = () => {
             <source src={AMBROSIA_BG_VIDEO} type="video/mp4" />
           </video>
         
-          <div
-            className="absolute inset-0 backdrop-blur-[1px] bg-black/55"
+          <div className="absolute inset-0 bg-black/55" />
+
+          <motion.div
+            initial={{
+              opacity: 0.6,
+              x: transitionDirection > 0 ? 0 : 60,
+              rotateY: transitionDirection > 0 ? -16 : 16,
+              scaleX: 1,
+            }}
+            animate={{
+              opacity: 0,
+              x: transitionDirection > 0 ? 130 : -130,
+              rotateY: transitionDirection > 0 ? -34 : 34,
+              scaleX: 0.8,
+            }}
+            transition={{ duration: 0.95, ease: [0.2, 0.84, 0.22, 1] }}
+            className={`pointer-events-none absolute inset-y-0 z-[2] w-[28%] ${
+              transitionDirection > 0 ? "left-0 origin-left" : "right-0 origin-right"
+            }`}
+            style={{
+              background:
+                transitionDirection > 0
+                  ? "linear-gradient(90deg, rgba(255,255,255,0.58) 0%, rgba(255,255,255,0.18) 55%, rgba(255,255,255,0) 100%)"
+                  : "linear-gradient(270deg, rgba(255,255,255,0.58) 0%, rgba(255,255,255,0.18) 55%, rgba(255,255,255,0) 100%)",
+              filter: "blur(0.5px)",
+            }}
           />
 
           <div
-            className="absolute right-[-5%] bottom-[-5%] w-[60vw] h-[90vh] bg-no-repeat bg-right-bottom bg-contain opacity-[0.15] pointer-events-none z-[1]"
+            className="absolute right-[-5%] bottom-[-5%] w-[60vw] h-[90vh] bg-no-repeat bg-right-bottom bg-contain opacity-[0] pointer-events-none z-[1]"
             style={{ backgroundImage: "url('/assets/rooms/background/page2bg.png')" }}
           />
 
@@ -239,7 +276,7 @@ const RestaurantSection: React.FC = () => {
                 </span>
                 <div>
                   <p className="text-xs sm:text-sm text-[var(--color-secondary)]/75">Cuisine</p>
-                  <p className="text-[18px] sm:text-[24px] font-semibold text-[var(--color-secondary)]">{section.cuisine}</p>
+                  <p className="text-[1.5em] sm:text-[1.5em]  text-[var(--color-secondary)]">{section.cuisine}</p>
                 </div>
               </div>
 
@@ -252,7 +289,7 @@ const RestaurantSection: React.FC = () => {
                 </span>
                 <div>
                   <p className="text-xs sm:text-sm text-[var(--color-secondary)]/75">Timings</p>
-                  <p className="text-[18px] sm:text-[24px] font-semibold text-[var(--color-secondary)]">{section.timings}</p>
+                  <p className="text-[1.5em] sm:text-[1.5em] text-[var(--color-secondary)]">{section.timings}</p>
                 </div>
               </div>
 
@@ -267,7 +304,7 @@ const RestaurantSection: React.FC = () => {
                 </span>
                 <div>
                   <p className="text-xs sm:text-sm !text-[var(--color-secondary)]/75">Capacity</p>
-                  <p className="text-[18px] sm:text-[24px] font-semibold !text-[var(--color-secondary)]">{section.capacity}</p>
+                  <p className="text-[1.5em] sm:text-[1.5em]  !text-[var(--color-secondary)]">{section.capacity}</p>
                 </div>
               </div>
             </div>

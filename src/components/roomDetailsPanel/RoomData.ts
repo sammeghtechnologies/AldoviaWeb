@@ -13,7 +13,7 @@ export const roomData: Record<number, RoomContent> = {
     subtitle: "Oceanfront View",
     desc: "Indulge in the epitome of elegance. Our Luxury Suites offer breathtaking ocean views and bespoke furnishings.",
     price: "$450",
-    img1: "https://images.unsplash.com/photo-1611892440504-42a792e24d32?q=80&w=600&auto=format&fit=crop",
+    img1: "assets/pages/rooms/room1.webp",
     img2: "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?q=80&w=600&auto=format&fit=crop"
   },
   2: {

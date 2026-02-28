@@ -38,7 +38,7 @@ const CarouselControls: React.FC<Props> = ({
 
       {/* Progress Bar */}
       <div
-        className={`h-[4px] rounded-full overflow-hidden ${progressBarClassName}`}
+        className={`h-[1px] rounded-full overflow-hidden ${progressBarClassName}`}
         style={{
           backgroundColor: progressTrackColor,
           width: progressBarWidth ? `${progressBarWidth}px` : undefined,
@@ -58,7 +58,7 @@ const CarouselControls: React.FC<Props> = ({
       <div className={`flex items-center gap-4 ${buttonsClassName}`}>
         <button
           onClick={onPrev}
-          className="w-10 h-10 flex items-center justify-center rounded-full hover:opacity-80 transition"
+          className="!rounded-[999px] h-10 !border !border-[rgba(255,255,255,0.30)] !bg-[rgba(255,255,255,0.10)] !px-5 !py-2 text-sm font-normal !text-[var(--color-secondary)] backdrop-blur-md transition duration-300 hover:!bg-[rgba(255,255,255,0.18)] md:text-base"
           style={{ backgroundColor: buttonColor }}
         >
           <ArrowLeft className="w-4 h-4" style={{ color: iconColor }} />
@@ -66,8 +66,8 @@ const CarouselControls: React.FC<Props> = ({
 
         <button
           onClick={onNext}
-          className="w-10 h-10 flex items-center justify-center rounded-full hover:opacity-80 transition"
-          style={{ backgroundColor: buttonColor }}
+          className="!rounded-[999px] h-10 !border !border-[rgba(255,255,255,0.30)] !bg-[rgba(255,255,255,0.10)] !px-5 !py-2 text-sm font-normal !text-[var(--color-secondary)] backdrop-blur-md transition duration-300 hover:!bg-[rgba(255,255,255,0.18)] md:text-base"
+          
         >
           <ArrowRight className="w-4 h-4" style={{ color: iconColor }} />
         </button>

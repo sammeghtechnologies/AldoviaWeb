@@ -13,7 +13,7 @@ const Main = () => {
           Visible during both phases. 'introFinished' toggles its internal states.
       */}
       <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
-        <MenuFrame masterTl={masterTl} introFinished={introFinished} />
+        <MenuFrame masterTl={masterTl} introFinished={introFinished} disableTopBarBackground />
       </div>
 
       <div id="landing-page" className="relative w-full">

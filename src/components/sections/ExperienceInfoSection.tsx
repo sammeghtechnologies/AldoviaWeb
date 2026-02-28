@@ -13,6 +13,7 @@ export interface ExperienceInfoItem {
   packageTab: "Day out package" | "Rooms package" | "Festive package";
   title: string;
   subtitle: string;
+  duration?: string;
   price: string;
   priceNote?: string;
   description: string;
@@ -37,6 +38,7 @@ const ExperienceInfoCard: React.FC<{
   const [prevImage, setPrevImage] = useState<string | null>(null);
   const [imageScale, setImageScale] = useState(1);
   const [typedDescription, setTypedDescription] = useState("");
+  const [typedIncludes, setTypedIncludes] = useState<string[]>([]);
 
   useEffect(() => {
     setImageScale(1.08);
@@ -59,6 +61,37 @@ const ExperienceInfoCard: React.FC<{
 
     return () => window.clearInterval(timer);
   }, [item.description]);
+
+  useEffect(() => {
+    const includeLines = item.includes ?? [];
+    setTypedIncludes(includeLines.map(() => ""));
+    if (!includeLines.length) return;
+
+    let lineIndex = 0;
+    let charIndex = 0;
+
+    const timer = window.setInterval(() => {
+      const currentLine = includeLines[lineIndex] ?? "";
+      charIndex += 1;
+
+      setTypedIncludes((prev) => {
+        const next = [...prev];
+        next[lineIndex] = currentLine.slice(0, charIndex);
+        return next;
+      });
+
+      if (charIndex >= currentLine.length) {
+        lineIndex += 1;
+        charIndex = 0;
+      }
+
+      if (lineIndex >= includeLines.length) {
+        window.clearInterval(timer);
+      }
+    }, 20);
+
+    return () => window.clearInterval(timer);
+  }, [item.includes]);
 
   const handleImageChange = (newImage: string) => {
     if (!newImage || newImage === activeImage) return;
@@ -123,25 +156,32 @@ const ExperienceInfoCard: React.FC<{
               {item.subtitle}
             </p>
 
-            <h2 className="!text-[2em] lg:!text-[54px] !leading-none !font-semibold !mb-2 !text-[var(--color-secondary)]">
+            {item.duration ? (
+              <div className="!mb-3 inline-flex items-center gap-2 rounded-[12px] !bg-white/10 !px-3 !py-1.5 text-[13px] lg:text-[15px] !text-[var(--color-secondary)] backdrop-blur-md">
+                <img src="/assets/icons/clock.svg" alt="Duration" className="h-4 w-4 object-contain" />
+                <span>{item.duration}</span>
+              </div>
+            ) : null}
+
+            <h2 className="font-lust-medium !mt-6 !text-[34px] lg:!text-[48px] !leading-none !font-normal !mb-2 !text-[var(--color-secondary)] [text-shadow:0_2px_10px_rgba(0,0,0,0.35)]">
               {item.price}
               {item.priceNote ? (
-                <span className="!text-[16px] lg:!text-[22px] !font-normal !text-[var(--color-secondary)]">
+                <span className="!text-[20px] lg:!text-[28px] !font-normal !text-[var(--color-secondary)]">
                   {" "}
                   {item.priceNote}
                 </span>
               ) : null}
             </h2>
 
-            <p className="!text-[.9em] lg:!text-[17px] !leading-[1.55] !mb-3 !opacity-90 !text-[var(--color-secondary)]">
+            <p className="!mt-6 !text-[.9em] lg:!text-[.9em] !leading-[1.55] !mb-3 !opacity-90 !text-[var(--color-secondary)]">
               {typedDescription}
             </p>
 
-            <ul className="!space-y-1.5 !text-[.9em] lg:!text-[18px] !leading-[1.4] !text-[var(--color-secondary)] lg:grid lg:grid-cols-2 lg:gap-x-6">
-              {item.includes.map((includeLine) => (
+            <ul className="!mt-6 !space-y-1.5 !text-[.9em] lg:!text-[18px] !leading-[1.4] !text-[var(--color-secondary)] lg:grid lg:grid-cols-2 lg:gap-x-6">
+              {item.includes.map((includeLine, includeIndex) => (
                 <li key={`${item.id}-${includeLine}`} className="flex items-center gap-2 !text-[var(--color-secondary)]">
                   <span className="!text-[var(--color-secondary)]">✔</span>
-                  {includeLine}
+                  {typedIncludes[includeIndex] ?? ""}
                 </li>
               ))}
             </ul>
@@ -150,13 +190,13 @@ const ExperienceInfoCard: React.FC<{
         </div>
       </div>
 
-      <div className="absolute !bottom-25 !left-4 lg:!left-22 flex items-end justify-between gap-3 z-20">
+      <div className="!mt-6 absolute !bottom-5 !left-4 lg:!left-22 flex items-end justify-between gap-3 z-20">
         <button className="!px-4 lg:!px-6 !py-2 !rounded-full !bg-white/15 backdrop-blur-md !border !border-white/35 hover:!bg-white/25 transition-all duration-300 !text-[13px] lg:!text-[16px] !text-[var(--color-secondary)]">
           {item.ctaLabel ?? "Book Now"} →
         </button>
       </div>
 
-      <div className="absolute !left-4 md:!left-5 !bottom-4 flex items-center gap-2 lg:hidden z-20">
+      <div className="absolute !right-4 md:!right-5 !bottom-4 flex items-center gap-2 lg:hidden z-20">
         {item.images.map((img) => (
           <button
             key={`mobile-${img.id}`}
@@ -245,8 +285,6 @@ export default function ExperienceInfoSection({ sections }: ExperienceInfoSectio
                 items={packageTabs}
                 active={activeTab}
                 onChange={(value) => setActiveTab(value as ExperienceInfoItem["packageTab"])}
-                activeClassName="bg-[var(--color-secondary)] !text-[var(--color-primary)] shadow-md"
-                inactiveClassName="bg-white/20 !text-[var(--color-secondary)] opacity-95 hover:bg-white/25 hover:opacity-100"
                 disableDesktopShift
               />
             ) : undefined

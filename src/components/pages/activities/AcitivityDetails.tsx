@@ -35,6 +35,7 @@ const AcitivityDetails: React.FC<AcitivityDetailsProps> = ({
       images: activeData.images,
       description: activeData.description,
       whatIncludes: activeData.whatIncludes,
+      timings: activeData.timings,
       backgroundImage: activeData.backgroundImage,
     };
 
@@ -45,6 +46,7 @@ const AcitivityDetails: React.FC<AcitivityDetailsProps> = ({
         images: section.images,
         description: section.description,
         whatIncludes: section.whatIncludes,
+        timings: section.timings,
         backgroundImage: section.backgroundImage,
       })
     );

@@ -16,7 +16,7 @@ const HeroStats: React.FC = () => {
         </div>
         <div>
           <p className="whitespace-nowrap text-sm font-semibold sm:text-base">
-            25+ Acres
+            70 Acres
           </p>
           <p className="whitespace-nowrap text-[10px] tracking-[0.2em] opacity-70 sm:text-xs sm:tracking-[0.24em]">
             LUSH GREENERY

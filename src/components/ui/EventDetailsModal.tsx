@@ -130,7 +130,7 @@ export default function EventDetailsModal({
           />
 
           <motion.div
-            className="fixed bottom-0 left-0 right-0 z-[2147483647] rounded-t-[24px] bg-[#F5F5F5] shadow-2xl"
+            className="fixed bottom-0 left-0 right-0 z-[2147483647] rounded-t-[24px] bg-[#F5F5F5] shadow-2xl lg:left-1/2 lg:right-auto lg:w-[min(92vw,860px)] lg:-translate-x-1/2"
             initial={{ y: "105%" }}
             animate={{ y: 0 }}
             exit={{ y: "105%" }}
@@ -227,45 +227,47 @@ export default function EventDetailsModal({
                         </div>
                       </div>
 
-                      <div>
-                        <label className="font-area !mb-2 block !text-[var(--color-primary)] text-[.9em]">Expected Guest Count</label>
-                        <div className="rounded-xl border border-[var(--color-primary)]/20 !px-2 ">
-                          <div className="flex items-center gap-3 !pt-5">
-                            <input
-                            type="range"
-                            min={50}
-                            max={maxGuestsForSelectedVenue}
-                            step={50}
-                            value={expectedGuestCount}
-                            onChange={(event) => setExpectedGuestCount(Number(event.target.value))}
-                            className="h-2 w-full cursor-pointer appearance-none rounded-full bg-[var(--color-primary)]/20 accent-[var(--color-primary)] [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[var(--color-primary)]"
-                          />
-                            <span className="min-w-[80px] text-[.9em] rounded-[10px] border border-[var(--color-primary)]/25 bg-[var(--color-secondary)] px-3 py-2 text-center text-[.9em] font-semibold !text-[var(--color-primary)]">
-                              {expectedGuestCount.toLocaleString()}
-                            </span>
-                          </div>
-                          <div className="font-area !mt-2 flex items-center justify-between text-[12px] !text-[var(--color-primary)]">
-                            <span>100</span>
-                            <span>{maxGuestsForSelectedVenue.toLocaleString()}</span>
+                      <div className="grid grid-cols-1 lg:grid-cols-2 !gap-4">
+                        <div>
+                          <label className="font-area !mb-2 block !text-[var(--color-primary)] text-[.9em]">Expected Guest Count</label>
+                          <div className="rounded-xl border border-[var(--color-primary)]/20 !px-2 ">
+                            <div className="flex items-center gap-3 !pt-5">
+                              <input
+                              type="range"
+                              min={50}
+                              max={maxGuestsForSelectedVenue}
+                              step={50}
+                              value={expectedGuestCount}
+                              onChange={(event) => setExpectedGuestCount(Number(event.target.value))}
+                              className="h-2 w-full cursor-pointer appearance-none rounded-full bg-[var(--color-primary)]/20 accent-[var(--color-primary)] [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[var(--color-primary)]"
+                            />
+                              <span className="min-w-[80px] text-[.9em] rounded-[10px] border border-[var(--color-primary)]/25 bg-[var(--color-secondary)] px-3 py-2 text-center text-[.9em] font-semibold !text-[var(--color-primary)]">
+                                {expectedGuestCount.toLocaleString()}
+                              </span>
+                            </div>
+                            <div className="font-area !mt-2 flex items-center justify-between text-[12px] !text-[var(--color-primary)]">
+                              <span>100</span>
+                              <span>{maxGuestsForSelectedVenue.toLocaleString()}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <div>
-                        <label className="font-area !mb-2 block !text-[var(--color-primary)] text-[.9em]">Venues</label>
-                        <div className="relative">
-                          <select
-                            value={selectedVenue}
-                            onChange={(event) => setSelectedVenue(event.target.value)}
-                            className="font-area text-[1em] h-14 w-full appearance-none rounded-xl border border-black/15 bg-white !p-2 !pr-10 !pl-4 !text-[var(--color-primary)] outline-none"
-                          >
-                            {venueOptions.map((option) => (
-                              <option key={option} value={option}>
-                                {option}
-                              </option>
-                            ))}
-                          </select>
-                          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 !text-[var(--color-primary)]">⌄</span>
+                        <div>
+                          <label className="font-area !mb-2 block !text-[var(--color-primary)] text-[.9em]">Venues</label>
+                          <div className="relative">
+                            <select
+                              value={selectedVenue}
+                              onChange={(event) => setSelectedVenue(event.target.value)}
+                              className="font-area text-[1em] h-14 w-full appearance-none rounded-xl border border-black/15 bg-white !p-2 !pr-10 !pl-4 !text-[var(--color-primary)] outline-none"
+                            >
+                              {venueOptions.map((option) => (
+                                <option key={option} value={option}>
+                                  {option}
+                                </option>
+                              ))}
+                            </select>
+                            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 !text-[var(--color-primary)]">⌄</span>
+                          </div>
                         </div>
                       </div>
                     </div>
