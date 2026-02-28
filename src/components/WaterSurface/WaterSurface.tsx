@@ -52,22 +52,18 @@ const WaterSurface = ({
 
         void main() {
           vUv = uv;
-
           vec3 pos = position;
 
           float dist = length(pos.xy);
 
           // slower and smoother wave
           float wave = sin(dist * 22.0 - uTime * 2.0) * 0.1;
-
           // secondary ripple randomness
           float wave2 = cos(dist * 12.0 - uTime * 1.2) * 0.1;
-
           // fade outward
           float fade = smoothstep(1.6, 0.0, dist);
 
           pos.z += (wave + wave2) * fade;
-
           vWave = wave;
 
           gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
@@ -86,7 +82,6 @@ const WaterSurface = ({
 
           // ring thickness
           float ring = smoothstep(0.50, 0.47, dist) - smoothstep(0.47, 0.44, dist);
-
           // fade outer edge
           float fade = smoothstep(0.9, 0.2, dist);
 
@@ -149,23 +144,19 @@ const WaterSurface = ({
     const currentWaterY = meshRef.current.position.y;
     const verticalDist = worldPos.y - currentWaterY;
 
-   // const reflectionCutoff = 0.45;
     const isTouching = verticalDist < 0.4;
 
-   materialRef.current.mixStrength = THREE.MathUtils.lerp(5.0, 0.0, swanProgress);
+    // 🔥 NEW MATH: Delays the Swan slightly (-0.1), then makes it fade in 5x faster! (Small Slide Scrollbar)
+    const fastSwanProgress = Math.max(0, Math.min(1, (swanProgress - 0.1) * 5.0));
 
-   // const swanFadeProgress = 1 - THREE.MathUtils.smoothstep(verticalDist, -0.1, 0.7);
+    materialRef.current.mixStrength = THREE.MathUtils.lerp(5.0, 0.0, fastSwanProgress);
 
-    // Swan show/hide
-   // Remove the old swanFadeProgress line entirely.
-    // Replace the "if (verticalDist < 0.8)" block with this:
-
-    // ✅ Swan show/fade based strictly on the new scroll step (swanProgress)
-    if (swanProgress > 0) {
+    // ✅ Swan show/fade based strictly on the FASTER scroll step AND touching the water
+    if (fastSwanProgress > 0 && isTouching) {
       if (animations.length > 0 && !hasStartedAnim.current) {
         const action = mixer.clipAction(animations[0]);
         action.reset().play();
-        action.paused = true; // ✅ Changed to false so the swan actually animates!
+        action.paused = true; 
         hasStartedAnim.current = true;
       }
 
@@ -192,8 +183,14 @@ const WaterSurface = ({
         swanGroupRef.current.traverse((child: any) => {
           if (child.isMesh) {
             child.material.transparent = true;
-            // ✅ Fades the swan in perfectly from 0 to 0.25 based on the scroll
-            child.material.opacity = THREE.MathUtils.lerp(0, 0.25, swanProgress);
+            
+            // 🔥 NEW MATH: Higher target opacity (0.8 instead of 0.25) so it stands out stronger
+            child.material.opacity = THREE.MathUtils.lerp(0, 0.8, fastSwanProgress);
+            
+            // 🔥 MORE WHITE: Adds a white emissive glow so it stops looking grey in the dark water
+            child.material.emissive = new THREE.Color("#ffffff");
+            child.material.emissiveIntensity = 0.4;
+            
             child.material.depthTest = false;
           }
         });
@@ -213,7 +210,6 @@ const WaterSurface = ({
       if (!ring) return;
 
       const mat = ring.material as any;
-
       ring.position.set(worldPos.x, currentWaterY + 0.05, worldPos.z);
 
       if (isTouching) {
@@ -221,24 +217,18 @@ const WaterSurface = ({
 
         const time = state.clock.getElapsedTime();
         const speed = 0.10;
-
         const randomOffset = ringSeeds[i];
-
         const t = ((time * speed) + i * 0.22 + randomOffset) % 1;
 
         // random ripple scaling
         const scale = THREE.MathUtils.lerp(0.3, 15, t);
-
         // slight random stretch
         const stretch = 1 + Math.sin(time * 0.8 + randomOffset) * 0.15;
 
         ring.scale.set(scale * stretch, scale, 1);
-
-        // fade out
         const fade = 1.0 - t;
 
-        const proximityFactor =
-          1 - THREE.MathUtils.smoothstep(verticalDist, -0.1, 0.5);
+        const proximityFactor = 1 - THREE.MathUtils.smoothstep(verticalDist, -0.1, 0.5);
 
         mat.uniforms.uOpacity.value = fade * proximityFactor * 0.55;
       } else {
@@ -246,7 +236,8 @@ const WaterSurface = ({
       }
     });
 
-materialRef.current.distortion = 0;  });
+    materialRef.current.distortion = 0; 
+  });
 
   return (
     <>

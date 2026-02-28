@@ -150,8 +150,8 @@ const SplashWalls = ({ splashProgress }: { splashProgress: number }) => {
       <cylinderGeometry args={[baseRadius * 1.05, baseRadius, 1, 64, 12, true]} />
       <meshPhysicalMaterial
         color="#ffffff"
-        emissive="#ffffff"         // Forces the material to output white
-        emissiveIntensity={0.6}    // Adjust this (0.0 to 1.0+) if you want it brighter or softer
+        emissive="#ffffff"         
+        emissiveIntensity={0.6}    
         transparent={true}
         opacity={1.0}
         roughness={0.05}
@@ -164,8 +164,9 @@ const SplashWalls = ({ splashProgress }: { splashProgress: number }) => {
     </instancedMesh>
   );
 };
+
 /* =========================================================
-   🦢 SWAN
+   🦢 SWAN (INTERACTIVE + CAMERA TRACKING)
 ========================================================= */
 const SwanModel = ({
   scrollProgress,
@@ -175,8 +176,15 @@ const SwanModel = ({
   transformProgress: number;
 }) => {
   const group = useRef<THREE.Group>(null);
-  const { scene, animations } = useGLTF("/models/Swan_anim_v12.glb");
+  const { scene, animations } = useGLTF("/models/Swan_anim_v13.glb");
   const { actions } = useAnimations(animations, group);
+
+  // --- DRAG INTERACTION STATE ---
+  const isDragging = useRef(false);
+  const previousX = useRef(0);
+  const previousY = useRef(0); // Tracks vertical mouse position
+  const targetCamY = useRef(0); // Tracks desired camera height
+  const [targetRotY, setTargetRotY] = useState(-Math.PI / 160); 
 
   useLayoutEffect(() => {
     scene.traverse((child: any) => {
@@ -207,6 +215,58 @@ const SwanModel = ({
     }
   }, [scrollProgress, actions]);
 
+  // --- SMOOTH ROTATION & CAMERA FRAME ---
+  useFrame(({ camera }) => {
+    // 1. Rotate the Swan
+    if (group.current) {
+      group.current.rotation.x = 0.1; 
+      group.current.rotation.z = 0;
+      group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, targetRotY, 0.1);
+    }
+
+    // 2. Move the Camera vertically based on drag
+    camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetCamY.current, 0.05);
+    
+    // 3. Keep camera focused on the Swan area (Y = -5 centers it nicely over the water)
+    camera.lookAt(0, -5, 0); 
+  });
+
+  // --- DRAG HANDLERS ---
+  useEffect(() => {
+    const handleGlobalPointerUp = () => {
+      isDragging.current = false;
+      document.body.style.cursor = "auto";
+    };
+
+    const handleGlobalPointerMove = (e: PointerEvent) => {
+      if (!isDragging.current) return;
+      
+      const deltaX = e.clientX - previousX.current;
+      const deltaY = e.clientY - previousY.current;
+      
+      // Horizontal Drag -> Rotates Swan
+      setTargetRotY((prev) => prev + deltaX * 0.015); 
+      
+      // Vertical Drag -> Moves Camera
+      // Moving mouse down pulls the camera up (over the swan)
+      targetCamY.current += deltaY * 0.15; 
+      
+      // Prevent camera from going underwater or flying out of orbit
+      targetCamY.current = THREE.MathUtils.clamp(targetCamY.current, -10, 40);
+
+      previousX.current = e.clientX;
+      previousY.current = e.clientY;
+    };
+
+    window.addEventListener("pointerup", handleGlobalPointerUp);
+    window.addEventListener("pointermove", handleGlobalPointerMove);
+
+    return () => {
+      window.removeEventListener("pointerup", handleGlobalPointerUp);
+      window.removeEventListener("pointermove", handleGlobalPointerMove);
+    };
+  }, []);
+
   const baseScale = isMobile ? 380 : 600;
   const currentScale = baseScale + transformProgress * (isMobile ? 250 : 400);
 
@@ -216,14 +276,27 @@ const SwanModel = ({
       object={scene}
       scale={currentScale}
       position={[0, -14, 0]}
-      rotation={[0.1, -Math.PI / 160, 0]}
+      onPointerDown={(e: any) => {
+        e.stopPropagation(); 
+        isDragging.current = true;
+        previousX.current = e.clientX;
+        previousY.current = e.clientY; // Start tracking Y position
+        document.body.style.cursor = "grabbing";
+      }}
+      onPointerOver={() => {
+        if (!isDragging.current) document.body.style.cursor = "grab";
+      }}
+      onPointerOut={() => {
+        if (!isDragging.current) document.body.style.cursor = "auto";
+      }}
     />
   );
 };
 
-
-
- const SplashDroplets = ({ splashProgress }: { splashProgress: number }) => {
+/* =========================================================
+   💦 SPLASH DROPLETS
+========================================================= */
+const SplashDroplets = ({ splashProgress }: { splashProgress: number }) => {
   const count = 3000;
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
@@ -329,8 +402,8 @@ const SwanModel = ({
       <sphereGeometry args={[1, 8, 8]} />
       <meshPhysicalMaterial 
         color="#ffffff" 
-        emissive="#ffffff"         // Makes it ignore shadows
-        emissiveIntensity={0.6}    // Adjust between 0.5 and 1.0 for desired brightness
+        emissive="#ffffff"         
+        emissiveIntensity={0.6}    
         transparent 
         opacity={0.8} 
         roughness={0.1} 
@@ -343,7 +416,7 @@ const SwanModel = ({
 /* =========================================================
    🌊 WATER PLANE
 ========================================================= */
-const WaterPlane = ({ splashProgress }: { splashProgress: number }) => {
+ const WaterPlane = ({ splashProgress }: { splashProgress: number }) => {
   const reflectorRef = useRef<any>(null);
   const timeRef = useRef(0);
   const geometry = useMemo(() => new THREE.PlaneGeometry(5000, 5000), []);
@@ -371,18 +444,48 @@ const WaterPlane = ({ splashProgress }: { splashProgress: number }) => {
         vec2 baseUV = vUv.xy / vUv.w - 0.5;
         vec2 perspectiveUV = vec2(baseUV.x - 0.0, (baseUV.y - (-0.15)) * 3.5);
         float distCenter = length(perspectiveUV);
-        float wakePower = smoothstep(0.0, 0.3, uTakeoff) * (1.0 - smoothstep(0.5, 1.0, uTakeoff));
+        
+        // 🔥 1. SPLASH POWER: Stays extremely strong during the water wall formation
+        float splashPower = smoothstep(0.0, 0.15, uTakeoff) * (1.0 - smoothstep(0.8, 1.0, uTakeoff));
         vec2 wakeUV = perspectiveUV - vec2(0.0, uTakeoff * 0.2); 
         float wakeDist = length(wakeUV);
-        float turbulence = (sin(wakeUV.x * 150.0 + uTime * 20.0) * cos(wakeUV.y * 150.0 - uTime * 15.0)) * wakePower;
-        float wakeMask = 1.0 - smoothstep(0.0, 0.4 + (uTakeoff * 0.5), wakeDist);
+        
+        // 🔥 2. EXTREME TURBULENCE: High-frequency math to shatter the clear reflection
+        float turbulence = (sin(wakeUV.x * 200.0 + uTime * 30.0) * cos(wakeUV.y * 200.0 - uTime * 25.0)) * splashPower;
+        
+        // The distorted area rapidly expands outward with the water walls
+        float wakeMask = 1.0 - smoothstep(0.0, 0.3 + (uTakeoff * 1.5), wakeDist);
+        
+        // Standard ambient ripples (calm water)
         float ambientRipple = sin(baseUV.x * 120.0 + uTime * 1.0) * cos(baseUV.y * 120.0 + uTime * 1.0);
-        float rippleStrength = mix(0.0005, 0.003, varRippleMask) * (1.0 - wakePower);
+        float rippleStrength = mix(0.0005, 0.003, varRippleMask) * (1.0 - splashPower);
+        
+        // Ring fade logic
         float ringPhase = distCenter * 70.0 - uTime * 1.2;
-        float ringFade = smoothstep(0.0, 0.02, distCenter) * (1.0 - smoothstep(0.05, 0.20, distCenter)) * (1.0 - wakePower); 
-        vec2 waveDistortion = normalize(perspectiveUV) * cos(ringPhase) * 0.0015 * ringFade;
-        vec2 wakeDistortion = normalize(wakeUV) * (turbulence * wakeMask) * 0.03; 
-        vec2 totalDistortion = vec2(ambientRipple * rippleStrength) + waveDistortion + wakeDistortion;
+        float ringFade = smoothstep(0.0, 0.02, distCenter) * (1.0 - smoothstep(0.05, 0.20, distCenter)) * (1.0 - splashPower); 
+        vec2 waveDistortion = normalize(perspectiveUV + vec2(0.0001)) * cos(ringPhase) * 0.0015 * ringFade;
+        
+        // 🔥 3. HEAVY DISTORTION: Massively shifts the UVs to break the reflection
+        vec2 wakeDistortion = normalize(wakeUV + vec2(0.0001)) * (turbulence * wakeMask) * 0.08; 
+        
+        // 🔥 4. SPLASH CHAOS: Adds an extra global wavy wobble while splash is active
+        vec2 splashChaos = vec2(sin(uTime * 15.0 + baseUV.y * 100.0), cos(uTime * 15.0 + baseUV.x * 100.0)) * splashPower * 0.015;
+
+        // 🔥 5. DROPLET IMPACTS: Creates tiny expanding rings simulating droplets hitting the surface!
+        vec2 grid1 = fract(perspectiveUV * 18.0 + uTime * 0.1) - 0.5;
+        vec2 grid2 = fract(perspectiveUV * 26.0 - uTime * 0.15 + vec2(0.4, 0.6)) - 0.5;
+        float d1 = length(grid1);
+        float d2 = length(grid2);
+        
+        // High speed pulsating ripples mapped to the droplet grids
+        float rip1 = sin(d1 * 80.0 - uTime * 50.0) * smoothstep(0.4, 0.1, d1);
+        float rip2 = sin(d2 * 100.0 - uTime * 60.0) * smoothstep(0.3, 0.0, d2);
+        
+        // Droplets only appear intensely inside the wake mask when splashing
+        vec2 dropDistortion = (normalize(grid1 + 0.0001) * rip1 + normalize(grid2 + 0.0001) * rip2) * splashPower * wakeMask * 0.025;
+
+        // Combine all physics
+        vec2 totalDistortion = vec2(ambientRipple * rippleStrength) + waveDistortion + wakeDistortion + splashChaos + dropDistortion;
 
         vec4 base = texture2DProj(tDiffuse, vec4(vUv.xy + (totalDistortion * vUv.w), vUv.zw));
         `
@@ -513,7 +616,6 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
     tl.to(logoRef.current, { autoAlpha: 1, scale: 1, filter: "blur(0px)", duration: 0.5 }, "<");
 
     // 3. Move Logo to corner AND unblur the Swan simultaneously (Takes 1.5 units = 15%)
-    // Notice how we removed the ">+0.1" delay so it fires immediately.
     tl.to(logoRef.current, {
       top: "37px",
       left: "48px",
@@ -531,7 +633,6 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
     }, "<");
 
     // 4. Pad the rest of the timeline (Takes 4.0 units = 40%)
-    // 4.0 + 0.5 + 1.5 + 4.0 = 10.0 Total Duration. Math is perfectly synced!
     tl.to({}, { duration: 4.0 });
 
     // Video Renderer
@@ -584,6 +685,7 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
           <ambientLight intensity={0.2} />
           <pointLight position={[10, 10, 10]} intensity={1.5} />
           <spotLight position={[-10, 20, 10]} angle={0.2} penumbra={1} intensity={2} />
+          {/* Base position is [0,0,70], interaction takes over Y via useFrame */}
           <PerspectiveCamera makeDefault position={[0, 0, 70]} fov={isMobile ? 65 : 40} />
 
           <Suspense fallback={null}>
@@ -609,6 +711,6 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
   );
 };
 
-useGLTF.preload("/models/Swan_anim_v12.glb");
+useGLTF.preload("/models/Swan_anim_v13.glb");
 
 export default LogoRevealNew;

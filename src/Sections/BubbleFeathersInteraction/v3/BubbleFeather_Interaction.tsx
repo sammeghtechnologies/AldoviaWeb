@@ -6,7 +6,6 @@ import { Canvas, useThree } from "@react-three/fiber";
 import { Environment, Lightformer } from "@react-three/drei";
 import ScrollTrigger from "gsap/ScrollTrigger";
 
-import { useStepScroll } from "../../../components/Observer/Observer";
 import CameraFocusController from "../../../components/CameraFocusController/CameraFocusController"; 
 import RoomDetailsPanel from "../../../components/pages/home/RoomDetailsPanel";
 import { roomData } from "../../../components/roomDetailsPanel/RoomData";
@@ -46,10 +45,9 @@ const BubbleFeather_Interaction = () => {
   const feather3Ref = useRef<any>(null);
   const [swanProgress, setSwanProgress] = useState(0);
 
-  useStepScroll();
-
   useEffect(() => {
     window.scrollTo(0, 0);
+    // Hides the visual scrollbar but keeps the native scrolling functionality active
     document.documentElement.classList.add('hide-scrollbar');
 
     const handleScroll = () => {
@@ -125,6 +123,7 @@ const BubbleFeather_Interaction = () => {
 
       <RoomDetailsPanel activeId={activeId} content={activeId ? roomData[activeId] : null} onClose={() => { setActiveId(null); setFocusTarget(null); }} />
 
+      {/* This spacer enables the native scrollbar, driving the GSAP scrubs natively */}
       <div style={{ height: "2300px", width: "100%", position: "absolute", top: 0, zIndex: -1 }} />
     </>
   );

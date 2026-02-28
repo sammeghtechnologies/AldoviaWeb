@@ -10,7 +10,6 @@ import ScrollTrigger from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Helper for responsive checks
 const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
 const NaturalFeather = forwardRef(({ 
@@ -35,16 +34,17 @@ const NaturalFeather = forwardRef(({
   const bubbleGroupRef = useRef<THREE.Group>(null!); 
 
   const [showBurst, setShowBurst] = useState(false);
-  const [rotation, setRotation] = useState([0, 0, 0]);
   const isDragging = useRef(false);
   const previousPointer = useRef({ x: 0, y: 0 });
+  
+  // 🔥 FIX 1: Use a ref for target rotation instead of React State to stop re-renders and clashing
+  const targetInteractiveRotation = useRef(new THREE.Vector2(0, 0));
 
   const isBurst = activeId === id || burstAll; 
   const wasClicked = useRef(false);
 
-  // ✅ ADJUST BUBBLE RADIUS FOR MOBILE/DESKTOP
   const getBubbleRadius = () => {
-    const mobileScale = 0.7; // Smaller bubbles on mobile
+    const mobileScale = 0.7; 
     const baseRadius = (() => {
       switch (variant) {
         case "small-drag": return 1.6;
@@ -58,9 +58,8 @@ const NaturalFeather = forwardRef(({
     return isMobile ? baseRadius * mobileScale : baseRadius;
   };
 
-  // ✅ ADJUST FEATHER SIZE FOR MOBILE/DESKTOP
   const getFeatherScale = () => {
-    const mobileFactor = 0.8; // Feathers slightly smaller on mobile
+    const mobileFactor = 0.8; 
     const baseScale = (() => {
       switch (variant) {
           case "small-drag": return 0.04;
@@ -78,6 +77,11 @@ const NaturalFeather = forwardRef(({
     e.stopPropagation();
     isDragging.current = true;
     previousPointer.current = { x: e.clientX, y: e.clientY };
+    
+    // Capture the current rotation so it doesn't snap back when you click
+    if (rotateRef.current) {
+        targetInteractiveRotation.current.set(rotateRef.current.rotation.x, rotateRef.current.rotation.y);
+    }
   };
 
   const handlePointerUp = () => { isDragging.current = false; };
@@ -86,7 +90,11 @@ const NaturalFeather = forwardRef(({
     if (!isDragging.current || !isBurst) return;
     const deltaX = e.clientX - previousPointer.current.x;
     const deltaY = e.clientY - previousPointer.current.y;
-    setRotation((prev) => [prev[0] + deltaY * 0.01, prev[1] + deltaX * 0.01, 0]);
+    
+    // Smoothly update the target ref, NOT state
+    targetInteractiveRotation.current.x += deltaY * 0.01;
+    targetInteractiveRotation.current.y += deltaX * 0.01;
+    
     previousPointer.current = { x: e.clientX, y: e.clientY };
   };
 
@@ -122,12 +130,14 @@ const NaturalFeather = forwardRef(({
     });
   }, [materials]);
 
+  // 🔥 FIX 2: Smooth lerping logic for manual interaction
   useFrame(() => {
-    if (!started) return;
+    if (!started || !rotateRef.current) return;
     
-    if (isBurst && rotateRef.current) {
-      rotateRef.current.rotation.x = THREE.MathUtils.lerp(rotateRef.current.rotation.x, rotation[0], 0.1);
-      rotateRef.current.rotation.y = THREE.MathUtils.lerp(rotateRef.current.rotation.y, rotation[1], 0.1);
+    // Only apply the manual rotation IF the user is clicking on it (isBurst is active)
+    if (isBurst && isDragging.current) {
+      rotateRef.current.rotation.x = THREE.MathUtils.lerp(rotateRef.current.rotation.x, targetInteractiveRotation.current.x, 0.1);
+      rotateRef.current.rotation.y = THREE.MathUtils.lerp(rotateRef.current.rotation.y, targetInteractiveRotation.current.y, 0.1);
     }
   });
 
@@ -136,8 +146,6 @@ const NaturalFeather = forwardRef(({
     const entranceTl = gsap.timeline({ scrollTrigger: { trigger: document.body, start: "top top", end: "500px top", scrub: 1.5 } });
     const posTl = gsap.timeline();
 
-    // ✅ FIXED STATIC ROTATION: No continuous rotation animation
- // ✅ FIXED STATIC ROTATION: Broad side faces the camera (Y & X near 0), angled uniquely on Z
     if (variant === "high-drag-zig") {
         posTl.to(groupRef.current.position, { x: startPos[0] + 1.5, y: startPos[1] + 1, duration: 0.8, ease: "power2.out" })
              .to(groupRef.current.position, { x: "-=2.5", y: THREE.MathUtils.lerp(startPos[1], targetPos[1], 0.35), duration: 1.8, ease: "sine.inOut" })
@@ -190,6 +198,7 @@ const NaturalFeather = forwardRef(({
               onEnter: () => { 
                   setShowBurst(true); 
                   if (bubbleGroupRef.current) bubbleGroupRef.current.visible = false; 
+                  // Reset rotation before the GSAP scrub takes over
                   gsap.set(rotateRef.current.rotation, { x: Math.PI / 1.8, y: Math.PI * 2.2, z: Math.PI / 2.8 });
               },
               onLeaveBack: () => { 
