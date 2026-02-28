@@ -149,16 +149,31 @@ const SplashWalls = ({ splashProgress }: { splashProgress: number }) => {
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
       <cylinderGeometry args={[baseRadius * 1.05, baseRadius, 1, 64, 12, true]} />
       <meshPhysicalMaterial
-        color="#ffffff"
-        emissive="#ffffff"         
-        emissiveIntensity={0.6}    
-        transparent={true}
-        opacity={1.0}
-        roughness={0.05}
-        clearcoat={1.0}
-        clearcoatRoughness={0.0}
+        color="#eaf6ff"
+
+        /* ---- REAL WATER ---- */
+        transmission={0.92}        // refraction
+        thickness={2.0}
+        ior={1.33}
+
+        roughness={0.03}
+        metalness={0}
+
+        clearcoat={1}
+        clearcoatRoughness={0}
+
+        envMapIntensity={3}
+
+        attenuationColor="#bfe3ff"
+        attenuationDistance={0.6}
+
+        transparent
+        opacity={1}
+
+        depthWrite={true}          // ⭐ IMPORTANT
+        depthTest={true}
+
         side={THREE.DoubleSide}
-        depthWrite={false}
         onBeforeCompile={onBeforeCompile}
       />
     </instancedMesh>
@@ -184,7 +199,7 @@ const SwanModel = ({
   const previousX = useRef(0);
   const previousY = useRef(0); // Tracks vertical mouse position
   const targetCamY = useRef(0); // Tracks desired camera height
-  const [targetRotY, setTargetRotY] = useState(-Math.PI / 160); 
+  const [targetRotY, setTargetRotY] = useState(-Math.PI / 160);
 
   useLayoutEffect(() => {
     scene.traverse((child: any) => {
@@ -219,16 +234,16 @@ const SwanModel = ({
   useFrame(({ camera }) => {
     // 1. Rotate the Swan
     if (group.current) {
-      group.current.rotation.x = 0.1; 
+      group.current.rotation.x = 0.1;
       group.current.rotation.z = 0;
       group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, targetRotY, 0.1);
     }
 
     // 2. Move the Camera vertically based on drag
     camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetCamY.current, 0.05);
-    
+
     // 3. Keep camera focused on the Swan area (Y = -5 centers it nicely over the water)
-    camera.lookAt(0, -5, 0); 
+    camera.lookAt(0, -5, 0);
   });
 
   // --- DRAG HANDLERS ---
@@ -240,17 +255,17 @@ const SwanModel = ({
 
     const handleGlobalPointerMove = (e: PointerEvent) => {
       if (!isDragging.current) return;
-      
+
       const deltaX = e.clientX - previousX.current;
       const deltaY = e.clientY - previousY.current;
-      
+
       // Horizontal Drag -> Rotates Swan
-      setTargetRotY((prev) => prev + deltaX * 0.015); 
-      
+      setTargetRotY((prev) => prev + deltaX * 0.015);
+
       // Vertical Drag -> Moves Camera
       // Moving mouse down pulls the camera up (over the swan)
-      targetCamY.current += deltaY * 0.15; 
-      
+      targetCamY.current += deltaY * 0.15;
+
       // Prevent camera from going underwater or flying out of orbit
       targetCamY.current = THREE.MathUtils.clamp(targetCamY.current, -10, 40);
 
@@ -277,7 +292,7 @@ const SwanModel = ({
       scale={currentScale}
       position={[0, -14, 0]}
       onPointerDown={(e: any) => {
-        e.stopPropagation(); 
+        e.stopPropagation();
         isDragging.current = true;
         previousX.current = e.clientX;
         previousY.current = e.clientY; // Start tracking Y position
@@ -399,15 +414,29 @@ const SplashDroplets = ({ splashProgress }: { splashProgress: number }) => {
 
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
-      <sphereGeometry args={[1, 8, 8]} />
-      <meshPhysicalMaterial 
-        color="#ffffff" 
-        emissive="#ffffff"         
-        emissiveIntensity={0.6}    
-        transparent 
-        opacity={0.8} 
-        roughness={0.1} 
-        depthWrite={false} 
+      <sphereGeometry args={[1, 28, 28]} />
+      <meshPhysicalMaterial
+        color="#000"
+
+        transmission={1}
+        thickness={1.2}          // ⭐ thicker = stronger depth
+        ior={1.33}
+
+        roughness={0.01}         // sharper reflections
+        metalness={0}
+
+        clearcoat={1}
+        clearcoatRoughness={0}
+
+        envMapIntensity={4}      // ⭐ stronger reflections
+
+        attenuationColor="#bfe3ff"     // inner water tint
+        attenuationDistance={0.35}     // core darkening
+
+        transparent
+        opacity={1}
+
+        depthWrite
       />
     </instancedMesh>
   );
@@ -416,7 +445,7 @@ const SplashDroplets = ({ splashProgress }: { splashProgress: number }) => {
 /* =========================================================
    🌊 WATER PLANE
 ========================================================= */
- const WaterPlane = ({ splashProgress }: { splashProgress: number }) => {
+const WaterPlane = ({ splashProgress }: { splashProgress: number }) => {
   const reflectorRef = useRef<any>(null);
   const timeRef = useRef(0);
   const geometry = useMemo(() => new THREE.PlaneGeometry(5000, 5000), []);
@@ -562,7 +591,7 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
             setScrollProgress(0);
             setTransformProgress(0);
             setSplashProgress(0);
-          } 
+          }
           // --- PHASE 2: 3D Scene Takes Over ---
           else {
             // 1. SWAN ANIMATION: Starts EXACTLY when Logo finishes moving (60%) and goes to 100%
@@ -607,7 +636,7 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
       frame: TOTAL_FRAMES - 1,
       snap: "frame",
       ease: "none",
-      duration: 4.0, 
+      duration: 4.0,
       onUpdate: () => renderHero(frameObj.frame)
     });
 
@@ -625,7 +654,7 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
       duration: 1.5,
       ease: "power2.inOut",
     }, ">");
-    
+
     tl.to(canvasWrapperRef.current, {
       filter: "blur(0px)",
       duration: 1.5,
@@ -663,7 +692,7 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
 
   return (
     <section ref={containerRef} className="relative w-full h-screen overflow-hidden bg-black">
-      
+
       {/* --- 2D HERO VIDEO --- */}
       <canvas
         ref={canvasRef}
@@ -672,8 +701,8 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
       />
 
       {/* --- 3D SCENE --- */}
-      <div 
-        ref={canvasWrapperRef} 
+      <div
+        ref={canvasWrapperRef}
         className="absolute inset-0 z-20"
         style={{ opacity: 0, visibility: "hidden" }}
       >
@@ -699,8 +728,8 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
       </div>
 
       {/* --- LOGO --- */}
-      <div 
-        ref={logoRef} 
+      <div
+        ref={logoRef}
         className="absolute z-30 pointer-events-none"
         style={{ opacity: 0, visibility: "hidden" }}
       >
