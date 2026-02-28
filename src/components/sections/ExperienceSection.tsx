@@ -332,14 +332,14 @@ const ExperienceSection: React.FC = () => {
           <div className="lg:hidden">
             <SlidingTitleReveal
               eyebrowClassName="!mb-1 text-[11px] tracking-[0.35em] uppercase text-[#78716C]"
-              lines={["Experience Alvodia", "Visually"]}
+              lines={["Experience Aldovia", "Visually"]}
               className="text-white text-[34px] md:text-[42px] leading-[1.1] font-medium [font-family:'Playfair_Display']"
               />
           </div>
           <div className="w-full hidden lg:flex justify-center">
             <SlidingTitleReveal
               eyebrowClassName="!mb-1 text-[11px] tracking-[0.35em] uppercase text-[#78716C]"
-              lines={["Experience Alvodia Visually"]}
+              lines={["Experience Aldovia Visually"]}
               className="text-white text-[34px] md:text-[42px] leading-[1.1] font-medium [font-family:'Playfair_Display'] text-center"
               />
           </div>

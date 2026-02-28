@@ -5,16 +5,27 @@ import { useNavigate } from "react-router";
 
 // --- LOGO COMPONENT ---
 // ✅ FIX 1: Added introFinished prop to resolve 'isVisible' name error
-const Logo_top = ({ introFinished }: { introFinished?: boolean }) => {
+const Logo_top = ({
+  introFinished,
+  onClick,
+}: {
+  introFinished?: boolean;
+  onClick?: () => void;
+}) => {
   const isVisible = introFinished ?? true;
   return (
-    <div className={`logo-top relative z-[5000] transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Go to landing page"
+      className={`logo-top relative z-[5000] transition-opacity duration-300 cursor-pointer ${isVisible ? "opacity-100" : "opacity-0"}`}
+    >
       <img
         src="assets/logo/aldovialogo.svg"
         alt="Aldovia"
         className="logo-image w-[5em] lg:w-[6rem] h-auto object-contain block brightness-0 invert"
       />
-    </div>
+    </button>
   );
 };
 
@@ -314,7 +325,7 @@ const MenuFrame = ({
       >
         <div className="flex items-center justify-between px-3 py-2">
         {/* ✅ Pass introFinished here */}
-        <Logo_top introFinished={introFinished} />
+        <Logo_top introFinished={introFinished} onClick={() => navigate("/")} />
 
         <div className="flex items-center gap-10">
           {/* BOOK NOW BUTTON */}

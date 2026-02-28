@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 const impactStats = [
-  { end: 25, suffix: "+", label: "Years of Excellence" },
+  { end: 17, suffix: "+", label: "Years of Excellence" },
   { end: 250, suffix: "+", label: "Team Members" },
   { end: 98, suffix: "%", label: "Guest Satisfaction" },
 ];
