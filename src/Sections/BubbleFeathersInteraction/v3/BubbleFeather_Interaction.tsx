@@ -54,7 +54,6 @@ const BubbleFeather_Interaction = ({ }: any) => {
   const [focusTarget, setFocusTarget] = useState<THREE.Vector3 | null>(null);
   const [burstAll, setBurstAll] = useState(false); 
   const [zoomActive, setZoomActive] = useState(false); 
-  const [fallProgress, setFallProgress] = useState(0); 
   
   const feather3Ref = useRef<any>(null);
 
@@ -72,12 +71,6 @@ const BubbleFeather_Interaction = ({ }: any) => {
     if (scrollY > 850) setZoomActive(true);
     else setZoomActive(false);
 
-    // 3. FALL PROGRESS (Water Rise)
-    // Synced to the feather's approach to the surface.
-    const startRise = 1000; // Water begins rising earlier
-    const endRise = 1500;   // Fully risen by 1500px
-    const progress = THREE.MathUtils.clamp((scrollY - startRise) / (endRise - startRise), 0, 1);
-    setFallProgress(progress);
   };
 
   const enableScrolling = () => {
@@ -125,7 +118,7 @@ const handleBubbleClick = (id: number, target: THREE.Vector3) => {
           <ambientLight intensity={1.5} /><directionalLight position={[10, 10, 10]} intensity={4} />
           
           <group>
-{/* <WaterSurface fallProgress={fallProgress} id3Ref={feather3Ref} />             */}
+{/* <WaterSurface id3Ref={feather3Ref} />             */}
             <NaturalFeather id={1} variant="main" startPos={[0, 2, 0]} targetPos={[1.5, -4.5, 0]} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} />
             <NaturalFeather id={2} variant="small-drag" startPos={[-2, 3, -2]} targetPos={[-3.5, -5.5, -1]} started={started} delay={0.6} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} />
             <NaturalFeather ref={feather3Ref} id={3} variant="upper-pendulum" startPos={[4, 5, -3]} targetPos={[-1, 1.5, -2]} started={started} delay={0.3} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} />

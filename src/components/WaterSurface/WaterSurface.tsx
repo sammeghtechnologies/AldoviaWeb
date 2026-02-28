@@ -5,9 +5,9 @@ import { MeshReflectorMaterial, useGLTF } from "@react-three/drei";
 // @ts-ignore
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
 
-const WATER_LEVEL = 0.7;
+const WATER_LEVEL = 0.95;
 const START_OFFSET = 5.0;
-const RING_COUNT = 8;
+const RING_COUNT = 10;
 
 const WaterSurface = ({
   fallProgress,
@@ -57,9 +57,9 @@ const WaterSurface = ({
           float dist = length(pos.xy);
 
           // slower and smoother wave
-          float wave = sin(dist * 22.0 - uTime * 2.0) * 0.1;
+          float wave = sin(dist * 22.0 - uTime * 2.0) * 0.18;
           // secondary ripple randomness
-          float wave2 = cos(dist * 12.0 - uTime * 1.2) * 0.1;
+          float wave2 = cos(dist * 12.0 - uTime * 1.2) * 0.15;
           // fade outward
           float fade = smoothstep(1.6, 0.0, dist);
 
@@ -144,7 +144,8 @@ const WaterSurface = ({
     const currentWaterY = meshRef.current.position.y;
     const verticalDist = worldPos.y - currentWaterY;
 
-    const isTouching = verticalDist < 0.4;
+    const contactEase = THREE.MathUtils.smoothstep(fallProgress, 0.48, 0.72);
+    const isTouching = verticalDist < 0.55 || contactEase > 0.3;
 
     const fastSwanProgress = Math.max(0, Math.min(1, (swanProgress - 0.1) * 5.0));
 
@@ -197,7 +198,7 @@ const WaterSurface = ({
       if (swanGroupRef.current) swanGroupRef.current.visible = false;
     }
 
-    materialRef.current.opacity = 0.15;
+    materialRef.current.opacity = THREE.MathUtils.lerp(0.04, 0.26, contactEase);
 
     // ✅ Random Ripples Animation
     ringRefs.current.forEach((ring, i) => {
@@ -207,29 +208,30 @@ const WaterSurface = ({
       // 🔥 FIX: Removed the +5 on Z so the ripples perfectly wrap around the feather impact
       ring.position.set(worldPos.x, currentWaterY + 0.05, worldPos.z);
 
-      if (isTouching) {
+      if (isTouching || contactEase > 0.08) {
         ring.visible = true;
 
         const time = state.clock.getElapsedTime();
-        const speed = 0.10;
+        const speed = THREE.MathUtils.lerp(0.06, 0.12, contactEase);
         const randomOffset = ringSeeds[i];
         const t = ((time * speed) + i * 0.22 + randomOffset) % 1;
 
-        const scale = THREE.MathUtils.lerp(0.3, 15, t);
+        const scale = THREE.MathUtils.lerp(0.22, 18, t);
         const stretch = 1 + Math.sin(time * 0.8 + randomOffset) * 0.15;
 
         ring.scale.set(scale * stretch, scale, 1);
         const fade = 1.0 - t;
 
-        const proximityFactor = 1 - THREE.MathUtils.smoothstep(verticalDist, -0.1, 0.5);
+        const proximityFactor = 1 - THREE.MathUtils.smoothstep(verticalDist, -0.12, 0.75);
+        const contactBoost = THREE.MathUtils.lerp(0.35, 1.0, contactEase);
 
-        mat.uniforms.uOpacity.value = fade * proximityFactor * 0.55;
+        mat.uniforms.uOpacity.value = fade * proximityFactor * contactBoost * 0.78;
       } else {
         ring.visible = false;
       }
     });
 
-    materialRef.current.distortion = 0; 
+    materialRef.current.distortion = THREE.MathUtils.lerp(0.06, 0.22, contactEase);
   });
 
   return (
@@ -247,7 +249,7 @@ const WaterSurface = ({
           mixBlur={1}
           mixStrength={5.0}
           mirror={1}
-          color="#49261c"
+          color="#2f1a14"
           transparent
           opacity={0}
           depthScale={2.0}
