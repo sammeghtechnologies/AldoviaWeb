@@ -45,16 +45,6 @@ const BubbleFeather_Interaction = () => {
   const [fallProgress, setFallProgress] = useState(0); 
   const feather3Ref = useRef<any>(null);
   const [swanProgress, setSwanProgress] = useState(0);
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-
- const getResponsivePos = (desktopPos: [number, number, number]) => {
-  if (!isMobile) return desktopPos;
-  
-  // On mobile: 
-  // 1. Bring X closer to center (multiply by 0.4)
-  // 2. Spread Y further apart to fill vertical space (multiply by 1.3)
-  return [desktopPos[0] * 0.4, desktopPos[1] * 1.3, desktopPos[2]] as [number, number, number];
-};
 
   useStepScroll();
 
@@ -62,7 +52,6 @@ const BubbleFeather_Interaction = () => {
     window.scrollTo(0, 0);
     document.documentElement.classList.add('hide-scrollbar');
 
-   
     const handleScroll = () => {
       const scrollY = window.scrollY;
       
@@ -123,12 +112,12 @@ const BubbleFeather_Interaction = () => {
             
             <group>
               <WaterSurface fallProgress={fallProgress} swanProgress={swanProgress} id3Ref={feather3Ref} />        
-              <NaturalFeather id={1} variant="main" startPos={[0, 2, 0]} targetPos={getResponsivePos([1.5, -4.5, 0])} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
-              <NaturalFeather id={2} variant="small-drag" startPos={[-2, 3, -2]} targetPos={getResponsivePos([-3.5, -5.5, -1])} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
-              <NaturalFeather ref={feather3Ref} id={3} variant="upper-pendulum" startPos={[4, 5, -3]} targetPos={getResponsivePos([-1.2, 1.8, -2])} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
-              <NaturalFeather id={4} variant="side-roll-upper" startPos={[1.5, 6, -1]} targetPos={getResponsivePos([3.5, 2.5, -1.5])} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
-              <NaturalFeather id={5} variant="mid-drift" startPos={[-1, 5, 2]} targetPos={getResponsivePos([-4.5, 0.8, 1.0])} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
-              <NaturalFeather id={6} variant="high-drag-zig" startPos={[4, 5, 0]} targetPos={getResponsivePos([5.5, -4.5, -0.5])} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
+              <NaturalFeather id={1} variant="main" startPos={[0, 2, 0]} targetPos={[1.5, -4.5, 0]} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
+              <NaturalFeather id={2} variant="small-drag" startPos={[-2, 3, -2]} targetPos={[-3.5, -5.5, -1]} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
+              <NaturalFeather ref={feather3Ref} id={3} variant="upper-pendulum" startPos={[4, 5, -3]} targetPos={[-1, 1.5, -2]} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
+              <NaturalFeather id={4} variant="side-roll-upper" startPos={[1.5, 6, -1]} targetPos={[4.5, 2.2, -1.5]} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
+              <NaturalFeather id={5} variant="mid-drift" startPos={[-1, 5, 2]} targetPos={[-6.5, 0.5, 1.0]} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
+              <NaturalFeather id={6} variant="high-drag-zig" startPos={[4, 5, 0]} targetPos={[7.5, -4.5, -0.5]} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
             </group>
           </Suspense>
         </Canvas>

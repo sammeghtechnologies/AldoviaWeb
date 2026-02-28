@@ -15,7 +15,7 @@ const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
 const NaturalFeather = forwardRef(({ 
   id, startPos, targetPos, started, variant, activeId, onBubbleClick,
-  allBubblesReady
+  allBubblesReady, burstAll
 }: any, ref: any) => {
   
   const modelPath = (id === 1 || id === 3) ? "/models/feather1.glb" : "/models/feather2.glb";
@@ -33,14 +33,13 @@ const NaturalFeather = forwardRef(({
   const groupRef = ref || localGroupRef; 
   const rotateRef = useRef<THREE.Group>(null!);
   const bubbleGroupRef = useRef<THREE.Group>(null!); 
-  //const rotTimelineRef = useRef<gsap.core.Timeline | null>(null);
 
   const [showBurst, setShowBurst] = useState(false);
   const [rotation, setRotation] = useState([0, 0, 0]);
   const isDragging = useRef(false);
   const previousPointer = useRef({ x: 0, y: 0 });
 
-  const isBurst = activeId === id; 
+  const isBurst = activeId === id || burstAll; 
   const wasClicked = useRef(false);
 
   // ✅ ADJUST BUBBLE RADIUS FOR MOBILE/DESKTOP
@@ -125,8 +124,6 @@ const NaturalFeather = forwardRef(({
 
   useFrame(() => {
     if (!started) return;
-
-    // ✅ FEATHERS ARE NOW STATIC: Removed bobbing sin/cos logic
     
     if (isBurst && rotateRef.current) {
       rotateRef.current.rotation.x = THREE.MathUtils.lerp(rotateRef.current.rotation.x, rotation[0], 0.1);
@@ -140,41 +137,43 @@ const NaturalFeather = forwardRef(({
     const posTl = gsap.timeline();
 
     // ✅ FIXED STATIC ROTATION: No continuous rotation animation
+ // ✅ FIXED STATIC ROTATION: Broad side faces the camera (Y & X near 0), angled uniquely on Z
     if (variant === "high-drag-zig") {
         posTl.to(groupRef.current.position, { x: startPos[0] + 1.5, y: startPos[1] + 1, duration: 0.8, ease: "power2.out" })
              .to(groupRef.current.position, { x: "-=2.5", y: THREE.MathUtils.lerp(startPos[1], targetPos[1], 0.35), duration: 1.8, ease: "sine.inOut" })
              .to(groupRef.current.position, { x: "+=2.0", y: THREE.MathUtils.lerp(startPos[1], targetPos[1], 0.7), duration: 1.8, ease: "sine.inOut" })
              .to(groupRef.current.position, { x: targetPos[0], y: targetPos[1], duration: 1.5, ease: "power2.inOut" });
-        gsap.set(rotateRef.current.rotation, { x: Math.PI * 0.2, y: Math.PI * 0.5, z: Math.PI / 1.6 });
+        gsap.set(rotateRef.current.rotation, { x: 0.1, y: 0.1, z: Math.PI / 4 }); 
     } else if (variant === "mid-drift") {
       posTl.to(groupRef.current.position, { x: startPos[0] - 0.5, y: startPos[1] + 1.5, duration: 1.2, ease: "power2.out" })
            .to(groupRef.current.position, { x: targetPos[0] + 2, y: THREE.MathUtils.lerp(startPos[1] + 1.5, targetPos[1], 0.45), duration: 3.0, ease: "sine.inOut" })
            .to(groupRef.current.position, { y: targetPos[1], x: targetPos[0], duration: 2.5, ease: "power1.inOut" });
-      gsap.set(rotateRef.current.rotation, { x: Math.PI / -6, z: -Math.PI / 8 });
+      gsap.set(rotateRef.current.rotation, { x: -0.1, y: 0, z: -Math.PI / 6 }); 
     } else if (variant === "side-roll-upper") {
       posTl.to(groupRef.current.position, { x: startPos[0] + 1, y: startPos[1] + 2, z: startPos[2], duration: 1.5, ease: "power2.out" })
            .to(groupRef.current.position, { x: targetPos[0] + 1.5, y: THREE.MathUtils.lerp(startPos[1] + 2, targetPos[1], 0.5), duration: 3.5, ease: "sine.inOut" })
            .to(groupRef.current.position, { y: targetPos[1], x: targetPos[0], duration: 2.8, ease: "power1.inOut" });
-      gsap.set(rotateRef.current.rotation, { x: Math.PI / 3, y: Math.PI * 0.5, z: Math.PI * 0.4 });
+      gsap.set(rotateRef.current.rotation, { x: 0.2, y: -0.1, z: Math.PI / 2.5 }); 
     } else if (variant === "upper-pendulum") {
       posTl.to(groupRef.current.position, { x: startPos[0] + 1, y: startPos[1] + 3, z: startPos[2] - 1.5, duration: 1.2, ease: "power2.out" })
            .to(groupRef.current.position, { x: "-=2", y: THREE.MathUtils.lerp(startPos[1] + 3, targetPos[1], 0.5), duration: 2.5, ease: "sine.inOut" })
            .to(groupRef.current.position, { x: "+=1.5", y: THREE.MathUtils.lerp(startPos[1] + 3, targetPos[1], 0.8), duration: 2.5, ease: "sine.inOut" })
            .to(groupRef.current.position, { y: targetPos[1], x: targetPos[0], duration: 2.5, ease: "slow(0.5, 0.8, false)" });
-      gsap.set(rotateRef.current.rotation, { x: Math.PI * 0.15, y: Math.PI * 1.2, z: Math.PI * 0.08 });
+      gsap.set(rotateRef.current.rotation, { x: 0.15, y: 0.1, z: -Math.PI / 3 }); 
     } else if (variant === "small-drag") {
       posTl.to(groupRef.current.position, { x: startPos[0] - 2.5, y: startPos[1] + 4, z: startPos[2] + 1, duration: 1.0, ease: "power1.out" })
            .to(groupRef.current.position, { x: 6.0, y: THREE.MathUtils.lerp(startPos[1] + 4, targetPos[1], 0.3), duration: 3.6, ease: "sine.inOut" })
            .to(groupRef.current.position, { x: "-=6.0", y: THREE.MathUtils.lerp(startPos[1] + 4, targetPos[1], 0.6), duration: 3.6, ease: "sine.inOut" })
            .to(groupRef.current.position, { x: targetPos[0], y: targetPos[1], duration: 3.6, ease: "power1.inOut" });
-      gsap.set(rotateRef.current.rotation, { x: Math.PI * 0.15, z: Math.PI / 2, y: Math.PI * 0.5 });
+      gsap.set(rotateRef.current.rotation, { x: -0.15, y: 0, z: Math.PI / 6 }); 
     } else {
         posTl.to(groupRef.current.position, { x: startPos[0] + 3, y: startPos[1] + 5, z: startPos[2] - 2, duration: 0.8, ease: "power2.out" })
              .to(groupRef.current.position, { x: -4.5, y: THREE.MathUtils.lerp(startPos[1] + 5, targetPos[1], 0.25), duration: 2.2, ease: "sine.inOut" })
              .to(groupRef.current.position, { x: 4.5, y: THREE.MathUtils.lerp(startPos[1] + 5, targetPos[1], 0.5), duration: 2.2, ease: "sine.inOut" })
              .to(groupRef.current.position, { x: targetPos[0], y: targetPos[1], duration: 4.5, ease: "power1.inOut" });
-        gsap.set(rotateRef.current.rotation, { x: Math.PI * 0.3, z: Math.PI * 0.1, y: Math.PI * 1 });
+        gsap.set(rotateRef.current.rotation, { x: 0, y: 0, z: -Math.PI / 8 }); 
     }
+  
     entranceTl.add(posTl, 0);
 
     if (bubbleGroupRef.current) {
