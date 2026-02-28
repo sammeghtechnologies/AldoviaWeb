@@ -103,11 +103,13 @@ const MenuFrame = ({
   introFinished,
   showBookNow = true,
   forceTopBarBackground = false,
+  disableTopBarBackground = false,
 }: {
   masterTl?: any;
   introFinished?: boolean;
   showBookNow?: boolean;
   forceTopBarBackground?: boolean;
+  disableTopBarBackground?: boolean;
 }) => {
   const { icons } = useAssets();
   const navigate = useNavigate();
@@ -125,9 +127,7 @@ const MenuFrame = ({
   const [openSection, setOpenSection] = useState("stay");
   const [isTopBarVisible, setIsTopBarVisible] = useState(true);
   const [isBeyondHero, setIsBeyondHero] = useState(false);
-  const shouldShowTopBarBackground = forceTopBarBackground || isBeyondHero;
-  const lastScrollYRef = useRef(0);
-  const downScrollAccumRef = useRef(0);
+  const shouldShowTopBarBackground = !disableTopBarBackground && (forceTopBarBackground || isBeyondHero);
 
   // Logo animation
   useLayoutEffect(() => {
@@ -245,46 +245,16 @@ const MenuFrame = ({
     }
   }, [openSection]);
 
-  // Hide on downward scroll; reveal after a slight upward scroll.
+  // Keep top bar visible; only track whether we're beyond hero for background styling.
   useEffect(() => {
     const onScroll = () => {
       const currentY = window.scrollY || 0;
       setIsBeyondHero(currentY > window.innerHeight * 0.6);
-      const delta = currentY - lastScrollYRef.current;
-      lastScrollYRef.current = currentY;
-
-      if (currentY <= 8 || isOpen) {
-        downScrollAccumRef.current = 0;
-        setIsTopBarVisible(true);
-        return;
-      }
-
-      // Scrolling down: hide quickly.
-      if (delta > 6) {
-        downScrollAccumRef.current = 0;
-        setIsTopBarVisible(false);
-        return;
-      }
-
-      // Scrolling up: reveal after small cumulative movement.
-      if (delta < -1) {
-        downScrollAccumRef.current += Math.abs(delta);
-        if (downScrollAccumRef.current >= 20) {
-          setIsTopBarVisible(true);
-          downScrollAccumRef.current = 0;
-        }
-        return;
-      }
-
-      if (Math.abs(delta) < 1) {
-        return;
-      }
-
-      downScrollAccumRef.current = 0;
+      setIsTopBarVisible(true);
     };
 
-    lastScrollYRef.current = window.scrollY || 0;
     setIsBeyondHero((window.scrollY || 0) > window.innerHeight * 0.6);
+    setIsTopBarVisible(true);
     window.addEventListener("scroll", onScroll, { passive: true });
 
     return () => {

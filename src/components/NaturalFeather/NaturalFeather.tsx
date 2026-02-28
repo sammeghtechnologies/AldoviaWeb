@@ -14,7 +14,7 @@ const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
 const NaturalFeather = forwardRef(({ 
   id, startPos, targetPos, started, variant, activeId, onBubbleClick,
-  allBubblesReady, burstAll
+  allBubblesReady, burstAll, dropProgress = 0
 }: any, ref: any) => {
   
   const modelPath = (id === 1 || id === 3) ? "/models/feather1.glb" : "/models/feather2.glb";
@@ -39,9 +39,14 @@ const NaturalFeather = forwardRef(({
   
   // 🔥 FIX 1: Use a ref for target rotation instead of React State to stop re-renders and clashing
   const targetInteractiveRotation = useRef(new THREE.Vector2(0, 0));
+  const pathPosRef = useRef(new THREE.Vector3());
 
   const isBurst = activeId === id || burstAll; 
   const wasClicked = useRef(false);
+  const c0 = useMemo(() => new THREE.Vector3(startPos[0], startPos[1], startPos[2]), [startPos]);
+  const c1 = useMemo(() => new THREE.Vector3(startPos[0] - 0.4, startPos[1] + 1.0, startPos[2] - 0.25), [startPos]);
+  const c2 = useMemo(() => new THREE.Vector3(targetPos[0] + 0.8, 2.5, targetPos[2] - 0.35), [targetPos]);
+  const c3 = useMemo(() => new THREE.Vector3(targetPos[0], 1.05, targetPos[2]), [targetPos]);
 
   const getBubbleRadius = () => {
     const mobileScale = 0.7; 
@@ -139,6 +144,34 @@ const NaturalFeather = forwardRef(({
       rotateRef.current.rotation.x = THREE.MathUtils.lerp(rotateRef.current.rotation.x, targetInteractiveRotation.current.x, 0.1);
       rotateRef.current.rotation.y = THREE.MathUtils.lerp(rotateRef.current.rotation.y, targetInteractiveRotation.current.y, 0.1);
     }
+
+    // Dedicated scroll-driven drop path for feather #3 for stable, smooth fall.
+    if (id === 3 && groupRef.current && dropProgress > 0) {
+      const t = THREE.MathUtils.smoothstep(dropProgress, 0, 1);
+      const it = 1 - t;
+      const b0 = it * it * it;
+      const b1 = 3 * it * it * t;
+      const b2 = 3 * it * t * t;
+      const b3 = t * t * t;
+
+      pathPosRef.current
+        .set(0, 0, 0)
+        .addScaledVector(c0, b0)
+        .addScaledVector(c1, b1)
+        .addScaledVector(c2, b2)
+        .addScaledVector(c3, b3);
+
+      groupRef.current.position.lerp(pathPosRef.current, 0.14);
+
+      if (!isDragging.current) {
+        const rx = THREE.MathUtils.lerp(Math.PI / 2.0, Math.PI / 6, t);
+        const ry = THREE.MathUtils.lerp(Math.PI * 2.05, 0, t);
+        const rz = THREE.MathUtils.lerp(Math.PI / 2.95, Math.PI / 2, t);
+        rotateRef.current.rotation.x = THREE.MathUtils.lerp(rotateRef.current.rotation.x, rx, 0.12);
+        rotateRef.current.rotation.y = THREE.MathUtils.lerp(rotateRef.current.rotation.y, ry, 0.12);
+        rotateRef.current.rotation.z = THREE.MathUtils.lerp(rotateRef.current.rotation.z, rz, 0.12);
+      }
+    }
   });
 
   useGSAP(() => {
@@ -190,40 +223,32 @@ const NaturalFeather = forwardRef(({
         bubbleTl.to(bubbleGroupRef.current.scale, { x: 1, y: 1, z: 1, ease: "back.out(1.7)" });
     }
 
-    const fallStart = 800; 
-    if (id === 3) {
+    const fallStart = 760; 
+    if (id !== 3) {
       const scrubTl = gsap.timeline({
+          defaults: { ease: "none" },
           scrollTrigger: {
-              trigger: document.body, start: `${fallStart}px top`, end: "+=700", scrub: 2.5, 
-              onEnter: () => { 
-                  setShowBurst(true); 
-                  if (bubbleGroupRef.current) bubbleGroupRef.current.visible = false; 
-                  // Reset rotation before the GSAP scrub takes over
-                  gsap.set(rotateRef.current.rotation, { x: Math.PI / 1.8, y: Math.PI * 2.2, z: Math.PI / 2.8 });
-              },
-              onLeaveBack: () => { 
-                  setShowBurst(false); 
-                  if (bubbleGroupRef.current) bubbleGroupRef.current.visible = true; 
-              }
-          }
-      });
-      const currentY = groupRef.current.position.y;
-      const peakY = currentY + 0.1; 
-      scrubTl.to(groupRef.current.position, { x: "-=1.5", y: peakY, duration: 1.0, ease: "power2.out" }, 0);
-      scrubTl.to(groupRef.current.position, { x: "+=4.0", y: THREE.MathUtils.lerp(peakY, 1.05, 0.3), duration: 3.6, ease: "sine.inOut" }, 1.0);
-      scrubTl.to(groupRef.current.position, { x: "-=4.0", y: THREE.MathUtils.lerp(peakY, 1.05, 0.6), duration: 3.6, ease: "sine.inOut" }, 4.6);
-      scrubTl.to(groupRef.current.position, { x: targetPos[0], y: 1.05, duration: 3.6, ease: "power1.inOut" }, 8.2)
-             .to(rotateRef.current.rotation, { x: Math.PI/6, y: 0, z: Math.PI/2, duration: 3.6, ease: "power2.inOut" }, 8.2);
-    } else {
-      const scrubTl = gsap.timeline({
-          scrollTrigger: {
-              trigger: document.body, start: `${fallStart}px top`, end: "+=600", scrub: 1.5,
+              trigger: document.body, start: `${fallStart}px top`, end: "+=1100", scrub: 2.4,
+              invalidateOnRefresh: true,
               onEnter: () => { setShowBurst(true); if (bubbleGroupRef.current) bubbleGroupRef.current.visible = false; },
               onLeaveBack: () => { setShowBurst(false); if (bubbleGroupRef.current) bubbleGroupRef.current.visible = true; }
           }
       });
-      scrubTl.to(groupRef.current.position, { x: `+=${(id % 2 === 0 ? 1.5 : -1.5)}`, y: `+=${-1.5 - (id % 2)}`, z: `+=${(id % 2 === 0 ? -1 : 1)}`, duration: 1.5, ease: "power2.out" }, 0);
-      scrubTl.to(rotateRef.current.rotation, { x: Math.PI / (1.2 + (id % 2)), y: Math.PI * (1.5 + (id * 0.2)), z: Math.PI / (2 + (id % 3)), duration: 1.5, ease: "power2.out" }, 0);
+      const xDrift = id % 2 === 0 ? 0.95 : -0.95;
+      const yDrop = -(1.05 + id * 0.2);
+      const zDrift = id % 2 === 0 ? -0.5 : 0.5;
+      scrubTl.to(groupRef.current.position, {
+        x: `+=${xDrift}`,
+        y: `+=${yDrop}`,
+        z: `+=${zDrift}`,
+        duration: 2.6
+      }, 0);
+      scrubTl.to(rotateRef.current.rotation, {
+        x: Math.PI / (1.45 + (id % 2) * 0.35),
+        y: Math.PI * (1.2 + (id * 0.14)),
+        z: Math.PI / (2.4 + (id % 3) * 0.35),
+        duration: 2.6
+      }, 0);
     }
   }, [started]);
 

@@ -59,14 +59,16 @@ const BubbleFeather_Interaction = () => {
       if (scrollY > 850) setZoomActive(true);
       else setZoomActive(false);
 
-      const startRise = 800; 
-      const endRise = 1500;   
-      const progress = THREE.MathUtils.clamp((scrollY - startRise) / (endRise - startRise), 0, 1);
+      const startRise = 760; 
+      const endRise = 1780;   
+      const rawProgress = THREE.MathUtils.clamp((scrollY - startRise) / (endRise - startRise), 0, 1);
+      const progress = rawProgress * rawProgress * (3 - 2 * rawProgress);
       setFallProgress(progress);
 
       const startSwan = 1500; 
       const endSwan = 2200;   
-      const swanProg = THREE.MathUtils.clamp((scrollY - startSwan) / (endSwan - startSwan), 0, 1);
+      const swanRaw = THREE.MathUtils.clamp((scrollY - startSwan) / (endSwan - startSwan), 0, 1);
+      const swanProg = swanRaw * swanRaw * (3 - 2 * swanRaw);
       setSwanProgress(swanProg);
     };
 
@@ -112,7 +114,7 @@ const BubbleFeather_Interaction = () => {
               <WaterSurface fallProgress={fallProgress} swanProgress={swanProgress} id3Ref={feather3Ref} />        
               <NaturalFeather id={1} variant="main" startPos={[0, 2, 0]} targetPos={[1.5, -4.5, 0]} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
               <NaturalFeather id={2} variant="small-drag" startPos={[-2, 3, -2]} targetPos={[-3.5, -5.5, -1]} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
-              <NaturalFeather ref={feather3Ref} id={3} variant="upper-pendulum" startPos={[4, 5, -3]} targetPos={[-1, 1.5, -2]} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
+              <NaturalFeather ref={feather3Ref} id={3} variant="upper-pendulum" startPos={[4, 5, -3]} targetPos={[-1, 1.5, -2]} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} dropProgress={fallProgress} />
               <NaturalFeather id={4} variant="side-roll-upper" startPos={[1.5, 6, -1]} targetPos={[4.5, 2.2, -1.5]} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
               <NaturalFeather id={5} variant="mid-drift" startPos={[-1, 5, 2]} targetPos={[-6.5, 0.5, 1.0]} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
               <NaturalFeather id={6} variant="high-drag-zig" startPos={[4, 5, 0]} targetPos={[7.5, -4.5, -0.5]} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={true} />
