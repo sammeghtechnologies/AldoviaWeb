@@ -12,7 +12,7 @@ const Logo_top = ({ introFinished }: { introFinished?: boolean }) => {
       <img
         src="assets/logo/aldovialogo.svg"
         alt="Aldovia"
-        className="logo-image w-[56px] h-auto object-contain block brightness-0 invert"
+        className="logo-image w-[5em] lg:w-[6rem] h-auto object-contain block brightness-0 invert"
       />
     </div>
   );
@@ -91,10 +91,12 @@ const MenuFrame = ({
   masterTl,
   introFinished,
   showBookNow = true,
+  forceTopBarBackground = false,
 }: {
   masterTl?: any;
   introFinished?: boolean;
   showBookNow?: boolean;
+  forceTopBarBackground?: boolean;
 }) => {
   const { icons } = useAssets();
   const navigate = useNavigate();
@@ -111,6 +113,8 @@ const MenuFrame = ({
   const [isOpen, setIsOpen] = useState(false);
   const [openSection, setOpenSection] = useState("stay");
   const [isTopBarVisible, setIsTopBarVisible] = useState(true);
+  const [isBeyondHero, setIsBeyondHero] = useState(false);
+  const shouldShowTopBarBackground = forceTopBarBackground || isBeyondHero;
   const lastScrollYRef = useRef(0);
   const downScrollAccumRef = useRef(0);
 
@@ -234,6 +238,7 @@ const MenuFrame = ({
   useEffect(() => {
     const onScroll = () => {
       const currentY = window.scrollY || 0;
+      setIsBeyondHero(currentY > window.innerHeight * 0.6);
       const delta = currentY - lastScrollYRef.current;
       lastScrollYRef.current = currentY;
 
@@ -268,10 +273,32 @@ const MenuFrame = ({
     };
 
     lastScrollYRef.current = window.scrollY || 0;
+    setIsBeyondHero((window.scrollY || 0) > window.innerHeight * 0.6);
     window.addEventListener("scroll", onScroll, { passive: true });
 
     return () => {
       window.removeEventListener("scroll", onScroll);
+    };
+  }, [isOpen]);
+
+  // Prevent page scroll when menu is open.
+  useEffect(() => {
+    const body = document.body;
+    const html = document.documentElement;
+    const prevBodyOverflow = body.style.overflow;
+    const prevHtmlOverflow = html.style.overflow;
+
+    if (isOpen) {
+      body.style.overflow = "hidden";
+      html.style.overflow = "hidden";
+    } else {
+      body.style.overflow = prevBodyOverflow;
+      html.style.overflow = prevHtmlOverflow;
+    }
+
+    return () => {
+      body.style.overflow = prevBodyOverflow;
+      html.style.overflow = prevHtmlOverflow;
     };
   }, [isOpen]);
 
@@ -282,9 +309,10 @@ const MenuFrame = ({
     >
       {/* TOP BAR */}
       <div
-        className={`absolute left-10 right-10 top-6 z-[2147483647] flex items-center justify-between transition-all duration-300 ${isTopBarVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "-translate-y-12 opacity-0 pointer-events-none"
+        className={`h-[10vh] !p-3 absolute left-0 right-0 top-0 z-[2147483647]  transition-all duration-300 ${shouldShowTopBarBackground ? " backdrop-blur-xl  shadow-[0_10px_30px_rgba(0,0,0,0.45)]" : "bg-transparent border border-transparent"} ${isTopBarVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "-translate-y-12 opacity-0 pointer-events-none"
           }`}
       >
+        <div className="flex items-center justify-between px-3 py-2">
         {/* ✅ Pass introFinished here */}
         <Logo_top introFinished={introFinished} />
 
@@ -313,6 +341,7 @@ const MenuFrame = ({
             />
           </div>
         </div>
+        </div>
       </div>
 
       {/* OVERLAY */}
@@ -333,7 +362,12 @@ const MenuFrame = ({
           <div className="h-14 md:h-16 lg:h-14" />
 
           {/* HOME */}
-          <div className="!p-1  !mt-5 flex items-center gap-5 mb-12 shadow-xl">
+          <div className="!p-1  !mt-5 flex items-center gap-5 mb-12 shadow-xl"
+          onClick={() => {
+            setIsOpen(false);
+            navigate("/home");
+          }} 
+          >
             <img
               src={icons.home || "/assets/icons/home.svg"}
               alt=""
@@ -463,7 +497,14 @@ const MenuFrame = ({
               className="!mt-5 lg:!mt-3 space-y-8 lg:space-y-4 !pl-2 overflow-hidden"
               style={{ height: openSection === "discover" ? "auto" : 0 }}
             >
-              <MenuIcon icon={icons.about || "/assets/icons/about.svg"} title="About Us" />
+              <MenuIcon
+                icon={icons.about || "/assets/icons/about.svg"}
+                title="About Us"
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate("/aboutus");
+                }}
+              />
               <MenuIcon icon={icons.contact || "/assets/icons/contact.svg"} title="Get in Touch" />
             </ul>
           </div>

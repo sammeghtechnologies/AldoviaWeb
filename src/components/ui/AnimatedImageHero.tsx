@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { ArrowRight, Download } from "lucide-react";
 import CarouselControls from "./CarouselControls";
 
 interface AnimatedImageHeroProps {
@@ -9,6 +10,9 @@ interface AnimatedImageHeroProps {
   eyebrow?: string;
   buttonLabel: string;
   onButtonClick?: () => void;
+  secondaryButtonLabel?: string;
+  onSecondaryButtonClick?: () => void;
+  primaryButtonClassName?: string;
   topLeftContent?: React.ReactNode;
   topRightContent?: React.ReactNode;
   className?: string;
@@ -31,6 +35,9 @@ const AnimatedImageHero: React.FC<AnimatedImageHeroProps> = ({
   eyebrow,
   buttonLabel,
   onButtonClick,
+  secondaryButtonLabel,
+  onSecondaryButtonClick,
+  primaryButtonClassName = "",
   topLeftContent,
   topRightContent,
   className = "",
@@ -47,6 +54,10 @@ const AnimatedImageHero: React.FC<AnimatedImageHeroProps> = ({
 }) => {
   const [activeIndex, setActiveIndex] = React.useState(0);
   const [typedCount, setTypedCount] = React.useState(0);
+  const hasSecondaryButton = Boolean(secondaryButtonLabel);
+  const isPlanYourEvent = buttonLabel === "Plan Your Event";
+  const planEventSecondaryLabel = secondaryButtonLabel ?? buttonLabel;
+  const planEventSecondaryClick = onSecondaryButtonClick ?? onButtonClick;
   const subtitleChars = React.useMemo(() => (subtitle ? subtitle.split("") : []), [subtitle]);
   const titleWords = React.useMemo(() => title.split(" "), [title]);
 
@@ -109,7 +120,7 @@ const AnimatedImageHero: React.FC<AnimatedImageHeroProps> = ({
         );
       })}
 
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(28,25,23,0.46)_0%,rgba(28,25,23,0.56)_50%,rgba(28,25,23,0.46)_100%)]" />
+      <div className="absolute inset-0 bg-[color:#1C1917] opacity-70" />
 
       {(topLeftContent || topRightContent) && (
         <div className="relative z-20 mx-auto flex w-full max-w-6xl items-center justify-between px-6 pt-8 md:px-10">
@@ -128,7 +139,7 @@ const AnimatedImageHero: React.FC<AnimatedImageHeroProps> = ({
         )}
 
         <motion.h1
-          className="max-w-[16ch] font-lust text-5xl !leading-[1] md:text-7xl !text-[var(--color-secondary)]"
+          className="max-w-[25ch] font-lust text-5xl !leading-[1] text-[2em] md:text-5xl  !text-[var(--color-secondary)]"
           initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{ duration: 1.25, ease: [0.22, 1, 0.36, 1] }}
@@ -156,7 +167,7 @@ const AnimatedImageHero: React.FC<AnimatedImageHeroProps> = ({
         </motion.h1>
 
         {subtitle && (
-          <p className="!mt-8 max-w-[38ch] text-base text-white/90 md:text-xl">
+          <p className="!mt-8 !pl-2 !pr-2 max-w-[55ch]  text-base text-white/90 !leading-[1.5] text-[1em] md:text-[1em]">
             {enableTypingSubtitle
               ? subtitleChars.map((char, index) => (
                 <span
@@ -173,17 +184,36 @@ const AnimatedImageHero: React.FC<AnimatedImageHeroProps> = ({
           </p>
         )}
 
-        <button
-          type="button"
-          onClick={onButtonClick}
-          className={`!mt-8 !rounded-[999px] !border !border-[rgba(255,255,255,0.30)] !bg-[rgba(255,255,255,0.10)] !px-7 !py-3 text-sm font-medium backdrop-blur-md transition duration-300 hover:!bg-[rgba(255,255,255,0.18)] md:text-base ${
-            buttonLabel === "Explore Activities" || buttonLabel === "Plan Your Event" || buttonLabel === "Explore Dining"
-              ? "!text-[var(--color-secondary)]"
-              : "text-white"
-          }`}
-        >
-          {buttonLabel}
-        </button>
+        <div className="!mt-8 flex flex-wrap items-center justify-center gap-4">
+          {!isPlanYourEvent && (
+            <button
+              type="button"
+              onClick={onButtonClick}
+              className={`!rounded-[999px] h-10 !border !border-[var(--color-primary)] !bg-[var(--color-primary)] !px-7 !py-2 text-sm font-normal transition duration-300 hover:opacity-90 md:text-base ${hasSecondaryButton ? "!w-[220px] lg:!w-[260px]" : ""} ${
+                buttonLabel === "Explore Activities" || buttonLabel === "Plan Your Event" || buttonLabel === "Explore Dining"
+                  ? "!text-[var(--color-secondary)]"
+                  : "text-white"
+              } ${primaryButtonClassName}`}
+            >
+              <span className="inline-flex items-center gap-2">
+                <span>{buttonLabel}</span>
+                {buttonLabel === "Request Proposal" && <ArrowRight className="h-4 w-4" />}
+              </span>
+            </button>
+          )}
+          {(secondaryButtonLabel || isPlanYourEvent) && (
+            <button
+              type="button"
+              onClick={isPlanYourEvent ? planEventSecondaryClick : onSecondaryButtonClick}
+              className="!rounded-[999px] h-10 !w-[220px] lg:!w-[260px] !border !border-[rgba(255,255,255,0.30)] !bg-[rgba(255,255,255,0.10)] !px-7 !py-2 text-sm font-normal !text-[var(--color-secondary)] backdrop-blur-md transition duration-300 hover:!bg-[rgba(255,255,255,0.18)] md:text-base"
+            >
+              <span className="inline-flex items-center gap-2">
+                {secondaryButtonLabel === "Download Brochure" && <Download className="h-4 w-4" />}
+                <span>{isPlanYourEvent ? planEventSecondaryLabel : secondaryButtonLabel}</span>
+              </span>
+            </button>
+          )}
+        </div>
 
         {images.length > 1 && (
           <div className={controlsWrapperClassName}>
@@ -195,7 +225,7 @@ const AnimatedImageHero: React.FC<AnimatedImageHeroProps> = ({
               progressTrackColor="rgba(255, 255, 255, 0.3)"
               progressFillColor="var(--color-secondary)"
               buttonColor="var(--color-secondary)"
-              iconColor="var(--color-primary)"
+              iconColor="var(--color-secondary)"
               className={controlsClassName}
               progressBarClassName={controlsProgressBarClassName}
             />

@@ -1,10 +1,13 @@
 import React from "react";
+import { useNavigate } from "react-router";
 import MenuFrame from "../../MenuFrame/v2/MenuFrame";
 import AnimatedImageHero from "../../ui/AnimatedImageHero";
+import HeroBreadcrumb from "../../ui/HeroBreadcrumb";
 import RestaurantSection from "../../sections/RestaurantSection";
 import Footer from "../../sections/Footer";
 
 const DiningHeroPage: React.FC = () => {
+  const navigate = useNavigate();
   const diningImages = [
     "/assets/herobackgrounds/dining/Buvette.jpg",
     "/assets/herobackgrounds/dining/Buvette1.jpg",
@@ -14,6 +17,12 @@ const DiningHeroPage: React.FC = () => {
   return (
     <section className="relative min-h-screen w-full">
       <MenuFrame showBookNow={false} />
+      <div className="absolute left-5 top-24 z-[2147483645] md:left-8 md:top-26">
+        <HeroBreadcrumb
+          label="Dining"
+          onHomeClick={() => navigate("/home")}
+        />
+      </div>
       <AnimatedImageHero
         images={diningImages}
         title="Exquisite Dining"

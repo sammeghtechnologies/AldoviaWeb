@@ -36,19 +36,21 @@ const HeroPage: React.FC = () => {
       <section className="relative h-screen w-full overflow-hidden text-white">
 
         {/* Background Image */}
-        <motion.img
-          src="/assets/hero/hero.jpg"
-          alt="Luxury Resort"
-          loading="eager"
-          fetchPriority="high"
+        <motion.video
+          autoPlay
+          muted
+          loop
+          playsInline
           initial={{ scale: 1.1 }}
           animate={{ scale: 1 }}
           transition={{ duration: 8, ease: "easeOut" }}
           className="absolute inset-0 w-full h-full object-cover"
-        />
+        >
+          <source src="/assets/herobackgrounds/home/home.mp4" type="video/mp4" />
+        </motion.video>
 
         {/* Dark Luxury Overlay */}
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-black/50" />
 
         {/* Content */}
         <div className="relative z-10 h-full px-6 py-8 md:px-16">

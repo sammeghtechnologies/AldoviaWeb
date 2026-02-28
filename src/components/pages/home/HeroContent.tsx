@@ -15,21 +15,21 @@ const HeroContent: React.FC = () => {
           mx-auto
           max-w-[18ch]
           font-lust
-          text-4xl 
-          sm:text-5xl 
-          md:text-6xl 
-          lg:text-7xl 
+          text-2xl 
+          sm:text-2xl 
+          md:text-4xl 
+          lg:text-5xl 
           leading-[1.15] 
           tracking-tight
           text-[var(--color-secondary)]
         ">
-          Escape into Grandeur
+          Where Every Moment Is Crafted In Excellence
         </h1>
 
         <p className="
           !mt-5 
           mx-auto
-          max-w-[36ch]
+          max-w-[50ch]
           text-center
           font-['Inter']
           text-base
@@ -38,7 +38,7 @@ const HeroContent: React.FC = () => {
           text-white/90
           text-[var(--color-secondary)]
         ">
-          Grand Celebrations. Timeless Stays.
+          A destination resort 40 minutes from Bangalore, where world-class venues, refined dining, and timeless hospitality come together.
         </p>
 
         <div className="!mt-6 flex justify-center">

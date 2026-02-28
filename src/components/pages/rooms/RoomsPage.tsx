@@ -117,8 +117,8 @@ const RoomsPage = () => {
 
   return (
     <div ref={containerRef} className="relative w-full h-screen overflow-hidden bg-black" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-      <MenuFrame/>
-      <AnimatePresence initial={false} custom={direction} mode="popLayout">
+      <MenuFrame showBookNow={false} forceTopBarBackground={view !== 'hero'} />
+      <AnimatePresence initial={false} custom={direction}>
         <motion.div
           key={view}
           custom={direction}
@@ -138,8 +138,13 @@ const RoomsPage = () => {
               setActiveRoom={(room) => setRoomIndex(roomsData.findIndex(r => r.id === room.id))} 
             />
           )}
+
+          {view === 'footer' && (
+            <div className="h-full w-full overflow-y-auto bg-[#0F1A2A]">
+              <Footer />
+            </div>
+          )}
           
-          {view === 'footer' && <Footer />}
         </motion.div>
       </AnimatePresence>
     </div>

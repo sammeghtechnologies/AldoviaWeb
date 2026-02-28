@@ -214,16 +214,21 @@ export default function CarouselCards({
       <div className="relative z-10 !pt-8">
         <div className="z-[130] w-full">
           {tabs.length > 0 && activeTab && onTabChange && (
-            <div className="!px-2 md:!px-6 lg:!px-10">
-              <ScrollSelectTabs items={tabs} active={activeTab} onChange={onTabChange} />
+            <div className="!mt-10 !mb-4!px-2 md:!px-6 lg:!px-10">
+              <ScrollSelectTabs
+                items={tabs}
+                active={activeTab}
+                onChange={onTabChange}
+                disableDesktopShift
+              />
             </div>
           )}
         </div>
-        <div className="!pb-24">
-          <div className="mx-auto w-full max-w-[1500px] !px-2 md:!px-6 lg:!px-10">
-            <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,620px)_minmax(0,760px)] lg:justify-center lg:items-start lg:justify-items-center lg:gap-10 lg:translate-x-32">
+        <div className="!pb-24 !mt-15">
+          <div className="!mx-auto !w-full !max-w-[1240px] !px-2 md:!px-6 lg:!px-0">
+            <div className="!flex !flex-col !items-center !gap-4 lg:!grid lg:!grid-cols-[minmax(0,600px)_minmax(0,600px)] lg:!items-start lg:!justify-center lg:!justify-items-center lg:!gap-8">
               <motion.div
-                className="z-[120] w-full lg:max-w-[620px] lg:translate-y-10"
+                className="z-[120] !w-full !max-w-[600px] lg:translate-y-6"
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true, amount: 0.3 }}
@@ -306,14 +311,14 @@ export default function CarouselCards({
                     progressTrackColor="rgba(255, 255, 255, 0.22)"
                     progressFillColor="var(--color-secondary)"
                     buttonColor="var(--color-secondary)"
-                    iconColor="var(--color-primary)"
+                    iconColor="var(--color-secondary)"
                     className="!flex !mt-4 !max-w-none !px-0 !justify-center !gap-6"
                     progressBarClassName="w-[180px] max-w-[180px] shrink-0"
                   />
                 )}
               </motion.div>
 
-              <div className="!mt-1 w-full lg:!mt-0 lg:max-w-[760px]">
+              <div className="!mt-1 !w-full !max-w-[600px] lg:!mt-0">
                 <VenueInfo
                   contentKey={activeTab ?? activeItem.id}
                   title={activeItem.title}
