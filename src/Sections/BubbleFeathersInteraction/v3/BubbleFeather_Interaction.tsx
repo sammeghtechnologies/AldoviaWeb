@@ -10,6 +10,7 @@ import CameraFocusController from "../../../components/CameraFocusController/Cam
 import RoomDetailsPanel from "../../../components/pages/home/RoomDetailsPanel";
 import { roomData } from "../../../components/roomDetailsPanel/RoomData";
 import NaturalFeather from "../../../components/NaturalFeather/NaturalFeather";
+import WaterSurface from "../../../components/WaterSurface/WaterSurface";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -54,6 +55,8 @@ const BubbleFeather_Interaction = ({ }: any) => {
   const [focusTarget, setFocusTarget] = useState<THREE.Vector3 | null>(null);
   const [burstAll, setBurstAll] = useState(false); 
   const [zoomActive, setZoomActive] = useState(false); 
+  const [fallProgress, setFallProgress] = useState(0);
+  const [swanProgress, setSwanProgress] = useState(0);
   
   const feather3Ref = useRef<any>(null);
 
@@ -71,6 +74,17 @@ const BubbleFeather_Interaction = ({ }: any) => {
     if (scrollY > 850) setZoomActive(true);
     else setZoomActive(false);
 
+    // 3. WATER SURFACE + RIPPLE PHASE
+    const riseStart = 880;
+    const riseEnd = 1500;
+    const riseRaw = THREE.MathUtils.clamp((scrollY - riseStart) / (riseEnd - riseStart), 0, 1);
+    const riseEase = riseRaw * riseRaw * (3 - 2 * riseRaw);
+    setFallProgress(riseEase);
+
+    const swanStart = 1650;
+    const swanEnd = 2300;
+    const swanRaw = THREE.MathUtils.clamp((scrollY - swanStart) / (swanEnd - swanStart), 0, 1);
+    setSwanProgress(swanRaw * swanRaw * (3 - 2 * swanRaw));
   };
 
   const enableScrolling = () => {
@@ -116,9 +130,11 @@ const handleBubbleClick = (id: number, target: THREE.Vector3) => {
             <Lightformer form="rect" intensity={80} position={[0, -36, -74]} scale={[100, 1, 1]} target={[0, 0, 0]} />
           </Environment>
           <ambientLight intensity={1.5} /><directionalLight position={[10, 10, 10]} intensity={4} />
+          <pointLight position={[0, 1.6, 4]} intensity={1.4} color="#d9f1ff" distance={20} decay={2} />
+          <spotLight position={[-4, 6, 8]} angle={0.34} penumbra={1} intensity={1.2} color="#e8f6ff" />
           
           <group>
-{/* <WaterSurface id3Ref={feather3Ref} />             */}
+            <WaterSurface fallProgress={fallProgress} swanProgress={swanProgress} id3Ref={feather3Ref} />
             <NaturalFeather id={1} variant="main" startPos={[0, 2, 0]} targetPos={[1.5, -4.5, 0]} started={started} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} />
             <NaturalFeather id={2} variant="small-drag" startPos={[-2, 3, -2]} targetPos={[-3.5, -5.5, -1]} started={started} delay={0.6} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} />
             <NaturalFeather ref={feather3Ref} id={3} variant="upper-pendulum" startPos={[4, 5, -3]} targetPos={[-1, 1.5, -2]} started={started} delay={0.3} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} />
@@ -133,5 +149,5 @@ const handleBubbleClick = (id: number, target: THREE.Vector3) => {
   );
 };
 useGLTF.preload("/models/feather_2.glb");
-useGLTF.preload("/models/swan.glb");
+useGLTF.preload("/models/Swan_anim_v13.glb");
 export default BubbleFeather_Interaction;

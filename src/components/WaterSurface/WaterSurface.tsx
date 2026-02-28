@@ -8,6 +8,7 @@ import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
 const WATER_LEVEL = 0.95;
 const START_OFFSET = 5.0;
 const RING_COUNT = 10;
+const MIRROR_SWAN_SCALE = 320;
 
 const WaterSurface = ({
   fallProgress,
@@ -23,7 +24,7 @@ const WaterSurface = ({
   const ringRefs = useRef<THREE.Mesh[]>([]);
   const swanGroupRef = useRef<THREE.Group>(null!);
 
-  const { scene: swanScene, animations } = useGLTF("/models/swan.glb") as any;
+  const { scene: swanScene, animations } = useGLTF("/models/Swan_anim_v13.glb") as any;
 
   // random seeds for each ripple ring
   const ringSeeds = useMemo(
@@ -42,24 +43,27 @@ const WaterSurface = ({
       uniforms: {
         uTime: { value: 0 },
         uOpacity: { value: 1 },
-        uColor: { value: new THREE.Color("#ffffff") },
-        uDarkColor: { value: new THREE.Color("#000000") },
+        uColor: { value: new THREE.Color("#9fb8c8") },
+        uDarkColor: { value: new THREE.Color("#111a22") },
+        uLightDir: { value: new THREE.Vector3(-0.35, 0.88, 0.42).normalize() },
       },
       vertexShader: `
         uniform float uTime;
         varying vec2 vUv;
         varying float vWave;
+        varying float vDist;
 
         void main() {
           vUv = uv;
           vec3 pos = position;
 
           float dist = length(pos.xy);
+          vDist = dist;
 
           // slower and smoother wave
-          float wave = sin(dist * 22.0 - uTime * 2.0) * 0.18;
+          float wave = sin(dist * 22.0 - uTime * 2.0) * 0.13;
           // secondary ripple randomness
-          float wave2 = cos(dist * 12.0 - uTime * 1.2) * 0.15;
+          float wave2 = cos(dist * 12.0 - uTime * 1.2) * 0.11;
           // fade outward
           float fade = smoothstep(1.6, 0.0, dist);
 
@@ -73,9 +77,11 @@ const WaterSurface = ({
         uniform float uOpacity;
         uniform vec3 uColor;
         uniform vec3 uDarkColor;
+        uniform vec3 uLightDir;
 
         varying vec2 vUv;
         varying float vWave;
+        varying float vDist;
 
         void main() {
           float dist = distance(vUv, vec2(0.5));
@@ -84,11 +90,20 @@ const WaterSurface = ({
           float ring = smoothstep(0.50, 0.47, dist) - smoothstep(0.47, 0.44, dist);
           // fade outer edge
           float fade = smoothstep(0.9, 0.2, dist);
+          float ridge = smoothstep(0.515, 0.485, dist) - smoothstep(0.485, 0.435, dist);
+          float crown = smoothstep(0.458, 0.445, dist) * (1.0 - smoothstep(0.445, 0.392, dist));
+          float innerDepth = smoothstep(0.40, 0.0, dist);
 
-          // mix white + dark tint for realistic ripple
-          vec3 finalColor = mix(uDarkColor, uColor, ring);
+          vec2 centered = vUv - vec2(0.5);
+          vec3 pseudoNormal = normalize(vec3(centered * 4.2, 0.72 + vWave * 1.8));
+          float diffuse = max(dot(pseudoNormal, normalize(uLightDir)), 0.0);
+          float rim = pow(1.0 - clamp(abs(pseudoNormal.z), 0.0, 1.0), 2.35);
 
-          gl_FragColor = vec4(finalColor, ring * fade * uOpacity);
+          vec3 waterDepthTint = mix(uDarkColor * 1.15, uColor, ring * 0.9) + vec3(0.02, 0.03, 0.05) * innerDepth;
+          vec3 litColor = waterDepthTint * (0.5 + diffuse * 0.75) + vec3(0.85, 0.9, 0.95) * (rim * 0.2 + crown * 0.12);
+          float alpha = (ring * 0.75 + ridge * 0.42 + crown * 0.16) * fade * uOpacity;
+
+          gl_FragColor = vec4(litColor, alpha);
         }
       `,
     });
@@ -113,7 +128,7 @@ const WaterSurface = ({
   const mixer = useMemo(() => new THREE.AnimationMixer(swanModel), [swanModel]);
   const hasStartedAnim = useRef(false);
 
-  const ringGeo = useMemo(() => new THREE.RingGeometry(0.47, 0.53, 128, 4), []);
+  const ringGeo = useMemo(() => new THREE.RingGeometry(0.47, 0.53, 192, 12), []);
 
   useFrame((state, delta) => {
     mixer.update(delta);
@@ -178,7 +193,7 @@ const WaterSurface = ({
         swanGroupRef.current.rotation.z = tiltZ;
 
         swanGroupRef.current.position.set(baseX + sway, baseY + bobbing, baseZ);
-        swanGroupRef.current.scale.setScalar(2.1);
+        swanGroupRef.current.scale.setScalar(MIRROR_SWAN_SCALE);
 
         swanGroupRef.current.traverse((child: any) => {
           if (child.isMesh) {
@@ -198,7 +213,7 @@ const WaterSurface = ({
       if (swanGroupRef.current) swanGroupRef.current.visible = false;
     }
 
-    materialRef.current.opacity = THREE.MathUtils.lerp(0.04, 0.26, contactEase);
+    materialRef.current.opacity = THREE.MathUtils.lerp(0.03, 0.18, contactEase);
 
     // ✅ Random Ripples Animation
     ringRefs.current.forEach((ring, i) => {
@@ -206,7 +221,7 @@ const WaterSurface = ({
 
       const mat = ring.material as any;
       // 🔥 FIX: Removed the +5 on Z so the ripples perfectly wrap around the feather impact
-      ring.position.set(worldPos.x, currentWaterY + 0.05, worldPos.z);
+      ring.position.set(worldPos.x, currentWaterY + 0.08, worldPos.z);
 
       if (isTouching || contactEase > 0.08) {
         ring.visible = true;
@@ -216,7 +231,7 @@ const WaterSurface = ({
         const randomOffset = ringSeeds[i];
         const t = ((time * speed) + i * 0.22 + randomOffset) % 1;
 
-        const scale = THREE.MathUtils.lerp(0.22, 18, t);
+        const scale = THREE.MathUtils.lerp(0.22, 14, t);
         const stretch = 1 + Math.sin(time * 0.8 + randomOffset) * 0.15;
 
         ring.scale.set(scale * stretch, scale, 1);
@@ -225,13 +240,13 @@ const WaterSurface = ({
         const proximityFactor = 1 - THREE.MathUtils.smoothstep(verticalDist, -0.12, 0.75);
         const contactBoost = THREE.MathUtils.lerp(0.35, 1.0, contactEase);
 
-        mat.uniforms.uOpacity.value = fade * proximityFactor * contactBoost * 0.78;
+        mat.uniforms.uOpacity.value = fade * proximityFactor * contactBoost * 0.52;
       } else {
         ring.visible = false;
       }
     });
 
-    materialRef.current.distortion = THREE.MathUtils.lerp(0.06, 0.22, contactEase);
+    materialRef.current.distortion = THREE.MathUtils.lerp(0.05, 0.14, contactEase);
   });
 
   return (
