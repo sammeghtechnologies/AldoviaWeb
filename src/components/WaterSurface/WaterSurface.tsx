@@ -146,12 +146,10 @@ const WaterSurface = ({
 
     const isTouching = verticalDist < 0.4;
 
-    // 🔥 NEW MATH: Delays the Swan slightly (-0.1), then makes it fade in 5x faster! (Small Slide Scrollbar)
     const fastSwanProgress = Math.max(0, Math.min(1, (swanProgress - 0.1) * 5.0));
 
     materialRef.current.mixStrength = THREE.MathUtils.lerp(5.0, 0.0, fastSwanProgress);
 
-    // ✅ Swan show/fade based strictly on the FASTER scroll step AND touching the water
     if (fastSwanProgress > 0 && isTouching) {
       if (animations.length > 0 && !hasStartedAnim.current) {
         const action = mixer.clipAction(animations[0]);
@@ -163,8 +161,9 @@ const WaterSurface = ({
       if (swanGroupRef.current) {
         swanGroupRef.current.visible = true;
 
-        const baseX = worldPos.x - 0.2;
-        const baseY = currentWaterY - 1.1;
+        // 🔥 FIX: Set X and Z to exactly match worldPos without extra offsets!
+        const baseX = worldPos.x;
+        const baseY = currentWaterY - 0.8;
         const baseZ = worldPos.z;
 
         const time = state.clock.getElapsedTime();
@@ -183,14 +182,9 @@ const WaterSurface = ({
         swanGroupRef.current.traverse((child: any) => {
           if (child.isMesh) {
             child.material.transparent = true;
-            
-            // 🔥 NEW MATH: Higher target opacity (0.8 instead of 0.25) so it stands out stronger
             child.material.opacity = THREE.MathUtils.lerp(0, 0.8, fastSwanProgress);
-            
-            // 🔥 MORE WHITE: Adds a white emissive glow so it stops looking grey in the dark water
             child.material.emissive = new THREE.Color("#ffffff");
             child.material.emissiveIntensity = 0.4;
-            
             child.material.depthTest = false;
           }
         });
@@ -210,6 +204,7 @@ const WaterSurface = ({
       if (!ring) return;
 
       const mat = ring.material as any;
+      // 🔥 FIX: Removed the +5 on Z so the ripples perfectly wrap around the feather impact
       ring.position.set(worldPos.x, currentWaterY + 0.05, worldPos.z);
 
       if (isTouching) {
@@ -220,9 +215,7 @@ const WaterSurface = ({
         const randomOffset = ringSeeds[i];
         const t = ((time * speed) + i * 0.22 + randomOffset) % 1;
 
-        // random ripple scaling
         const scale = THREE.MathUtils.lerp(0.3, 15, t);
-        // slight random stretch
         const stretch = 1 + Math.sin(time * 0.8 + randomOffset) * 0.15;
 
         ring.scale.set(scale * stretch, scale, 1);
@@ -241,11 +234,10 @@ const WaterSurface = ({
 
   return (
     <>
-      {/* Water Plane */}
       <mesh
         ref={meshRef}
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, WATER_LEVEL - START_OFFSET, 0]}
+        position={[0, WATER_LEVEL - START_OFFSET, 3]}
       >
         <planeGeometry args={[100, 100]} />
         <MeshReflectorMaterial
@@ -265,12 +257,10 @@ const WaterSurface = ({
         />
       </mesh>
 
-      {/* Swan */}
       <group ref={swanGroupRef} visible={false} renderOrder={100}>
         <primitive object={swanModel} rotation={[Math.PI, Math.PI / -2, 0]} />
       </group>
 
-      {/* Ripple Rings */}
       {Array.from({ length: RING_COUNT }).map((_, i) => (
         <mesh
           key={i}
