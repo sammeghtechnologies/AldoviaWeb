@@ -48,7 +48,8 @@ const NaturalFeather = forwardRef(({
         case "small-drag": return 0.35;
         case "high-drag-zig": return 0.32;
         case "side-roll-upper": return 0.28;
-        case "mid-drift": return 0.30;
+        case "mid-drift": return 0.35;
+        case "upper-pendulum": return 0.45;
         default: return 0.45;
     }
   };
@@ -132,12 +133,6 @@ const NaturalFeather = forwardRef(({
         rotTimelineRef.current.play();
       }
     }
-
-    if (!showBurst) {
-      const time = state.clock.getElapsedTime() * 2; 
-      rotateRef.current.position.x = Math.sin(time + id) * 0.02;
-      rotateRef.current.position.y = Math.cos(time + id) * 0.02;
-    }
     
     if (isBurst && rotateRef.current) {
       rotateRef.current.rotation.x = THREE.MathUtils.lerp(rotateRef.current.rotation.x, rotation[0], 0.1);
@@ -177,7 +172,15 @@ const NaturalFeather = forwardRef(({
            .to(groupRef.current.position, { x: "-=2", y: THREE.MathUtils.lerp(startPos[1] + 3, targetPos[1], 0.5), duration: 2.5, ease: "sine.inOut" })
            .to(groupRef.current.position, { x: "+=1.5", y: THREE.MathUtils.lerp(startPos[1] + 3, targetPos[1], 0.8), duration: 2.5, ease: "sine.inOut" })
            .to(groupRef.current.position, { y: targetPos[1], x: targetPos[0], duration: 2.5, ease: "slow(0.5, 0.8, false)" });
-      rotTl.to(rotateRef.current.rotation, { x: Math.PI * 0.15, y: Math.PI * 1.2, z: Math.PI * 0.08, duration: 11, ease: "power2.out" });
+      
+      // ✅ CHANGED: Now perfectly matches the starting rotation of Phase 3
+      rotTl.to(rotateRef.current.rotation, { 
+          x: Math.PI / 1.8, 
+          y: Math.PI * 2.2, 
+          z: Math.PI / 2.8, 
+          duration: 11, 
+          ease: "power2.out" 
+      });
     } else if (variant === "small-drag") {
       posTl.to(groupRef.current.position, { x: startPos[0] - 2.5, y: startPos[1] + 4, z: startPos[2] + 1, duration: 1.0, ease: "power1.out" })
            .to(groupRef.current.position, { x: 6.0, y: THREE.MathUtils.lerp(startPos[1] + 4, targetPos[1], 0.3), duration: 11 / 3, ease: "sine.inOut" })
