@@ -25,6 +25,7 @@ const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 /* =========================================================
    💦 WATER WALLS
 ========================================================= */
+
 const SplashWalls = ({ splashProgress }: { splashProgress: number }) => {
   const count = 6;
   const meshRef = useRef<THREE.InstancedMesh>(null);
@@ -53,7 +54,13 @@ const SplashWalls = ({ splashProgress }: { splashProgress: number }) => {
       const activeT = t / duration;
       const heightCurve = Math.sin(activeT * Math.PI);
       let height = heightCurve * (6.5 + layerIndex * 2.5);
+      
       let outwardExpansion = 1.0 + activeT * 0.35;
+
+      if (activeT > 0.4) {
+        const flareProgress = (activeT - 0.4) / 0.6; 
+        outwardExpansion += Math.pow(flareProgress, 1.5) * 0.6; 
+      }
 
       if (isInner) {
         outwardExpansion *= 0.45;
@@ -117,68 +124,94 @@ const SplashWalls = ({ splashProgress }: { splashProgress: number }) => {
         `vec4 diffuseColor = vec4( diffuse, opacity );`,
         `vec4 diffuseColor = vec4( diffuse, opacity );
        float angle = atan(vPos.z, vPos.x);
+       
+       // --- HOLE CATEGORIZATION ---
+       // Use a pseudo-random hash based on angle to bucket holes
+       float holeBucket = fract(sin(floor(angle * 8.0) * 12.9898) * 43758.5453);
+       
+       float tearNoise = sin(angle * 15.0 + uProgress * 5.0) * cos(vMyUv.y * 15.0 - uProgress * 5.0);
+       tearNoise = tearNoise * 0.5 + 0.5;
+
+       float holes = 0.0;
+       float holeRims = 0.0;
+       float rimWidth = 0.04; // Tightened border for 3D look
+
+       if (holeBucket < 0.3) {
+         // 30% DYNAMIC HOLES: Threshold moves with scroll
+         float dynThreshold = mix(0.95, 0.45, uProgress);
+         holes = smoothstep(dynThreshold, dynThreshold + 0.1, tearNoise);
+         holeRims = smoothstep(dynThreshold - rimWidth, dynThreshold, tearNoise) * smoothstep(dynThreshold + 0.1, dynThreshold + 0.1 - rimWidth, tearNoise);
+       } 
+       else if (holeBucket < 0.4) {
+         // 10% STATIC HOLES: Fixed size
+         float staticThreshold = 0.72;
+         holes = smoothstep(staticThreshold, staticThreshold + 0.1, tearNoise);
+         holeRims = smoothstep(staticThreshold - rimWidth, staticThreshold, tearNoise) * smoothstep(staticThreshold + 0.1, staticThreshold + 0.1 - rimWidth, tearNoise);
+       }
+       // 60% REMOVED: holes remains 0.0
+
        float wave1 = sin(angle * 3.0);
        float wave2 = sin(angle * 7.0);
        float combinedWaves = (wave1 * 0.7 + wave2 * 0.3) * 0.5 + 0.5;
        float lobes = pow(combinedWaves, 1.5);
        float edgeLimit = 0.20 + (0.55 * lobes);
        float bodyAlpha = smoothstep(edgeLimit + 0.15, edgeLimit - 0.05, vMyUv.y);
-       float tearNoise = sin(angle * 15.0 + uProgress * 5.0) * cos(vMyUv.y * 15.0 - uProgress * 5.0);
-       tearNoise = tearNoise * 0.5 + 0.5;
-       float holes = smoothstep(0.7, 0.9, tearNoise); 
-       float holeRims = smoothstep(0.6, 0.7, tearNoise) * smoothstep(0.9, 0.7, tearNoise);
+
        float beadNoise = sin(angle * 50.0 - uProgress * 20.0) * cos(vMyUv.y * 40.0 + uProgress * 10.0);
        beadNoise = smoothstep(0.85, 1.0, beadNoise * 0.5 + 0.5);
        float holeZone = smoothstep(0.1, edgeLimit - 0.05, vMyUv.y);
+       
        bodyAlpha = max(0.0, bodyAlpha - (holes * holeZone));
-       float wallDrops = (holeRims * 1.5 + beadNoise * 2.0) * holeZone;
-       float heavyRim = smoothstep(edgeLimit - 0.10, edgeLimit, vMyUv.y) * smoothstep(edgeLimit + 0.10, edgeLimit, vMyUv.y);
+       
+       float wallDrops = (holeRims * 1.8 + beadNoise * 2.2) * holeZone;
+       float heavyRim = smoothstep(edgeLimit - 0.08, edgeLimit, vMyUv.y) * smoothstep(edgeLimit + 0.08, edgeLimit, vMyUv.y);
+       
        float dropZone = smoothstep(edgeLimit, edgeLimit + 0.12, vMyUv.y) * smoothstep(edgeLimit + 0.25, edgeLimit + 0.08, vMyUv.y);
        float dropNoise = sin(angle * 30.0) * 0.5 + 0.5; 
        float crownDrops = dropZone * smoothstep(0.4, 1.0, lobes) * smoothstep(0.4, 1.0, dropNoise); 
+       
        float bottomAlpha = smoothstep(0.0, 0.1, vMyUv.y);
        float weightGradient = mix(1.0, 0.5, vMyUv.y);
        float finalAlpha = (max(0.0, bodyAlpha * 0.25) + (heavyRim * 2.0) + (crownDrops * 2.5) + wallDrops) * bottomAlpha * weightGradient;
-       diffuseColor.rgb = vec3(1.0);
+       
+       // --- 3D SPECULAR LOOK ---
+       // Use high RGB values (> 1.0) on the rims to simulate depth and light refraction
+       vec3 waterTint = vec3(0.9, 0.96, 1.0);
+       vec3 rimHighlight = vec3(1.6, 1.8, 2.0) * (holeRims + heavyRim * 0.5 + crownDrops);
+       diffuseColor.rgb = waterTint + rimHighlight;
+       
        diffuseColor.a *= finalAlpha;
       `
       );
   };
 
   return (
-    <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
+    <instancedMesh ref={meshRef} args={[undefined, undefined, count]} frustumCulled={false}>
       <cylinderGeometry args={[baseRadius * 1.05, baseRadius, 1, 64, 12, true]} />
       <meshPhysicalMaterial
         color="#eaf6ff"
-
-        /* ---- REAL WATER ---- */
-        transmission={0.92}        // refraction
+        transmission={0.92}
         thickness={2.0}
         ior={1.33}
-
         roughness={0.03}
         metalness={0}
-
         clearcoat={1}
         clearcoatRoughness={0}
-
         envMapIntensity={3}
-
         attenuationColor="#bfe3ff"
         attenuationDistance={0.6}
-
         transparent
         opacity={1}
-
-        depthWrite={true}          // ⭐ IMPORTANT
+        depthWrite={true}
         depthTest={true}
-
         side={THREE.DoubleSide}
         onBeforeCompile={onBeforeCompile}
       />
     </instancedMesh>
   );
 };
+
+
 
 /* =========================================================
    🦢 SWAN (INTERACTIVE + CAMERA TRACKING)
@@ -479,7 +512,7 @@ const WaterPlane = ({ splashProgress }: { splashProgress: number }) => {
         vec2 wakeUV = perspectiveUV - vec2(0.0, uTakeoff * 0.2); 
         float wakeDist = length(wakeUV);
         
-        // 🔥 2. EXTREME TURBULENCE
+        // 🔥 2. EXTREME TURBULENCE (Tamed down for the swan)
         float turbulence = (sin(wakeUV.x * 200.0 + uTime * 30.0) * cos(wakeUV.y * 200.0 - uTime * 25.0)) * splashPower;
         float wakeMask = 1.0 - smoothstep(0.0, 0.3 + (uTakeoff * 1.5), wakeDist);
         
@@ -492,25 +525,34 @@ const WaterPlane = ({ splashProgress }: { splashProgress: number }) => {
         float ringFade = smoothstep(0.0, 0.02, distCenter) * (1.0 - smoothstep(0.05, 0.20, distCenter)) * (1.0 - splashPower); 
         vec2 waveDistortion = normalize(perspectiveUV + vec2(0.0001)) * cos(ringPhase) * 0.0015 * ringFade;
         
-        // 🔥 3. HEAVY DISTORTION
-        vec2 wakeDistortion = normalize(wakeUV + vec2(0.0001)) * (turbulence * wakeMask) * 0.08; 
+        // 🔥 3. HEAVY DISTORTION (Reduced from 0.08 to 0.02 for a calmer takeoff)
+        vec2 wakeDistortion = normalize(wakeUV + vec2(0.0001)) * (turbulence * wakeMask) * 0.02; 
         
-        // 🔥 4. SPLASH CHAOS
-        vec2 splashChaos = vec2(sin(uTime * 15.0 + baseUV.y * 100.0), cos(uTime * 15.0 + baseUV.x * 100.0)) * splashPower * 0.015;
+        // 🔥 4. SPLASH CHAOS (Reduced from 0.015 to 0.003)
+        vec2 splashChaos = vec2(sin(uTime * 15.0 + baseUV.y * 100.0), cos(uTime * 15.0 + baseUV.x * 100.0)) * splashPower * 0.003;
 
-        // 🔥 5. DROPLET IMPACTS
-        vec2 grid1 = fract(perspectiveUV * 18.0 + uTime * 0.1) - 0.5;
-        vec2 grid2 = fract(perspectiveUV * 26.0 - uTime * 0.15 + vec2(0.4, 0.6)) - 0.5;
-        float d1 = length(grid1);
-        float d2 = length(grid2);
+        // 🔥 5. RAINDROP IMPACTS (Tiny, scattered rainy ripples)
+        // We create 3 separate, highly dense grids to simulate random drops across the surface
+        vec2 dropGrid1 = fract(perspectiveUV * 40.0 + uTime * 0.2) - 0.5;
+        vec2 dropGrid2 = fract(perspectiveUV * 65.0 - uTime * 0.3 + vec2(0.3, 0.7)) - 0.5;
+        vec2 dropGrid3 = fract(perspectiveUV * 90.0 + uTime * 0.15 + vec2(0.6, 0.2)) - 0.5;
         
-        float rip1 = sin(d1 * 80.0 - uTime * 50.0) * smoothstep(0.4, 0.1, d1);
-        float rip2 = sin(d2 * 100.0 - uTime * 60.0) * smoothstep(0.3, 0.0, d2);
+        float dropD1 = length(dropGrid1);
+        float dropD2 = length(dropGrid2);
+        float dropD3 = length(dropGrid3);
         
-        vec2 dropDistortion = (normalize(grid1 + 0.0001) * rip1 + normalize(grid2 + 0.0001) * rip2) * splashPower * wakeMask * 0.025;
+        // High frequency sine waves mapped tightly to the centers of the grids
+        float rainRip1 = sin(dropD1 * 150.0 - uTime * 60.0) * smoothstep(0.15, 0.02, dropD1);
+        float rainRip2 = sin(dropD2 * 200.0 - uTime * 80.0) * smoothstep(0.1, 0.01, dropD2);
+        float rainRip3 = sin(dropD3 * 250.0 - uTime * 90.0) * smoothstep(0.08, 0.005, dropD3);
+        
+        // Combine them into a subtle ambient rain effect (multiplier 0.003 controls rain strength)
+        vec2 rainDistortion = (normalize(dropGrid1 + 0.0001) * rainRip1 + 
+                               normalize(dropGrid2 + 0.0001) * rainRip2 + 
+                               normalize(dropGrid3 + 0.0001) * rainRip3) * 0.003;
 
         // Combine all physics
-        vec2 totalDistortion = vec2(ambientRipple * rippleStrength) + waveDistortion + wakeDistortion + splashChaos + dropDistortion;
+        vec2 totalDistortion = vec2(ambientRipple * rippleStrength) + waveDistortion + wakeDistortion + splashChaos + rainDistortion;
 
         vec4 base = texture2DProj(tDiffuse, vec4(vUv.xy + (totalDistortion * vUv.w), vUv.zw));
         `
