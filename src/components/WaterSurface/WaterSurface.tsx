@@ -9,6 +9,8 @@ const WATER_LEVEL = 0.95;
 const START_OFFSET = 5.0;
 const RING_COUNT = 10;
 const MIRROR_SWAN_SCALE = 320;
+const MIRROR_FEATHER_SCALE = 0.1;
+const MIRROR_FEATHER_WIDTH_SCALE = 1.45;
 
 const WaterSurface = ({
   fallProgress,
@@ -23,7 +25,11 @@ const WaterSurface = ({
   const materialRef = useRef<any>(null!);
   const ringRefs = useRef<THREE.Mesh[]>([]);
   const swanGroupRef = useRef<THREE.Group>(null!);
-
+  const shadowSwanGroupRef = useRef<THREE.Group>(null!);
+  const featherMirrorRef = useRef<THREE.Group>(null!);
+  const featherMirrorCloneRef = useRef<THREE.Object3D | null>(null);
+  const hasTouchedWater = useRef(false);
+  
   const { scene: swanScene, animations } = useGLTF("/models/Swan_anim_v13.glb") as any;
 
   // random seeds for each ripple ring
@@ -124,6 +130,11 @@ const WaterSurface = ({
 
     return clone;
   }, [swanScene, animations]);
+  const shadowSwanModel = useMemo(() => SkeletonUtils.clone(swanScene), [swanScene]);
+  const mirrorFlipQuat = useMemo(
+    () => new THREE.Quaternion().setFromEuler(new THREE.Euler(0, THREE.MathUtils.degToRad(60), 0)),
+    []
+  );
 
   const mixer = useMemo(() => new THREE.AnimationMixer(swanModel), [swanModel]);
   const hasStartedAnim = useRef(false);
@@ -150,6 +161,20 @@ const WaterSurface = ({
     );
 
     if (!id3Ref?.current) return;
+    if (featherMirrorRef.current && !featherMirrorCloneRef.current) {
+      const clone = SkeletonUtils.clone(id3Ref.current);
+      // Isolate materials so edits affect only mirror clone.
+      clone.traverse((child: any) => {
+        if (!child.isMesh || !child.material) return;
+        if (Array.isArray(child.material)) {
+          child.material = child.material.map((mat: any) => (mat?.clone ? mat.clone() : mat));
+        } else if (child.material.clone) {
+          child.material = child.material.clone();
+        }
+      });
+      featherMirrorCloneRef.current = clone;
+      featherMirrorRef.current.add(clone);
+    }
 
     id3Ref.current.updateMatrixWorld();
 
@@ -161,12 +186,14 @@ const WaterSurface = ({
 
     const contactEase = THREE.MathUtils.smoothstep(fallProgress, 0.48, 0.72);
     const isTouching = verticalDist < 0.55 || contactEase > 0.3;
+    const touchFactor = 1.0 - THREE.MathUtils.smoothstep(0.02, 0.35, Math.max(verticalDist, 0.0));
+    const morphToSwan = THREE.MathUtils.smoothstep(swanProgress, 0.06, 0.58);
 
     const fastSwanProgress = Math.max(0, Math.min(1, (swanProgress - 0.1) * 5.0));
 
     materialRef.current.mixStrength = THREE.MathUtils.lerp(5.0, 0.0, fastSwanProgress);
 
-    if (fastSwanProgress > 0 && isTouching) {
+    if ((fastSwanProgress > 0 || morphToSwan > 0.05) && isTouching) {
       if (animations.length > 0 && !hasStartedAnim.current) {
         const action = mixer.clipAction(animations[0]);
         action.reset().play();
@@ -198,7 +225,8 @@ const WaterSurface = ({
         swanGroupRef.current.traverse((child: any) => {
           if (child.isMesh) {
             child.material.transparent = true;
-            child.material.opacity = THREE.MathUtils.lerp(0, 0.8, fastSwanProgress);
+            const swanAlpha = THREE.MathUtils.lerp(0, 0.85, THREE.MathUtils.clamp(Math.max(fastSwanProgress, morphToSwan), 0, 1));
+            child.material.opacity = swanAlpha;
             child.material.emissive = new THREE.Color("#ffffff");
             child.material.emissiveIntensity = 0.4;
             child.material.depthTest = false;
@@ -212,6 +240,87 @@ const WaterSurface = ({
       }
       if (swanGroupRef.current) swanGroupRef.current.visible = false;
     }
+
+    // Dark submerged/mirror swan under the feather (shadow layer)
+    if (shadowSwanGroupRef.current) {
+      const shadowVisibility = THREE.MathUtils.clamp(contactEase * morphToSwan * 1.35, 0, 0.65);
+      shadowSwanGroupRef.current.visible = shadowVisibility > 0.02;
+      shadowSwanGroupRef.current.position.set(worldPos.x, currentWaterY - 1.28, worldPos.z);
+      shadowSwanGroupRef.current.rotation.set(Math.PI, Math.PI / -2, 0);
+      shadowSwanGroupRef.current.scale.setScalar(MIRROR_SWAN_SCALE);
+      shadowSwanGroupRef.current.traverse((child: any) => {
+        if (child.isMesh && child.material) {
+          child.material.transparent = true;
+          child.material.opacity = shadowVisibility;
+          child.material.color = new THREE.Color("#050608");
+          child.material.emissive = new THREE.Color("#000000");
+          child.material.emissiveIntensity = 0;
+          child.material.roughness = 0.95;
+          child.material.metalness = 0;
+          child.material.depthTest = true;
+        }
+      });
+    }
+
+    // Feather mirror: appears only when feather is near/touching the water surface.
+  // Feather mirror (perfect planar reflection)
+if (featherMirrorRef.current && id3Ref.current) {
+  const mirrorVisibility = THREE.MathUtils.clamp(
+    touchFactor * (1 - morphToSwan) * 2.0,
+    0,
+    1
+  );
+
+  featherMirrorRef.current.visible = mirrorVisibility > 0.03;
+
+  // --- WORLD TRANSFORMS ---
+  const worldPos = new THREE.Vector3();
+  const worldQuat = new THREE.Quaternion();
+  const worldScale = new THREE.Vector3();
+
+  id3Ref.current.getWorldPosition(worldPos);
+  id3Ref.current.getWorldQuaternion(worldQuat);
+  id3Ref.current.getWorldScale(worldScale);
+
+  const waterY = meshRef.current.position.y;
+
+  // ✅ TRUE MIRROR POSITION
+  const mirroredY = 2 * waterY - worldPos.y;
+
+  featherMirrorRef.current.position.set(
+    worldPos.x,
+    mirroredY,
+    worldPos.z
+  );
+
+  // ✅ copy rotation
+  featherMirrorRef.current.quaternion.copy(worldQuat);
+
+  // ✅ vertical flip (reflection)
+  featherMirrorRef.current.scale.set(
+    worldScale.x * MIRROR_FEATHER_WIDTH_SCALE,
+    -worldScale.y,
+    worldScale.z
+  );
+
+  // Slight sink into water for realism
+  featherMirrorRef.current.position.y -= 0.12;
+
+  // --- MATERIAL LOOK ---
+  featherMirrorRef.current.traverse((child: any) => {
+    if (child.isMesh && child.material) {
+      child.material.transparent = true;
+      child.material.opacity = mirrorVisibility * 0.85;
+
+      child.material.color.set("#ffffff");
+      child.material.emissive.set("#000000");
+
+      child.material.roughness = 0.9;
+      child.material.metalness = 0;
+      child.material.depthTest = true;
+    }
+  });
+}
 
     materialRef.current.opacity = THREE.MathUtils.lerp(0.03, 0.18, contactEase);
 
@@ -276,6 +385,13 @@ const WaterSurface = ({
 
       <group ref={swanGroupRef} visible={false} renderOrder={100}>
         <primitive object={swanModel} rotation={[Math.PI, Math.PI / -2, 0]} />
+      </group>
+
+      <group ref={shadowSwanGroupRef} visible={false} renderOrder={10}>
+        <primitive object={shadowSwanModel} />
+      </group>
+
+      <group ref={featherMirrorRef} visible={false} renderOrder={12}>
       </group>
 
       {Array.from({ length: RING_COUNT }).map((_, i) => (

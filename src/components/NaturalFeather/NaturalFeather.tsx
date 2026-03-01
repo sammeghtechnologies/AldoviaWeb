@@ -103,10 +103,21 @@ const NaturalFeather = forwardRef(({
   }, [isBurst, burstAll]);
 
   useLayoutEffect(() => {
-    Object.values(materials).forEach((mat: any) => {
-      if (mat) { mat.color = new THREE.Color("#ffffff"); mat.toneMapped = false; mat.transparent = true; }
-    });
-  }, [materials]);
+    const applyMaterialStyle = (mat: any) => {
+      if (!mat) return;
+      mat.color = new THREE.Color("#ffffff");
+      mat.toneMapped = false;
+      mat.transparent = true;
+      mat.opacity = 1;
+      mat.depthWrite = true;
+      mat.needsUpdate = true;
+    };
+
+    Object.values(materials).forEach((mat: any) => applyMaterialStyle(mat));
+    applyMaterialStyle(nodes?.Mesh002?.material);
+    applyMaterialStyle(nodes?.Mesh003?.material);
+    applyMaterialStyle(nodes?.Cylinder021?.material);
+  }, [materials, nodes]);
 
   useFrame((state) => {
     if (!started) return;
