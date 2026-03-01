@@ -10,7 +10,7 @@ const START_OFFSET = 5.0;
 const RING_COUNT = 10;
 const MIRROR_SWAN_SCALE = 320;
 const MIRROR_FEATHER_SCALE = 0.1;
-const MIRROR_FEATHER_WIDTH_SCALE = 1.45;
+const MIRROR_FEATHER_WIDTH_SCALE = 1.50;
 
 const WaterSurface = ({
   fallProgress,
@@ -288,7 +288,7 @@ if (featherMirrorRef.current && id3Ref.current) {
   const mirroredY = 2 * waterY - worldPos.y;
 
   featherMirrorRef.current.position.set(
-    worldPos.x,
+    worldPos.x + 1.5,
     mirroredY,
     worldPos.z
   );
@@ -304,13 +304,13 @@ if (featherMirrorRef.current && id3Ref.current) {
   );
 
   // Slight sink into water for realism
-  featherMirrorRef.current.position.y -= 0.12;
+  featherMirrorRef.current.position.y -= 0;
 
   // --- MATERIAL LOOK ---
   featherMirrorRef.current.traverse((child: any) => {
     if (child.isMesh && child.material) {
       child.material.transparent = true;
-      child.material.opacity = mirrorVisibility * 0.85;
+      child.material.opacity = mirrorVisibility * 0.35;
 
       child.material.color.set("#ffffff");
       child.material.emissive.set("#000000");
