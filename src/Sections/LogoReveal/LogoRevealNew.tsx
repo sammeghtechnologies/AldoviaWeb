@@ -447,7 +447,7 @@ const SplashDroplets = ({ splashProgress }: { splashProgress: number }) => {
 ========================================================= */
 const WaterPlane = ({ splashProgress }: { splashProgress: number }) => {
   const reflectorRef = useRef<any>(null);
-  const timeRef = useRef(0);
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const geometry = useMemo(() => new THREE.PlaneGeometry(5000, 5000), []);
 
   const reflector = useMemo(() => {
@@ -474,18 +474,16 @@ const WaterPlane = ({ splashProgress }: { splashProgress: number }) => {
         vec2 perspectiveUV = vec2(baseUV.x - 0.0, (baseUV.y - (-0.15)) * 3.5);
         float distCenter = length(perspectiveUV);
         
-        // 🔥 1. SPLASH POWER: Stays extremely strong during the water wall formation
+        // 🔥 1. SPLASH POWER
         float splashPower = smoothstep(0.0, 0.15, uTakeoff) * (1.0 - smoothstep(0.8, 1.0, uTakeoff));
         vec2 wakeUV = perspectiveUV - vec2(0.0, uTakeoff * 0.2); 
         float wakeDist = length(wakeUV);
         
-        // 🔥 2. EXTREME TURBULENCE: High-frequency math to shatter the clear reflection
+        // 🔥 2. EXTREME TURBULENCE
         float turbulence = (sin(wakeUV.x * 200.0 + uTime * 30.0) * cos(wakeUV.y * 200.0 - uTime * 25.0)) * splashPower;
-        
-        // The distorted area rapidly expands outward with the water walls
         float wakeMask = 1.0 - smoothstep(0.0, 0.3 + (uTakeoff * 1.5), wakeDist);
         
-        // Standard ambient ripples (calm water)
+        // Standard ambient ripples (now tied to scroll)
         float ambientRipple = sin(baseUV.x * 120.0 + uTime * 1.0) * cos(baseUV.y * 120.0 + uTime * 1.0);
         float rippleStrength = mix(0.0005, 0.003, varRippleMask) * (1.0 - splashPower);
         
@@ -494,23 +492,21 @@ const WaterPlane = ({ splashProgress }: { splashProgress: number }) => {
         float ringFade = smoothstep(0.0, 0.02, distCenter) * (1.0 - smoothstep(0.05, 0.20, distCenter)) * (1.0 - splashPower); 
         vec2 waveDistortion = normalize(perspectiveUV + vec2(0.0001)) * cos(ringPhase) * 0.0015 * ringFade;
         
-        // 🔥 3. HEAVY DISTORTION: Massively shifts the UVs to break the reflection
+        // 🔥 3. HEAVY DISTORTION
         vec2 wakeDistortion = normalize(wakeUV + vec2(0.0001)) * (turbulence * wakeMask) * 0.08; 
         
-        // 🔥 4. SPLASH CHAOS: Adds an extra global wavy wobble while splash is active
+        // 🔥 4. SPLASH CHAOS
         vec2 splashChaos = vec2(sin(uTime * 15.0 + baseUV.y * 100.0), cos(uTime * 15.0 + baseUV.x * 100.0)) * splashPower * 0.015;
 
-        // 🔥 5. DROPLET IMPACTS: Creates tiny expanding rings simulating droplets hitting the surface!
+        // 🔥 5. DROPLET IMPACTS
         vec2 grid1 = fract(perspectiveUV * 18.0 + uTime * 0.1) - 0.5;
         vec2 grid2 = fract(perspectiveUV * 26.0 - uTime * 0.15 + vec2(0.4, 0.6)) - 0.5;
         float d1 = length(grid1);
         float d2 = length(grid2);
         
-        // High speed pulsating ripples mapped to the droplet grids
         float rip1 = sin(d1 * 80.0 - uTime * 50.0) * smoothstep(0.4, 0.1, d1);
         float rip2 = sin(d2 * 100.0 - uTime * 60.0) * smoothstep(0.3, 0.0, d2);
         
-        // Droplets only appear intensely inside the wake mask when splashing
         vec2 dropDistortion = (normalize(grid1 + 0.0001) * rip1 + normalize(grid2 + 0.0001) * rip2) * splashPower * wakeMask * 0.025;
 
         // Combine all physics
@@ -522,12 +518,14 @@ const WaterPlane = ({ splashProgress }: { splashProgress: number }) => {
       reflectorRef.current = { userData: { shader } };
     };
     return refl;
-  }, [geometry]);
+  }, [geometry, isMobile]);
 
-  useFrame((_, delta) => {
-    timeRef.current += delta;
+  useFrame(() => {
     if (reflectorRef.current?.userData.shader) {
-      reflectorRef.current.userData.shader.uniforms.uTime.value = timeRef.current;
+      // ✅ Multiply splashProgress so the waves scrub rapidly back and forth as you scroll
+      const scrollSpeedMultiplier = 30.0; 
+      
+      reflectorRef.current.userData.shader.uniforms.uTime.value = splashProgress * scrollSpeedMultiplier;
       reflectorRef.current.userData.shader.uniforms.uTakeoff.value = splashProgress;
     }
   });
