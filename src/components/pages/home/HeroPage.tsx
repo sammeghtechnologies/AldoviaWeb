@@ -50,7 +50,7 @@ const HeroPage: React.FC = () => {
         </motion.video>
 
         {/* Dark Luxury Overlay */}
-        <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-0 bg-black/20" />
 
         {/* Content */}
         <div className="relative z-10 h-full px-6 py-8 md:px-16">

@@ -202,14 +202,59 @@ const SwanModel = ({
   const [targetRotY, setTargetRotY] = useState(-Math.PI / 160);
 
   useLayoutEffect(() => {
+    const tuneMaterial = (material: THREE.Material) => {
+      const m = material as THREE.MeshStandardMaterial;
+      if (!("roughness" in m)) return;
+
+      m.flatShading = false;
+      m.metalness = 0.0;
+      m.roughness = 0.56;
+      m.envMapIntensity = 0.95;
+
+      if (m.map) {
+        m.map.colorSpace = THREE.SRGBColorSpace;
+        m.map.anisotropy = 8;
+      }
+
+      if (m.normalMap) {
+        m.normalScale = new THREE.Vector2(0.36, 0.36);
+      }
+
+      if (m.aoMap) {
+        m.aoMapIntensity = 0.9;
+      }
+
+      if (!m.map) {
+        m.color = new THREE.Color("#f4f4f1");
+      }
+
+      if ("clearcoat" in m) {
+        const physical = m as THREE.MeshPhysicalMaterial;
+        physical.clearcoat = 0.08;
+        physical.clearcoatRoughness = 0.65;
+        if ("sheen" in physical) {
+          physical.sheen = 0.2;
+          physical.sheenRoughness = 0.85;
+          physical.sheenColor = new THREE.Color("#f7f7f5");
+        }
+      }
+
+      m.needsUpdate = true;
+    };
+
     scene.traverse((child: any) => {
       if (child.isMesh) {
         child.castShadow = true;
         child.receiveShadow = true;
+        if (child.geometry?.attributes?.normal) {
+          child.geometry.computeVertexNormals();
+        }
         if (child.material) {
-          child.material.roughness = 0.4;
-          child.material.metalness = 0.0;
-          child.material.envMapIntensity = 1.5;
+          if (Array.isArray(child.material)) {
+            child.material.forEach((mat: THREE.Material) => tuneMaterial(mat));
+          } else {
+            tuneMaterial(child.material as THREE.Material);
+          }
         }
       }
     });
@@ -454,7 +499,7 @@ const WaterPlane = ({ splashProgress }: { splashProgress: number }) => {
     const refl = new Reflector(geometry, {
       textureWidth: isMobile ? 1024 : 2048,
       textureHeight: isMobile ? 1024 : 2048,
-      color: 0x808080,
+      color: 0x666666,
     });
     refl.rotation.x = -Math.PI / 2;
     refl.position.y = -15;
@@ -517,6 +562,8 @@ const WaterPlane = ({ splashProgress }: { splashProgress: number }) => {
         vec2 totalDistortion = vec2(ambientRipple * rippleStrength) + waveDistortion + wakeDistortion + splashChaos + dropDistortion;
 
         vec4 base = texture2DProj(tDiffuse, vec4(vUv.xy + (totalDistortion * vUv.w), vUv.zw));
+        base.rgb = mix(base.rgb, vec3(0.38), 0.20); // make mirror slightly gray
+        base.rgb *= 0.72; // reduce reflection opacity/strength
         `
       );
       reflectorRef.current = { userData: { shader } };
@@ -707,13 +754,40 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
         style={{ opacity: 0, visibility: "hidden" }}
       >
         <Canvas
-          gl={{ antialias: true, toneMapping: THREE.NoToneMapping, powerPreference: "high-performance" }}
-          onCreated={() => setIsReady(true)}
+          shadows
+          dpr={[1, 2]}
+          gl={{
+            antialias: true,
+            powerPreference: "high-performance",
+            toneMapping: THREE.ACESFilmicToneMapping,
+            outputColorSpace: THREE.SRGBColorSpace,
+          }}
+          onCreated={({ gl }) => {
+            gl.toneMappingExposure = 0.84;
+            gl.shadowMap.enabled = true;
+            gl.shadowMap.type = THREE.PCFSoftShadowMap;
+            setIsReady(true);
+          }}
         >
           <color attach="background" args={["#000000"]} />
-          <ambientLight intensity={0.2} />
-          <pointLight position={[10, 10, 10]} intensity={1.5} />
-          <spotLight position={[-10, 20, 10]} angle={0.2} penumbra={1} intensity={2} />
+          <hemisphereLight args={["#f4f6ff", "#0d1218", 0.1]} />
+          <directionalLight
+            position={[14, 20, 12]}
+            intensity={0.95}
+            color="#fff8ee"
+            castShadow
+            shadow-mapSize-width={2048}
+            shadow-mapSize-height={2048}
+            shadow-bias={-0.00008}
+          />
+          <directionalLight position={[-12, 10, 4]} intensity={0.3} color="#d8e5ff" />
+          <spotLight
+            position={[-8, 14, -12]}
+            angle={0.34}
+            penumbra={1}
+            intensity={0.45}
+            color="#eef4ff"
+          />
           {/* Base position is [0,0,70], interaction takes over Y via useFrame */}
           <PerspectiveCamera makeDefault position={[0, 0, 70]} fov={isMobile ? 65 : 40} />
 
@@ -722,7 +796,7 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
             <WaterPlane splashProgress={splashProgress} />
             <SplashDroplets splashProgress={splashProgress} />
             <SplashWalls splashProgress={splashProgress} />
-            <Environment preset="city" />
+            <Environment preset="studio" intensity={0.48} />
           </Suspense>
         </Canvas>
       </div>

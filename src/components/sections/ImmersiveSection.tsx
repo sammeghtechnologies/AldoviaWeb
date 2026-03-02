@@ -14,16 +14,40 @@ const ImmersiveSection: React.FC = () => {
   );
 
   return (
-    <section className="w-full min-h-screen bg-[rgba(33,20,15,0.80)] !py-20 !px-[2%] flex flex-col items-center">
+    <section className="relative w-full min-h-screen overflow-hidden bg-[var(--color-secondary)] !py-20 !px-[2%] flex flex-col items-center">
+      {/* <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-0 right-0 z-0 -translate-y-1/2 bg-no-repeat opacity-10 md:opacity-[0.15]"
+        style={{
+          backgroundImage: "url('/assets/logo/logo-wet-earth.png')",
+          backgroundSize: "min(54vw, 520px)",
+          backgroundPosition: "right top",
+          width: "min(54vw, 520px)",
+          height: "min(54vw, 520px)",
+        }}
+      /> */}
+
+<div
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-0 right-[-6%] z-0 -translate-y-[89%] bg-no-repeat opacity-10 md:opacity-[0.15]"
+        style={{
+          backgroundImage: "url('/assets/logo/logo-wet-earth.png')",
+          backgroundSize: "min(64vw, 820px)",
+          backgroundPosition: "right bottom",
+          width: "min(64vw, 820px)",
+          height: "min(64vw, 820px)",
+        }}
+      />
+
       {/* Heading */}
-      <div className="max-w-6xl mx-auto !mb-10 text-center">
+      <div className="relative z-10 max-w-6xl mx-auto !mb-10 text-center">
         <SlidingTitleReveal
           lines={["Explore the Resort"]}
-          className="!pt-2 !pb-2 text-4xl md:text-5xl font-serif text-white"
+          className="!pt-2 !pb-2 text-4xl md:text-5xl font-serif text-[var(--color-primary)]"
         />
       </div>
 
-      <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-center gap-16">
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center justify-center gap-16">
         {/* 360 Card */}
         <motion.div
           initial={{ opacity: 0, y: 60 }}
