@@ -9,22 +9,29 @@ interface PanelProps {
 const RoomDetailsPanel = ({ activeId, content, onClose }: PanelProps) => {
   return (
     <div
-    className={`fixed top-[90px] pt-5 right-0 h-[calc(100vh-90px)] w-full md:w-[50%] bg-[#f5f5dc] border-l border-white/5
-transform transition-transform duration-700 ease-[0.22,1,0.36,1]
-z-[9999] flex flex-col pointer-events-none
-${activeId ? "translate-x-0 pointer-events-auto" : "translate-x-full"}`}
-  >
+      // This is the "Magic" line: it makes the div invisible to clicks when 
+      // closed, but a solid clickable object when open.
+      style={{ pointerEvents: activeId ? 'auto' : 'none' }}
+      className={`fixed top-[90px] pt-5 right-0 h-[calc(100vh-90px)] w-full md:w-[50%] bg-[#f5f5dc] border-l border-white/5
+        transform transition-transform duration-700 ease-[0.22,1,0.36,1]
+        z-[99999] flex flex-col
+        ${activeId ? "translate-x-0" : "translate-x-full"}`}
+    >
+      {content && (
+        <div className="font-sans text-[#49261c] h-full relative flex flex-col justify-between px-8 md:px-12 pt-24 pb-10">
 
-    {content && (
-      <div className="font-sans text-[#49261c] h-full relative flex flex-col justify-between px-8 md:px-12 pt-24 pb-10">
-
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-6 left-6 text-xs text-gray-500 hover:text-white transition-colors tracking-widest uppercase"
-        >
-          [ CLOSE ]
-        </button>
+          {/* Fixed Close Button */}
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation(); // Prevents click from hitting the 3D scene below
+              onClose();
+            }}
+            // Added cursor-pointer and hover:text-black for visibility
+            className="absolute top-6 left-6 text-xs text-gray-500 hover:text-black transition-colors tracking-widest uppercase cursor-pointer z-[100001] p-2"
+          >
+            [ CLOSE ]
+          </button>
 
         {/* Header */}
         <div className="mb-10 text-right pt-12">

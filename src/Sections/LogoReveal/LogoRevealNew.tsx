@@ -26,7 +26,7 @@ const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
    💦 WATER WALLS
 ========================================================= */
 
-const SplashWalls = ({ splashProgress }: { splashProgress: number }) => {
+export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: number, opacity?: number }) => {
   const count = 6;
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const shaderRef = useRef<any>(null);
@@ -200,8 +200,8 @@ const SplashWalls = ({ splashProgress }: { splashProgress: number }) => {
         envMapIntensity={3}
         attenuationColor="#bfe3ff"
         attenuationDistance={0.6}
-        transparent
-        opacity={1}
+        transparent={true}
+        opacity={opacity}
         depthWrite={true}
         depthTest={true}
         side={THREE.DoubleSide}
@@ -216,7 +216,7 @@ const SplashWalls = ({ splashProgress }: { splashProgress: number }) => {
 /* =========================================================
    🦢 SWAN (INTERACTIVE + CAMERA TRACKING)
 ========================================================= */
-const SwanModel = ({
+export const SwanModel = ({
   scrollProgress,
   transformProgress,
 }: {
@@ -344,7 +344,7 @@ const SwanModel = ({
 /* =========================================================
    💦 SPLASH DROPLETS
 ========================================================= */
-const SplashDroplets = ({ splashProgress }: { splashProgress: number }) => {
+export const SplashDroplets = ({ splashProgress, opacity = 1  }: { splashProgress: number, opacity?: number }) => {
   const count = 3000;
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
@@ -465,9 +465,9 @@ const SplashDroplets = ({ splashProgress }: { splashProgress: number }) => {
 
         attenuationColor="#bfe3ff"     // inner water tint
         attenuationDistance={0.35}     // core darkening
-
-        transparent
-        opacity={1}
+    
+        transparent={true}
+        opacity={opacity}
 
         depthWrite
       />
@@ -478,7 +478,7 @@ const SplashDroplets = ({ splashProgress }: { splashProgress: number }) => {
 /* =========================================================
    🌊 WATER PLANE
 ========================================================= */
-const WaterPlane = ({ splashProgress }: { splashProgress: number }) => {
+export const WaterPlane = ({ splashProgress, opacity = 1  }: { splashProgress: number, opacity?: number }) => {
   const reflectorRef = useRef<any>(null);
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const geometry = useMemo(() => new THREE.PlaneGeometry(5000, 5000), []);
@@ -492,6 +492,8 @@ const WaterPlane = ({ splashProgress }: { splashProgress: number }) => {
     refl.rotation.x = -Math.PI / 2;
     refl.position.y = -15;
     const material = refl.material as THREE.ShaderMaterial;
+    material.transparent = true;
+    material.opacity = opacity;
 
     material.onBeforeCompile = (shader) => {
       shader.uniforms.uTime = { value: 0 };
@@ -625,6 +627,7 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
         scrub: 1.5,
         onUpdate: (self) => {
           const raw = self.progress;
+          
 
           // --- PHASE 1: Video executes first (0% to 40% of scroll) ---
           if (raw <= 0.4) {
