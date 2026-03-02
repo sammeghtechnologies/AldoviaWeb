@@ -237,23 +237,11 @@ const [swanOpacity, setSwanOpacity] = useState(1);
             {mountFeathers && (
               <group>
                 <CameraFocusController target={focusTarget} enabled={!!focusTarget} />
-                
-                {/* Far Left */}
                 <NaturalFeather id={5} variant="mid-drift" startPos={[-11.0, 12, 1]} targetPos={[-17.0, 2.5, 1]} started={true} delay={0.8} activeId={activeId} burstAll={burstAll}  allBubblesReady={allBubblesReady} startOffset={11680} />
-                
-                {/* Mid Left */}
                 <NaturalFeather id={2} variant="small-drag" startPos={[-6.5, 14, -2]} targetPos={[-16.5, -19.0, -2]} started={true} delay={0.6} activeId={activeId} burstAll={burstAll}  allBubblesReady={allBubblesReady} startOffset={11680} />
-                
-                {/* Center Left */}
                 <NaturalFeather id={3} variant="upper-pendulum" startPos={[-2.0, 10, -3]} targetPos={[7.0, 5.0, -3]} started={true} delay={0.3} activeId={activeId} burstAll={burstAll}  allBubblesReady={allBubblesReady} startOffset={11680} />
-                
-                {/* Center Right */}
                 <NaturalFeather id={1} variant="main" startPos={[2.5, 16, 0]} targetPos={[2.5, -10.0, 0]} started={true} activeId={activeId} burstAll={burstAll}  allBubblesReady={allBubblesReady} startOffset={11680} />
-                
-                {/* Mid Right */}
                 <NaturalFeather id={4} variant="side-roll-upper" startPos={[7.0, 12, -1]} targetPos={[30.0, -4.0, -1]} started={true} delay={0.5} activeId={activeId} burstAll={burstAll}  allBubblesReady={allBubblesReady} startOffset={11680} />
-                
-                {/* Far Right */}
                 <NaturalFeather id={6} variant="high-drag-zig" startPos={[11.5, 18, 0]} targetPos={[17.5, -20.0, 0]} started={true} delay={0.2} activeId={activeId} burstAll={burstAll}  allBubblesReady={allBubblesReady} startOffset={11680} />
               </group>
             )}

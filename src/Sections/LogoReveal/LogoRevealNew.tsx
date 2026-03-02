@@ -224,7 +224,7 @@ export const SwanModel = ({
   transformProgress: number;
 }) => {
   const group = useRef<THREE.Group>(null);
-  const { scene, animations } = useGLTF("/models/Swan_anim_v13.glb");
+  const { scene, animations } = useGLTF("/models/Swan_anim_v14.glb");
   const { actions } = useAnimations(animations, group);
 
   // --- DRAG INTERACTION STATE ---
@@ -235,18 +235,36 @@ export const SwanModel = ({
   const [targetRotY, setTargetRotY] = useState(-Math.PI / 160);
 
   useLayoutEffect(() => {
-    scene.traverse((child: any) => {
-      if (child.isMesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
-        if (child.material) {
-          child.material.roughness = 0.4;
-          child.material.metalness = 0.0;
-          child.material.envMapIntensity = 1.5;
-        }
+  scene.traverse((child: any) => {
+    if (child.isMesh) {
+      child.castShadow = true;
+      child.receiveShadow = true;
+
+      if (child.material) {
+        // 1. Render both sides of the geometry
+        child.material.side = THREE.DoubleSide; 
+
+        // 2. Fix Transparency Sorting Glitch
+        // AlphaTest prevents the "invisible" parts of the texture 
+        // from blocking the objects behind them.
+        child.material.alphaTest = 0.5; 
+
+        // 3. Ensure proper depth drawing
+        // This forces the mesh to write to the depth buffer,
+        // making the tail visible even through other transparent layers.
+        child.material.depthWrite = true;
+        child.material.depthTest = true;
+
+        // Existing styling
+        child.material.roughness = 0.4;
+        child.material.metalness = 0.0;
+        child.material.envMapIntensity = 1.5;
+        
+        child.material.needsUpdate = true;
       }
-    });
-  }, [scene]);
+    }
+  });
+}, [scene]);
 
   useEffect(() => {
     const action = actions["rigAction"] || actions[Object.keys(actions)[0]];
@@ -783,6 +801,6 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
   );
 };
 
-useGLTF.preload("/models/Swan_anim_v13.glb");
+useGLTF.preload("/models/Swan_anim_v14.glb");
 
 export default LogoRevealNew;
