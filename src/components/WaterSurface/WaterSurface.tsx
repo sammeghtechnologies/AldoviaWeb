@@ -1,411 +1,150 @@
-import { useRef, useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { MeshReflectorMaterial, useGLTF } from "@react-three/drei";
-// @ts-ignore
-import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
+import { Reflector } from "three/addons/objects/Reflector.js";
 
-const WATER_LEVEL = 0.95;
+const WATER_LEVEL = 0; 
 const START_OFFSET = 5.0;
-const RING_COUNT = 10;
-const MIRROR_SWAN_SCALE = 320;
-const MIRROR_FEATHER_SCALE = 0.1;
-const MIRROR_FEATHER_WIDTH_SCALE = 1.50;
 
-const WaterSurface = ({
-  fallProgress,
-  swanProgress,
-  id3Ref,
-}: {
-  fallProgress: number;
-  swanProgress: number;
-  id3Ref: any;
-}) => {
-  const meshRef = useRef<THREE.Mesh>(null!);
-  const materialRef = useRef<any>(null!);
-  const ringRefs = useRef<THREE.Mesh[]>([]);
-  const swanGroupRef = useRef<THREE.Group>(null!);
-  const shadowSwanGroupRef = useRef<THREE.Group>(null!);
-  const featherMirrorRef = useRef<THREE.Group>(null!);
-  const featherMirrorCloneRef = useRef<THREE.Object3D | null>(null);
-  const hasTouchedWater = useRef(false);
+const WaterSurface = ({ fallProgress, swanProgress, id3Ref }: any) => {
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const ripplePlaneRef = useRef<THREE.Mesh>(null!);
   
-  const { scene: swanScene, animations } = useGLTF("/models/Swan_anim_v14.glb") as any;
+  const geometry = useMemo(() => new THREE.PlaneGeometry(500, 500), []);
 
-  // random seeds for each ripple ring
-  const ringSeeds = useMemo(
-    () => Array.from({ length: RING_COUNT }).map(() => Math.random() * 10),
-    []
-  );
-
-  // ✅ Ripple Shader with dark tint + randomness
-  const rippleMaterial = useMemo(() => {
-    return new THREE.ShaderMaterial({
-      transparent: true,
-      depthTest: false,
-      depthWrite: false,
-      blending: THREE.NormalBlending,
-      side: THREE.DoubleSide,
-      uniforms: {
-        uTime: { value: 0 },
-        uOpacity: { value: 1 },
-        uColor: { value: new THREE.Color("#9fb8c8") },
-        uDarkColor: { value: new THREE.Color("#111a22") },
-        uLightDir: { value: new THREE.Vector3(-0.35, 0.88, 0.42).normalize() },
-      },
-      vertexShader: `
-        uniform float uTime;
-        varying vec2 vUv;
-        varying float vWave;
-        varying float vDist;
-
-        void main() {
-          vUv = uv;
-          vec3 pos = position;
-
-          float dist = length(pos.xy);
-          vDist = dist;
-
-          // slower and smoother wave
-          float wave = sin(dist * 22.0 - uTime * 2.0) * 0.13;
-          // secondary ripple randomness
-          float wave2 = cos(dist * 12.0 - uTime * 1.2) * 0.11;
-          // fade outward
-          float fade = smoothstep(1.6, 0.0, dist);
-
-          pos.z += (wave + wave2) * fade;
-          vWave = wave;
-
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform float uOpacity;
-        uniform vec3 uColor;
-        uniform vec3 uDarkColor;
-        uniform vec3 uLightDir;
-
-        varying vec2 vUv;
-        varying float vWave;
-        varying float vDist;
-
-        void main() {
-          float dist = distance(vUv, vec2(0.5));
-
-          // ring thickness
-          float ring = smoothstep(0.50, 0.47, dist) - smoothstep(0.47, 0.44, dist);
-          // fade outer edge
-          float fade = smoothstep(0.9, 0.2, dist);
-          float ridge = smoothstep(0.515, 0.485, dist) - smoothstep(0.485, 0.435, dist);
-          float crown = smoothstep(0.458, 0.445, dist) * (1.0 - smoothstep(0.445, 0.392, dist));
-          float innerDepth = smoothstep(0.40, 0.0, dist);
-
-          vec2 centered = vUv - vec2(0.5);
-          vec3 pseudoNormal = normalize(vec3(centered * 4.2, 0.72 + vWave * 1.8));
-          float diffuse = max(dot(pseudoNormal, normalize(uLightDir)), 0.0);
-          float rim = pow(1.0 - clamp(abs(pseudoNormal.z), 0.0, 1.0), 2.35);
-
-          vec3 waterDepthTint = mix(uDarkColor * 1.15, uColor, ring * 0.9) + vec3(0.02, 0.03, 0.05) * innerDepth;
-          vec3 litColor = waterDepthTint * (0.5 + diffuse * 0.75) + vec3(0.85, 0.9, 0.95) * (rim * 0.2 + crown * 0.12);
-          float alpha = (ring * 0.75 + ridge * 0.42 + crown * 0.16) * fade * uOpacity;
-
-          gl_FragColor = vec4(litColor, alpha);
-        }
-      `,
+  const reflector = useMemo(() => {
+    const refl = new Reflector(geometry, {
+      textureWidth: isMobile ? 1024 : 2048,
+      textureHeight: isMobile ? 1024 : 2048,
+      color: 0x080a0c, 
     });
-  }, []);
 
-  // Swan clone
-  const swanModel = useMemo(() => {
-    const clone = SkeletonUtils.clone(swanScene);
+    refl.rotation.x = -Math.PI / 2;
+    refl.position.y = WATER_LEVEL - START_OFFSET;
 
-    if (animations && animations.length > 0) {
-      const tempMixer = new THREE.AnimationMixer(clone);
-      const action = tempMixer.clipAction(animations[0]);
-      action.play();
-      action.time = 0;
-      tempMixer.update(0);
-      clone.updateMatrixWorld(true);
-    }
+    const material = refl.material as THREE.ShaderMaterial;
+    material.transparent = true;
+    material.opacity = 0; 
 
-    return clone;
-  }, [swanScene, animations]);
-  const shadowSwanModel = useMemo(() => SkeletonUtils.clone(swanScene), [swanScene]);
-  const mirrorFlipQuat = useMemo(
-    () => new THREE.Quaternion().setFromEuler(new THREE.Euler(0, THREE.MathUtils.degToRad(60), 0)),
-    []
-  );
+    return refl;
+  }, [geometry, isMobile]);
 
-  const mixer = useMemo(() => new THREE.AnimationMixer(swanModel), [swanModel]);
-  const hasStartedAnim = useRef(false);
-
-  const ringGeo = useMemo(() => new THREE.RingGeometry(0.47, 0.53, 192, 12), []);
-
-  useFrame((state, delta) => {
-    mixer.update(delta);
-
-    rippleMaterial.uniforms.uTime.value = state.clock.elapsedTime;
-
-    if (!materialRef.current || !meshRef.current) return;
-
-    const targetY = THREE.MathUtils.lerp(
-      WATER_LEVEL - START_OFFSET,
-      WATER_LEVEL,
-      fallProgress
-    );
-
-    meshRef.current.position.y = THREE.MathUtils.lerp(
-      meshRef.current.position.y,
-      targetY,
-      0.1
-    );
-
-    if (!id3Ref?.current) return;
-    if (featherMirrorRef.current && !featherMirrorCloneRef.current) {
-      const clone = SkeletonUtils.clone(id3Ref.current);
-      // Isolate materials so edits affect only mirror clone.
-      clone.traverse((child: any) => {
-        if (!child.isMesh || !child.material) return;
-        if (Array.isArray(child.material)) {
-          child.material = child.material.map((mat: any) => (mat?.clone ? mat.clone() : mat));
-        } else if (child.material.clone) {
-          child.material = child.material.clone();
-        }
-      });
-      featherMirrorCloneRef.current = clone;
-      featherMirrorRef.current.add(clone);
-    }
-
-    id3Ref.current.updateMatrixWorld();
-
-    const worldPos = new THREE.Vector3();
-    id3Ref.current.getWorldPosition(worldPos);
-
-    const currentWaterY = meshRef.current.position.y;
-    const verticalDist = worldPos.y - currentWaterY;
-
-    const contactEase = THREE.MathUtils.smoothstep(fallProgress, 0.48, 0.72);
-    const isTouching = verticalDist < 0.55 || contactEase > 0.3;
-    const touchFactor = 1.0 - THREE.MathUtils.smoothstep(0.02, 0.35, Math.max(verticalDist, 0.0));
-    const morphToSwan = THREE.MathUtils.smoothstep(swanProgress, 0.06, 0.58);
-
-    const fastSwanProgress = Math.max(0, Math.min(1, (swanProgress - 0.1) * 5.0));
-
-    materialRef.current.mixStrength = THREE.MathUtils.lerp(5.0, 0.0, fastSwanProgress);
-
-    if ((fastSwanProgress > 0 || morphToSwan > 0.05) && isTouching) {
-      if (animations.length > 0 && !hasStartedAnim.current) {
-        const action = mixer.clipAction(animations[0]);
-        action.reset().play();
-        action.paused = true; 
-        hasStartedAnim.current = true;
+  // 🚀 THE NEW TRUE 3D RIPPLE SHADER
+  const rippleMaterial = useMemo(() => new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.NormalBlending,
+    side: THREE.DoubleSide,
+    uniforms: { 
+      uTime: { value: 0 }, 
+      uOpacity: { value: 0 } 
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       }
+    `,
+    fragmentShader: `
+      uniform float uTime;
+      uniform float uOpacity;
+      varying vec2 vUv;
 
-      if (swanGroupRef.current) {
-        swanGroupRef.current.visible = true;
+      void main() {
+        vec2 uv = vUv - 0.5;
+        float dist = length(uv) * 2.0; 
 
-        // 🔥 FIX: Set X and Z to exactly match worldPos without extra offsets!
-        const baseX = worldPos.x;
-        const baseY = currentWaterY - 0.8;
-        const baseZ = worldPos.z;
+        // 1. Math for the wave
+        float freq = 45.0; // Tighter rings
+        float speed = 25.0; // Speed of expansion
+        float phase = dist * freq - uTime * speed;
+        
+        float wave = sin(phase);
+        float slope = cos(phase); // The mathematical derivative gives us the 3D slope
 
-        const time = state.clock.getElapsedTime();
+        // 2. Fake 3D Normal Mapping
+        // We tilt a fake 3D normal vector outward from the center based on the slope
+        vec2 dir = normalize(uv + vec2(0.0001)); // Prevent divide by zero
+        vec3 normal = normalize(vec3(dir * slope * 1.5, 1.0)); // 1.5 determines the "depth" of the 3D bump
 
-        const bobbing = isTouching ? Math.sin(time * 1.6) * 0.02 : 0;
-        const sway = isTouching ? Math.sin(time * 1.1) * 0.015 : 0;
-        const tiltX = isTouching ? Math.sin(time * 1.4) * 0.04 : 0; 
-        const tiltZ = isTouching ? Math.cos(time * 1.1) * 0.05 : 0; 
+        // 3. Virtual Lighting Setup
+        vec3 lightDir = normalize(vec3(-1.0, 1.5, 1.0)); // Light coming from top-left
+        vec3 viewDir = vec3(0.0, 0.0, 1.0); // Looking straight down
+        vec3 halfVector = normalize(lightDir + viewDir);
 
-        swanGroupRef.current.rotation.x = tiltX;
-        swanGroupRef.current.rotation.z = tiltZ;
+        // 4. Calculate 3D Light Bounces
+        float diffuse = max(dot(normal, lightDir), 0.0);
+        float specular = pow(max(dot(normal, halfVector), 0.0), 64.0); // 64 = Extremely shiny, glossy water
 
-        swanGroupRef.current.position.set(baseX + sway, baseY + bobbing, baseZ);
-        swanGroupRef.current.scale.setScalar(MIRROR_SWAN_SCALE);
+        // 5. Colors (Dark liquid + Icy Blue/White Highlights like your reference)
+        vec3 baseColor = vec3(0.01, 0.02, 0.03); // Almost pitch black water
+        vec3 highlight = vec3(0.8, 0.9, 1.0) * specular * 2.5; // Bright glossy ring
+        vec3 midtone = vec3(0.1, 0.2, 0.3) * diffuse * 0.5; // Subtle blue transition
+        
+        vec3 finalColor = baseColor + midtone + highlight;
 
-        swanGroupRef.current.traverse((child: any) => {
-          if (child.isMesh) {
-            child.material.transparent = true;
-            const swanAlpha = THREE.MathUtils.lerp(0, 0.85, THREE.MathUtils.clamp(Math.max(fastSwanProgress, morphToSwan), 0, 1));
-            child.material.opacity = swanAlpha;
-            child.material.emissive = new THREE.Color("#ffffff");
-            child.material.emissiveIntensity = 0.4;
-            child.material.depthTest = false;
-          }
-        });
+        // 6. Masking out the edges
+        float envelope = smoothstep(0.02, 0.1, dist) * smoothstep(1.0, 0.3, dist);
+
+        // Alpha: Make flat water invisible, but keep the 3D bumps and highlights fully visible
+        float alpha = (abs(slope) * 0.4 + specular * 1.2) * envelope;
+
+        gl_FragColor = vec4(finalColor, alpha * uOpacity);
       }
-    } else {
-      if (hasStartedAnim.current) {
-        mixer.stopAllAction();
-        hasStartedAnim.current = false;
-      }
-      if (swanGroupRef.current) swanGroupRef.current.visible = false;
-    }
+    `,
+  }), []);
 
-    // Dark submerged/mirror swan under the feather (shadow layer)
-    if (shadowSwanGroupRef.current) {
-      const shadowVisibility = THREE.MathUtils.clamp(contactEase * morphToSwan * 1.35, 0, 0.65);
-      shadowSwanGroupRef.current.visible = shadowVisibility > 0.02;
-      shadowSwanGroupRef.current.position.set(worldPos.x, currentWaterY - 1.28, worldPos.z);
-      shadowSwanGroupRef.current.rotation.set(Math.PI, Math.PI / -2, 0);
-      shadowSwanGroupRef.current.scale.setScalar(MIRROR_SWAN_SCALE);
-      shadowSwanGroupRef.current.traverse((child: any) => {
-        if (child.isMesh && child.material) {
-          child.material.transparent = true;
-          child.material.opacity = shadowVisibility;
-          child.material.color = new THREE.Color("#050608");
-          child.material.emissive = new THREE.Color("#000000");
-          child.material.emissiveIntensity = 0;
-          child.material.roughness = 0.95;
-          child.material.metalness = 0;
-          child.material.depthTest = true;
-        }
-      });
-    }
+  const rippleGeo = useMemo(() => new THREE.PlaneGeometry(30, 30), []);
 
-    // Feather mirror: appears only when feather is near/touching the water surface.
-  // Feather mirror (perfect planar reflection)
-if (featherMirrorRef.current && id3Ref.current) {
-  const mirrorVisibility = THREE.MathUtils.clamp(
-    touchFactor * (1 - morphToSwan) * 2.0,
-    0,
-    1
-  );
+  useFrame(() => {
+    if (!reflector) return;
 
-  featherMirrorRef.current.visible = mirrorVisibility > 0.03;
+    const targetY = THREE.MathUtils.lerp(WATER_LEVEL - START_OFFSET, WATER_LEVEL, fallProgress);
+    reflector.position.y = THREE.MathUtils.lerp(reflector.position.y, targetY, 0.1);
 
-  // --- WORLD TRANSFORMS ---
-  const worldPos = new THREE.Vector3();
-  const worldQuat = new THREE.Quaternion();
-  const worldScale = new THREE.Vector3();
+    const material = reflector.material as THREE.ShaderMaterial;
+    
+    const baseOpacity = THREE.MathUtils.smoothstep(fallProgress, 0.1, 0.5);
+    const fadeOutMultiplier = 1.0 - THREE.MathUtils.smoothstep(swanProgress, 0.26, 0.60);
+    
+    material.opacity = baseOpacity * fadeOutMultiplier;
 
-  id3Ref.current.getWorldPosition(worldPos);
-  id3Ref.current.getWorldQuaternion(worldQuat);
-  id3Ref.current.getWorldScale(worldScale);
+    if (id3Ref?.current && ripplePlaneRef.current) {
+      const worldPos = new THREE.Vector3();
+      id3Ref.current.getWorldPosition(worldPos);
 
-  const waterY = meshRef.current.position.y;
+      const tailX = worldPos.x + 2.8; 
+      const tailZ = worldPos.z - 0.5;
+      
+      ripplePlaneRef.current.position.set(tailX-5, reflector.position.y + 0.001, tailZ);
 
-  // ✅ TRUE MIRROR POSITION
-  const mirroredY = 2 * waterY - worldPos.y;
-
-  featherMirrorRef.current.position.set(
-    worldPos.x + 1.5,
-    mirroredY,
-    worldPos.z
-  );
-
-  // ✅ copy rotation
-  featherMirrorRef.current.quaternion.copy(worldQuat);
-
-  // ✅ vertical flip (reflection)
-  featherMirrorRef.current.scale.set(
-    worldScale.x * MIRROR_FEATHER_WIDTH_SCALE,
-    -worldScale.y,
-    worldScale.z
-  );
-
-  // Slight sink into water for realism
-  featherMirrorRef.current.position.y -= 0;
-
-  // --- MATERIAL LOOK ---
-  featherMirrorRef.current.traverse((child: any) => {
-    if (child.isMesh && child.material) {
-      child.material.transparent = true;
-      child.material.opacity = mirrorVisibility * 0.35;
-
-      child.material.color.set("#ffffff");
-      child.material.emissive.set("#000000");
-
-      child.material.roughness = 0.9;
-      child.material.metalness = 0;
-      child.material.depthTest = true;
-    }
-  });
-}
-
-    materialRef.current.opacity = THREE.MathUtils.lerp(0.03, 0.18, contactEase);
-
-    // ✅ Random Ripples Animation
-    ringRefs.current.forEach((ring, i) => {
-      if (!ring) return;
-
-      const mat = ring.material as any;
-      // 🔥 FIX: Removed the +5 on Z so the ripples perfectly wrap around the feather impact
-      ring.position.set(worldPos.x, currentWaterY + 0.08, worldPos.z);
-
-      if (isTouching || contactEase > 0.08) {
-        ring.visible = true;
-
-        const time = state.clock.getElapsedTime();
-        const speed = THREE.MathUtils.lerp(0.06, 0.12, contactEase);
-        const randomOffset = ringSeeds[i];
-        const t = ((time * speed) + i * 0.22 + randomOffset) % 1;
-
-        const scale = THREE.MathUtils.lerp(0.22, 14, t);
-        const stretch = 1 + Math.sin(time * 0.8 + randomOffset) * 0.15;
-
-        ring.scale.set(scale * stretch, scale, 1);
-        const fade = 1.0 - t;
-
-        const proximityFactor = 1 - THREE.MathUtils.smoothstep(verticalDist, -0.12, 0.75);
-        const contactBoost = THREE.MathUtils.lerp(0.35, 1.0, contactEase);
-
-        mat.uniforms.uOpacity.value = fade * proximityFactor * contactBoost * 0.52;
+      // Now triggers perfectly in sync because we delayed landStart in MainCanvas
+      if (swanProgress > 0.01) {
+        ripplePlaneRef.current.visible = true;
+        rippleMaterial.uniforms.uTime.value = swanProgress;
+        
+        const fadeIn = THREE.MathUtils.smoothstep(swanProgress, 0.01, 0.1);
+        rippleMaterial.uniforms.uOpacity.value = fadeIn * fadeOutMultiplier * 1.5;
       } else {
-        ring.visible = false;
+        ripplePlaneRef.current.visible = false;
+        rippleMaterial.uniforms.uOpacity.value = 0;
       }
-    });
-
-    materialRef.current.distortion = THREE.MathUtils.lerp(0.05, 0.14, contactEase);
+    }
   });
 
   return (
     <>
-      <mesh
-        ref={meshRef}
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, WATER_LEVEL - START_OFFSET, 3]}
-      >
-        <planeGeometry args={[100, 100]} />
-        <MeshReflectorMaterial
-          ref={materialRef}
-          blur={[500, 200]}
-          resolution={1024}
-          mixBlur={1}
-          mixStrength={5.0}
-          mirror={1}
-          color="#2f1a14"
-          transparent
-          opacity={0}
-          depthScale={2.0}
-          minDepthThreshold={0.1}
-          maxDepthThreshold={1.5}
-          depthWrite={false}
-        />
-      </mesh>
-
-      <group ref={swanGroupRef} visible={false} renderOrder={100}>
-        <primitive object={swanModel} rotation={[Math.PI, Math.PI / -2, 0]} />
-      </group>
-
-      <group ref={shadowSwanGroupRef} visible={false} renderOrder={10}>
-        <primitive object={shadowSwanModel} />
-      </group>
-
-      <group ref={featherMirrorRef} visible={false} renderOrder={12}>
-      </group>
-
-      {Array.from({ length: RING_COUNT }).map((_, i) => (
-        <mesh
-          key={i}
-          renderOrder={999}
-          ref={(el) => (ringRefs.current[i] = el!)}
-          rotation={[-Math.PI / 2, 0, 0]}
-          geometry={ringGeo}
-          visible={false}
-        >
-          <primitive object={rippleMaterial.clone()} attach="material" />
-        </mesh>
-      ))}
+      <primitive object={reflector} />
+      
+      <mesh 
+        ref={ripplePlaneRef} 
+        geometry={rippleGeo} 
+        material={rippleMaterial} 
+        rotation={[-Math.PI / 2, 0, 0]} 
+        renderOrder={99} 
+        visible={false}
+      />
     </>
   );
 };

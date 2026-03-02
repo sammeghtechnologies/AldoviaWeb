@@ -218,9 +218,13 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
 ========================================================= */
 export const SwanModel = ({
   scrollProgress,
+  opacity = 1,
+  isReflection = false,
   transformProgress,
 }: {
   scrollProgress: number;
+  opacity?: number;
+  isReflection?: boolean;
   transformProgress: number;
 }) => {
   const group = useRef<THREE.Group>(null);
@@ -254,6 +258,7 @@ export const SwanModel = ({
         // making the tail visible even through other transparent layers.
         child.material.depthWrite = true;
         child.material.depthTest = true;
+        child.material.opacity = opacity;
 
         // Existing styling
         child.material.roughness = 0.4;
@@ -283,18 +288,17 @@ export const SwanModel = ({
 
   // --- SMOOTH ROTATION & CAMERA FRAME ---
   useFrame(({ camera }) => {
-    // 1. Rotate the Swan
     if (group.current) {
       group.current.rotation.x = 0.1;
       group.current.rotation.z = 0;
       group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, targetRotY, 0.1);
     }
 
-    // 2. Move the Camera vertically based on drag
-    camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetCamY.current, 0.05);
-
-    // 3. Keep camera focused on the Swan area (Y = -5 centers it nicely over the water)
-    camera.lookAt(0, -5, 0);
+    // 🚀 ONLY run this if it's the main intro swan
+    if (!isReflection) {
+      camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetCamY.current, 0.05);
+      camera.lookAt(0, -5, 0); 
+    }
   });
 
   // --- DRAG HANDLERS ---
