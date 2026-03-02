@@ -59,17 +59,27 @@ const CarouselSection: React.FC = () => {
       ref={sectionRef}
       className="relative flex w-full min-h-[84vh] md:min-h-screen items-center justify-center overflow-hidden bg-center bg-cover bg-no-repeat py-14 md:py-20 [&_p]:!text-sm"
       style={{
-        backgroundColor: "#21140F",
-        backgroundImage:
-          "linear-gradient(rgba(33, 20, 15, 0.78), rgba(33, 20, 15, 0.78)), url('/assets/backgrounds/swanbg.png')",
+        backgroundColor:
+          "rgba(251, 246, 230, 0.94)",
       }}
     >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-0 right-[-6%] z-0 translate-y-[49%] bg-no-repeat opacity-10 md:opacity-[0.15]"
+        style={{
+          backgroundImage: "url('/assets/logo/logo-wet-earth.png')",
+          backgroundSize: "min(64vw, 820px)",
+          backgroundPosition: "right bottom",
+          width: "min(64vw, 820px)",
+          height: "min(64vw, 820px)",
+        }}
+      />
 
       <motion.div
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.4 }}
-        className="mx-auto flex w-full max-w-6xl flex-col items-center px-6"
+        className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center px-6"
       >
 
         <div className="relative !mt-20 flex h-[460px] w-full items-center justify-center md:hidden">

@@ -5,7 +5,7 @@ import { MeshReflectorMaterial, useGLTF } from "@react-three/drei";
 // @ts-ignore
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
 
-const WATER_LEVEL = 0.95;
+const WATER_LEVEL = 0.45;
 const START_OFFSET = 5.0;
 const RING_COUNT = 10;
 const MIRROR_SWAN_SCALE = 320;
@@ -373,7 +373,7 @@ if (featherMirrorRef.current && id3Ref.current) {
           mixBlur={1}
           mixStrength={5.0}
           mirror={1}
-          color="#2f1a14"
+          color="#FFFFFF"
           transparent
           opacity={0}
           depthScale={2.0}

@@ -67,13 +67,25 @@ const RoomsSection: React.FC = () => {
   return (
     <section
       ref={sectionRef}
-      className="w-full overflow-x-clip bg-[#FBF6E6] bg-cover bg-center bg-no-repeat !pt-12 !pb-24 !px-4 md:!px-6 lg:!px-8"
+      className="relative w-full overflow-hidden bg-[#FBF6E6] bg-cover bg-center bg-no-repeat !pt-12 !pb-24 !px-4 md:!px-6 lg:!px-8"
       style={{
         backgroundImage:
-          "linear-gradient(rgba(251, 246, 230, 0.78), rgba(251, 246, 230, 0.78)), url('/assets/backgrounds/swanbrown.png')",
+          "linear-gradient(rgba(61, 48, 4, 0.78), rgba(37, 30, 4, 0.78))",
       }}
     >
-      <div className="max-w-6xl mx-auto">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-0 right-[-6%] z-0 translate-y-[49%] bg-no-repeat opacity-10 md:opacity-[0.15]"
+        style={{
+          backgroundImage: "url('/assets/logo/logo-wet-earth.png')",
+          backgroundSize: "min(64vw, 820px)",
+          backgroundPosition: "right bottom",
+          width: "min(64vw, 820px)",
+          height: "min(64vw, 820px)",
+        }}
+      />
+
+      <div className="relative z-10 max-w-6xl mx-auto">
 
         {/* Header */}
         <div className="!mb-6 md:!mb-3 text-left lg:text-center lg:!w-full lg:!max-w-[980px] lg:!mx-auto">

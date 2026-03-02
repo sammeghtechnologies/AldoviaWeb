@@ -457,6 +457,14 @@ const MenuFrame = ({
                   navigate("/venues", { state: { mode: "venue" } });
                 }}
               />
+               <MenuIcon
+                icon={icons.venue || "/assets/icons/venue.svg"}
+                title="Convention center"
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate("/venues", { state: { mode: "Convention" } });
+                }}
+              />
             </ul>
           </div>
 
