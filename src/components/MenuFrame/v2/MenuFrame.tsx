@@ -69,12 +69,14 @@ const MenuSection = ({
   title,
   isOpen,
   onClick,
-  icons // ✅ Add icons here as a prop
+  icons, // ✅ Add icons here as a prop
+  showToggleIcon = true,
 }: {
   title: string;
   isOpen: boolean;
   onClick: () => void;
   icons: any; // ✅ Add this type
+  showToggleIcon?: boolean;
 }) => {
   return (
     <button
@@ -84,7 +86,7 @@ const MenuSection = ({
       {title}
 
       {/* ✅ Use the icons object from useAssets instead of a hardcoded string */}
-      {icons && (
+      {showToggleIcon && icons && (
         <img
           src={isOpen ? icons.collapse : icons.expand}
           alt="toggle"
@@ -127,7 +129,8 @@ const MenuFrame = ({
   const [openSection, setOpenSection] = useState("stay");
   const [isTopBarVisible, setIsTopBarVisible] = useState(true);
   const [isBeyondHero, setIsBeyondHero] = useState(false);
-  const shouldShowTopBarBackground = !disableTopBarBackground && (forceTopBarBackground || isBeyondHero);
+  const shouldShowTopBarBackground =
+    !isOpen && !disableTopBarBackground && (forceTopBarBackground || isBeyondHero);
 
   // Logo animation
   useLayoutEffect(() => {
@@ -290,7 +293,7 @@ const MenuFrame = ({
     >
       {/* TOP BAR */}
       <div
-        className={`h-[10vh] !p-3 absolute left-0 right-0 top-0 z-[2147483647]  transition-all duration-300 ${shouldShowTopBarBackground ? " backdrop-blur-xl  shadow-[0_10px_30px_rgba(0,0,0,0.45)]" : "bg-transparent border border-transparent"} ${isTopBarVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "-translate-y-12 opacity-0 pointer-events-none"
+        className={`h-[12vh] !p-3 absolute left-0 right-0 top-0 z-[2147483647]  transition-all duration-300 ${shouldShowTopBarBackground ? " backdrop-blur-xl  shadow-[0_10px_30px_rgba(0,0,0,0.45)]" : "bg-transparent"} ${isTopBarVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "-translate-y-12 opacity-0 pointer-events-none"
           }`}
       >
         <div className="flex items-center justify-between px-3 py-2">
@@ -337,10 +340,10 @@ const MenuFrame = ({
         ref={sidebarRef}
         className="fixed !top-0 !right-0 !h-full w-[380px] md:w-[420px] lg:w-[460px] max-w-[95%] translate-x-full pointer-events-auto !p-0 md:!p-0 lg:!p-0"
       >
-        <div className="!h-full bg-gradient-to-b from-[#4b2f23]/75 via-[#4b2f23]/75 to-[#4b2f23]/75 backdrop-blur-xl !px-8 !py-10 md:!px-10 md:!py-12 lg:!px-5 lg:!py-1 relative overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.6)] border border-white/10">
+        <div className="!h-full bg-gradient-to-b from-[#4b2f23]/75 via-[#4b2f23]/75 to-[#4b2f23]/75 backdrop-blur-xl !px-8 !py-10 md:!px-10 md:!py-12 lg:!px-5 lg:!py-1 relative overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
 
           {/* Spacer so Home starts below hamburger icon area */}
-          <div className="h-14 md:h-16 lg:h-14" />
+          <div className="h-16 md:h-20 lg:h-16" />
 
           {/* HOME */}
           <div className="!p-1  !mt-5 flex items-center gap-5 mb-12 shadow-xl"
@@ -420,7 +423,7 @@ const MenuFrame = ({
           {/* CELEBRATE & GATHER */}
           <div className="mb-10">
             <MenuSection
-              title="Celebrate & Gather"
+              title="Events"
               isOpen={openSection === "celebrate"}
               icons={icons}
               onClick={() =>
@@ -457,16 +460,22 @@ const MenuFrame = ({
                   navigate("/venues", { state: { mode: "venue" } });
                 }}
               />
-               <MenuIcon
-                icon={icons.venue || "/assets/icons/venue.svg"}
-                title="Convention center"
-                onClick={() => {
-                  setIsOpen(false);
-                  navigate("/venues", { state: { mode: "Convention" } });
-                }}
-              />
             </ul>
           </div>
+
+          <div className="border-t border-white/10 mb-10 !p-3" />
+          <div className="!mb-3">
+            <MenuSection
+              title="Convention"
+              isOpen={openSection === "convention"}
+              icons={icons}
+              showToggleIcon={false}
+              onClick={() => {
+                setIsOpen(false);
+                navigate("/aboutus");
+              }}
+            />
+            </div>
 
           <div className="border-t border-white/10 mb-10 !p-3" />
 

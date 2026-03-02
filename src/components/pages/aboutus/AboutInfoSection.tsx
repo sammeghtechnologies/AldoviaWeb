@@ -53,6 +53,17 @@ const AboutInfoSection = () => {
 
   return (
     <section ref={sectionRef} className="relative w-full overflow-hidden text-[var(--color-secondary)]">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-0 right-[-8%] z-[1] translate-y-[46%] bg-no-repeat opacity-10 md:opacity-[0.16]"
+        style={{
+          backgroundImage: "url('/assets/logo/logo-wet-earth.png')",
+          backgroundSize: "min(60vw, 760px)",
+          backgroundPosition: "right bottom",
+          width: "min(60vw, 760px)",
+          height: "min(60vw, 760px)",
+        }}
+      />
 
       {/* Background */}
       <div
@@ -70,7 +81,7 @@ const AboutInfoSection = () => {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(207,171,87,0.15),transparent_60%)]" />
 
       {/* ===== CENTER WRAPPER (IMPORTANT) ===== */}
-      <div className="relative flex w-full justify-center">
+      <div className="relative z-10 flex w-full justify-center">
         <div className="w-full max-w-6xl !px-4 !py-14 md:!px-8 md:!py-16 lg:!px-10 lg:!py-20">
 
           {/* RIGHT CARD */}

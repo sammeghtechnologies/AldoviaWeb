@@ -60,7 +60,7 @@ const CarouselSection: React.FC = () => {
       className="relative flex w-full min-h-[84vh] md:min-h-screen items-center justify-center overflow-hidden bg-center bg-cover bg-no-repeat py-14 md:py-20 [&_p]:!text-sm"
       style={{
         backgroundColor:
-          "rgba(251, 246, 230, 0.94)",
+          "var(--color-secondary)",
       }}
     >
       <div

@@ -65,12 +65,14 @@ const AcitivityDetails: React.FC<AcitivityDetailsProps> = ({
           backgroundImage={sectionData.backgroundImage ?? backgroundImage}
           topContent={
             index === 0 ? (
-              <div className="mx-auto flex w-full max-w-6xl justify-center !px-0 !pt-0 !pb-2 md:!px-0 lg:!px-0">
+              <div className="relative mx-auto flex w-full justify-center !px-0 !pt-0 !pb-2 md:!px-0 lg:!px-0 lg:w-screen lg:left-1/2 lg:-translate-x-1/2">
                 <ScrollSelectTabs
                   items={tabs}
                   active={activeTab}
                   onChange={setActiveTab}
                   floatingOnScroll
+                  floatingClassName="sticky top-4 z-[140] lg:top-4 lg:!w-[min(92vw,1320px)] lg:!mx-auto"
+                  innerWrapperClassName="!mx-auto !w-full !max-w-none lg:!w-full"
                 />
               </div>
             ) : undefined

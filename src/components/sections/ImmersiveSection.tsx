@@ -44,6 +44,8 @@ const ImmersiveSection: React.FC = () => {
         <SlidingTitleReveal
           lines={["Explore the Resort"]}
           className="!pt-2 !pb-2 text-4xl md:text-5xl font-serif text-[var(--color-primary)]"
+          lineClassName="!text-[var(--color-primary)]"
+
         />
       </div>
 
@@ -73,7 +75,7 @@ const ImmersiveSection: React.FC = () => {
               Immersive Experience
             </p>
 
-            <h3 className="!pt-2 !pb-2 text-4xl font-serif leading-tight !mb-6 max-w-[16ch] md:text-4xl !text-[var(--color-secondary)]">
+            <h3 className="!pt-2 !pb-2 text-4xl font-serif leading-tight !mb-6 max-w-[16ch] md:text-4xl !text-[var(--color-primary)]">
               Before You Arrive
             </h3>
 

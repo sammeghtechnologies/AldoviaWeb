@@ -6,6 +6,8 @@ interface ScrollSelectTabsProps {
   active: string;
   onChange: (value: string) => void;
   floatingOnScroll?: boolean;
+  floatingClassName?: string;
+  innerWrapperClassName?: string;
   activeClassName?: string;
   inactiveClassName?: string;
   disableDesktopShift?: boolean;
@@ -17,6 +19,8 @@ export default function ScrollSelectTabs({
   active,
   onChange,
   floatingOnScroll = false,
+  floatingClassName = "sticky top-4 z-[140]",
+  innerWrapperClassName = "!mx-auto !w-full !max-w-[1200px] lg:!w-[80%]",
   activeClassName = "!bg-[#FFE694] !text-[var(--color-primary)] shadow-md",
   inactiveClassName = "!bg-transparent !text-[var(--color-secondary)] opacity-80 hover:opacity-95",
   disableDesktopShift = false,
@@ -26,6 +30,7 @@ export default function ScrollSelectTabs({
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [isOverflowing, setIsOverflowing] = useState(false);
   const trackShiftClass = disableDesktopShift ? "lg:translate-x-0" : "lg:translate-x-0";
 
   const updateScrollState = useCallback(() => {
@@ -35,6 +40,7 @@ export default function ScrollSelectTabs({
     const { scrollLeft, scrollWidth, clientWidth } = container;
     setCanScrollLeft(scrollLeft > 4);
     setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 4);
+    setIsOverflowing(scrollWidth > clientWidth + 4);
   }, []);
 
   useEffect(() => {
@@ -75,10 +81,10 @@ export default function ScrollSelectTabs({
   return (
     <div
       className={`w-full !mt-0 !mb-3 ${
-        floatingOnScroll ? "sticky top-4 z-[140]" : ""
+        floatingOnScroll ? floatingClassName : ""
       }`}
     >
-      <div className="!mx-auto !w-full !max-w-[1200px] lg:!w-[80%]">
+      <div className={innerWrapperClassName}>
         <div className="mx-auto flex w-full max-w-full items-center justify-center gap-2">
           <button
             type="button"
@@ -96,13 +102,13 @@ export default function ScrollSelectTabs({
             <div
               ref={containerRef}
               className={`flex gap-3 overflow-x-auto whitespace-nowrap scroll-smooth
-                   lg:!w-full lg:!mx-auto lg:!justify-center
+                   lg:!w-full lg:!mx-auto ${isOverflowing ? "lg:!justify-start" : "lg:!justify-center"}
                    ${trackShiftClass}
-                   ${compactMobile ? "!px-3 !py-1.5 md:!px-4 md:!py-3 lg:!px-5 lg:!py-1.5" : "!px-4 !py-3 lg:!px-5 lg:!py-1.5"}
+                   ${compactMobile ? "!pl-5 !pr-3 !py-1.5 md:!pl-6 md:!pr-4 md:!py-3 lg:!pl-7 lg:!pr-5 lg:!py-1.5" : "!pl-6 !pr-4 !py-3 lg:!pl-7 lg:!pr-5 lg:!py-1.5"}
                    [-ms-overflow-style:none] [scrollbar-width:none]
                    [&::-webkit-scrollbar]:hidden`}
             >
-              {items.map((item) => {
+              {items.map((item, index) => {
                 const isActive = active === item;
 
                 return (
@@ -112,7 +118,9 @@ export default function ScrollSelectTabs({
                     ref={(node) => {
                       tabRefs.current[item] = node;
                     }}
-                    className={`!px-6 ${compactMobile ? "!py-1 md:!py-2 lg:!py-1" : "!py-2 lg:!py-1"} !rounded-[10px] text-sm font-medium transition-all duration-300 flex-shrink-0
+                    className={`!px-6 ${compactMobile ? "!py-1 md:!py-2 lg:!py-1" : "!py-2 lg:!py-1"} ${
+                      isOverflowing && index === 0 ? "!ml-1 md:!ml-2" : ""
+                    } !rounded-[10px] text-sm font-medium transition-all duration-300 flex-shrink-0
                 ${
                   isActive
                     ? activeClassName

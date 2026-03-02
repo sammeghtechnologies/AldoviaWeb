@@ -10,28 +10,28 @@ type TeamMember = {
 
 const members: TeamMember[] = [
   {
-    role: "Founder",
+    role: "",
     name: "Ronald Colaco",
-    description: "Dr. Ronald Colaco, the Founder of Clarks Exotica, is widely recognized for his visionary leadership and commitment to philanthropy. Dr. Colaco has been driven by a passion for excellence and dedication to service. His visionary leadership has helped to guide Clarks Exotica through periods of growth and transformation, and his unwavering commitment to innovation has ensured that the resort remains at the forefront of the hospitality industry. In addition to his achievements in the business world, Dr. Colaco is also known for his philanthropic work. He is a strong advocate for education and his charitable initiatives have helped to provide educational opportunities to underprivileged children. Through his leadership and philanthropy, Dr. Colaco has demonstrated a deep commitment to making a positive impact on the world around him.",
+    description: "Dr. Ronald Colaco, the Founder of Aldovia, is widely recognized for his visionary leadership and commitment to philanthropy. Dr. Colaco has been driven by a passion for excellence and dedication to service. His visionary leadership has helped to guide Aldovia through periods of growth and transformation, and his unwavering commitment to innovation has ensured that the resort remains at the forefront of the hospitality industry. In addition to his achievements in the business world, Dr. Colaco is also known for his philanthropic work. He is a strong advocate for education and his charitable initiatives have helped to provide educational opportunities to underprivileged children. Through his leadership and philanthropy, Dr. Colaco has demonstrated a deep commitment to making a positive impact on the world around him.",
     image: "/assets/pages/aboutus/Ronald_Colaco.jpg",
   },
   {
-    role: "Managing Director",
+    role: "",
     name: "Vivek Kumar",
-    description: "Mr. Vivek Kumar, the Co-Founder of Clarks Exotica and the Founder of Kamalya Group, is a highly respected entrepreneur known for his exceptional leadership and business acumen. In addition to his work with Clarks Exotica, Mr. Vivek Kumar has also made significant contributions to a wide range of industries through his work with the Kamalya Group. The group operates businesses across textiles, fitness, and real estate and has become a driving force in the Indian business community. His business intellect and leadership have been widely recognized, earning him various domestic and international awards.",
+    description: "Mr. Vivek Kumar, the Co-Founder of Aldovia and the Founder of Kamalya Group, is a highly respected entrepreneur known for his exceptional leadership and business acumen. In addition to his work with Aldovia, Mr. Vivek Kumar has also made significant contributions to a wide range of industries through his work with the Kamalya Group. The group operates businesses across textiles, fitness, and real estate and has become a driving force in the Indian business community. His business intellect and leadership have been widely recognized, earning him various domestic and international awards.",
     image: "/assets/pages/aboutus/vivek-kumar.webp",
   },
   {
     role: "Executive Director",
     name: "Mr. Nigel Colaco",
-    description: "Mr. Nigel Colaco, the Executive Director of Clarks Exotica and Director of Continental Builders and Developers, is a visionary entrepreneur and real estate expert known for his exceptional leadership and innovation in the real estate industry. Under Mr. Colaco's leadership and guidance, Continental Builders and Developers have constructed some of the most iconic residential and commercial properties in Bangalore. These include Swiss Town, Hollywood Town, Oval Reef, and Serene Gardens. His passion for creating exceptional properties that reflect the highest standards of quality and innovation, combined with his commitment to sustainability and community engagement is a testament to his leadership and vision.",
+    description: "Mr. Nigel Colaco, the Executive Director of Aldovia and Director of Continental Builders and Developers, is a visionary entrepreneur and real estate expert known for his exceptional leadership and innovation in the real estate industry. Under Mr. Colaco's leadership and guidance, Continental Builders and Developers have constructed some of the most iconic residential and commercial properties in Bangalore. These include Swiss Town, Hollywood Town, Oval Reef, and Serene Gardens. His passion for creating exceptional properties that reflect the highest standards of quality and innovation, combined with his commitment to sustainability and community engagement is a testament to his leadership and vision.",
     image: "/assets/pages/aboutus/nigel.webp",
   },
   {
-    role: "CEO",
-    name: "Mr. M Balaji",
-    description: "Mr. Balaji, the CEO of Clarks Exotica has been recognized as a prominent figure in the hospitality industry. With his visionary approach and extensive expertise, he has played a crucial role in the growth and success of Clarks Exotica. Under his leadership, Clarks Exotica has received numerous awards and accolades for its exceptional service. His dedication to providing unparalleled hospitality experiences has helped the resort become a popular choice for corporate events, weddings, and other social gatherings. Mr. Balaji has been honored with numerous awards and accolades, including the prestigious Socrates Commission Award in 2019, which is given for the highest achievement in management. His commitment to excellence and his ability to motivate and inspire the team has helped Clarks achieve unprecedented levels of success.",
-    image: "/assets/pages/aboutus/balaji.webp",
+    role: "",
+    name: "Mr. Randal Colaco",
+    description: "Mr. Randal Colaco, represents the new wave and brings fresh vision with creative direction to the family’s hospitality ventures. With a passion for premium experiences, Mr. Randal plays a key role in shaping Aldovia’s identity and growth. His approach blends design sensibility, operational excellence, and customer-first thinking. Mr. Randal represents the new wave of leadership with a strong focus on innovation and lifestyle-driven brands.",
+    image: "/assets/pages/aboutus/randel.webp",
   },
 ];
 
@@ -48,9 +48,13 @@ const MemberCardContent: React.FC<{ member: TeamMember }> = ({ member }) => {
       </div>
 
       <div className="text-center md:text-left">
-        <p className="inline-flex rounded-full bg-[var(--color-primary)] !px-5 !py-2 text-[1em] font-semibold uppercase tracking-[0.14em] text-[#2d180f]">
+        {
+          member.role &&  
+          <p className="inline-flex rounded-full bg-[var(--color-primary)] !px-5 !py-2 text-[1em] font-semibold uppercase tracking-[0.14em] text-[#2d180f]">
           {member.role}
         </p>
+        }
+       
         <h3 className="!mt-4 text-[2em] italic leading-tight !text-[var(--color-primary)] md:text-[48px]">
           {member.name}
         </h3>
@@ -123,6 +127,17 @@ const TeamSection: React.FC = () => {
           backgroundRepeat: "no-repeat",
         }}
       >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-0 right-[-8%] z-[1] translate-y-[46%] bg-no-repeat opacity-10 md:opacity-[0.16]"
+          style={{
+            backgroundImage: "url('/assets/logo/logo-wet-earth.png')",
+            backgroundSize: "min(60vw, 760px)",
+            backgroundPosition: "right bottom",
+            width: "min(60vw, 760px)",
+            height: "min(60vw, 760px)",
+          }}
+        />
         <div className="!pt-5 !pb-1 text-center">
           <h2 className="font-lust-medium text-[2em] md:text-[3em] leading-tight text-[var(--color-primary)]">
             The Management

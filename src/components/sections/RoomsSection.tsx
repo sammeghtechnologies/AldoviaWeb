@@ -69,8 +69,8 @@ const RoomsSection: React.FC = () => {
       ref={sectionRef}
       className="relative w-full overflow-hidden bg-[#FBF6E6] bg-cover bg-center bg-no-repeat !pt-12 !pb-24 !px-4 md:!px-6 lg:!px-8"
       style={{
-        backgroundImage:
-          "linear-gradient(rgba(61, 48, 4, 0.78), rgba(37, 30, 4, 0.78))",
+        backgroundColor:
+          "var(--color-secondary)",
       }}
     >
       <div
