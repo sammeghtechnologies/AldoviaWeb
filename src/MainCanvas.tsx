@@ -12,37 +12,16 @@ import { SwanModel, WaterPlane, SplashWalls, SplashDroplets } from "./Sections/L
 // 2. NEW: Feather Imports
 import NaturalFeather from "./components/NaturalFeather/NaturalFeather";
 import CameraFocusController from "./components/CameraFocusController/CameraFocusController";
-import RoomDetailsPanel from "./components/pages/home/RoomDetailsPanel";
-import { roomData } from "./components/roomDetailsPanel/RoomData";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
-const CameraZoomController = ({ mountFeathers, activeId, startOffset }: { mountFeathers: boolean, activeId: number | null, startOffset: number }) => {
+const CameraZoomController = ({ mountFeathers, startOffset }: { mountFeathers: boolean, startOffset: number }) => {
   const { camera } = useThree();
-  
-  // 📸 Storage for the "Home" position and rotation
-  const initialPos = useRef(new THREE.Vector3());
-  const initialRot = useRef(new THREE.Euler());
-  const hasCapturedInitial = useRef(false);
 
-  // 1. Capture the "Wide Shot" state once feathers are ready
-  useEffect(() => {
-    if (mountFeathers && !hasCapturedInitial.current) {
-      initialPos.current.copy(camera.position);
-      initialRot.current.copy(camera.rotation);
-      hasCapturedInitial.current = true;
-    }
-    // Reset if feathers unmount so we can capture fresh next time
-    if (!mountFeathers) {
-      hasCapturedInitial.current = false;
-    }
-  }, [mountFeathers, camera]);
-
-  // 2. Automatic Scroll-Based Zoom (Forward)
   useGSAP(() => {
-    if (!mountFeathers || activeId !== null) return;
+    if (!mountFeathers) return;
 
     const zoomStart = startOffset + 900;
     const zoomEnd = startOffset + 2000;
@@ -56,42 +35,18 @@ const CameraZoomController = ({ mountFeathers, activeId, startOffset }: { mountF
       }
     });
 
-    // Zoom into Feather ID 3's target position
+    // We keep ONLY the automatic zoom forward
     tl.to(camera.position, {
       x: 7.0,
       y: 5.0,
       z: 24, 
       ease: "power2.inOut"
     });
-  }, [mountFeathers, activeId, startOffset]);
-
-  // 3. 🚀 THE FIX: Glide back to the EXACT initial state on close
-  useEffect(() => {
-    if (mountFeathers && activeId === null && hasCapturedInitial.current) {
-      // Return Position
-      gsap.to(camera.position, {
-        x: initialPos.current.x,
-        y: initialPos.current.y,
-        z: initialPos.current.z,
-        duration: 1.8,
-        ease: "expo.inOut", // Smooth, high-end feel
-        overwrite: "auto"
-      });
-
-      // Return Rotation (Crucial so you aren't looking at an angle)
-      gsap.to(camera.rotation, {
-        x: initialRot.current.x,
-        y: initialRot.current.y,
-        z: initialRot.current.z,
-        duration: 1.8,
-        ease: "expo.inOut",
-        overwrite: "auto"
-      });
-    }
-  }, [activeId, mountFeathers, camera]);
+  }, [mountFeathers, startOffset]);
 
   return null;
 };
+
 
 const MainCanvas = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -140,13 +95,6 @@ const [swanOpacity, setSwanOpacity] = useState(1);
   }, []);
 
 // Inside MainCanvas.tsx
-const handleBubbleClick = (id: number, target: THREE.Vector3) => {
-  setActiveId(id);
-  
-  // 🔥 ZOOM LOGIC: 
-  // We set the focus target. CameraFocusController will automatically 
-  // take over and glide the camera to this position.
-setFocusTarget(new THREE.Vector3(target.x + 3.5, target.y, target.z + 8.0));};
 
   useGSAP(() => {
     if (!isLoaded || images.length === 0) return;
@@ -264,7 +212,6 @@ setFocusTarget(new THREE.Vector3(target.x + 3.5, target.y, target.z + 8.0));};
 
              <CameraZoomController 
                 mountFeathers={mountFeathers} 
-                activeId={activeId} 
                 startOffset={11680} 
                 />
             
@@ -292,22 +239,22 @@ setFocusTarget(new THREE.Vector3(target.x + 3.5, target.y, target.z + 8.0));};
                 <CameraFocusController target={focusTarget} enabled={!!focusTarget} />
                 
                 {/* Far Left */}
-                <NaturalFeather id={5} variant="mid-drift" startPos={[-11.0, 12, 1]} targetPos={[-17.0, 2.5, 1]} started={true} delay={0.8} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} />
+                <NaturalFeather id={5} variant="mid-drift" startPos={[-11.0, 12, 1]} targetPos={[-17.0, 2.5, 1]} started={true} delay={0.8} activeId={activeId} burstAll={burstAll}  allBubblesReady={allBubblesReady} startOffset={11680} />
                 
                 {/* Mid Left */}
-                <NaturalFeather id={2} variant="small-drag" startPos={[-6.5, 14, -2]} targetPos={[-16.5, -19.0, -2]} started={true} delay={0.6} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} />
+                <NaturalFeather id={2} variant="small-drag" startPos={[-6.5, 14, -2]} targetPos={[-16.5, -19.0, -2]} started={true} delay={0.6} activeId={activeId} burstAll={burstAll}  allBubblesReady={allBubblesReady} startOffset={11680} />
                 
                 {/* Center Left */}
-                <NaturalFeather id={3} variant="upper-pendulum" startPos={[-2.0, 10, -3]} targetPos={[7.0, 5.0, -3]} started={true} delay={0.3} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} />
+                <NaturalFeather id={3} variant="upper-pendulum" startPos={[-2.0, 10, -3]} targetPos={[7.0, 5.0, -3]} started={true} delay={0.3} activeId={activeId} burstAll={burstAll}  allBubblesReady={allBubblesReady} startOffset={11680} />
                 
                 {/* Center Right */}
-                <NaturalFeather id={1} variant="main" startPos={[2.5, 16, 0]} targetPos={[2.5, -10.0, 0]} started={true} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} />
+                <NaturalFeather id={1} variant="main" startPos={[2.5, 16, 0]} targetPos={[2.5, -10.0, 0]} started={true} activeId={activeId} burstAll={burstAll}  allBubblesReady={allBubblesReady} startOffset={11680} />
                 
                 {/* Mid Right */}
-                <NaturalFeather id={4} variant="side-roll-upper" startPos={[7.0, 12, -1]} targetPos={[25.0, 1.0, -1]} started={true} delay={0.5} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} />
+                <NaturalFeather id={4} variant="side-roll-upper" startPos={[7.0, 12, -1]} targetPos={[30.0, -4.0, -1]} started={true} delay={0.5} activeId={activeId} burstAll={burstAll}  allBubblesReady={allBubblesReady} startOffset={11680} />
                 
                 {/* Far Right */}
-                <NaturalFeather id={6} variant="high-drag-zig" startPos={[11.5, 18, 0]} targetPos={[17.5, -20.0, 0]} started={true} delay={0.2} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} />
+                <NaturalFeather id={6} variant="high-drag-zig" startPos={[11.5, 18, 0]} targetPos={[17.5, -20.0, 0]} started={true} delay={0.2} activeId={activeId} burstAll={burstAll}  allBubblesReady={allBubblesReady} startOffset={11680} />
               </group>
             )}
              </group>
@@ -319,16 +266,7 @@ setFocusTarget(new THREE.Vector3(target.x + 3.5, target.y, target.z + 8.0));};
       <div ref={logoRef} className="absolute z-30 pointer-events-none" style={{ visibility: "hidden" }}>
         <img src="assets/logo/aldovialogo.svg" alt="Logo" className="w-full h-auto brightness-0 invert" />
       </div>
-
-<RoomDetailsPanel 
-  activeId={activeId} 
-  content={activeId ? roomData[activeId] : null} 
-  onClose={() => { 
-    console.log("Close button clicked!"); // Add this to debug
-    setActiveId(null); 
-    setFocusTarget(null); 
-  }} 
-/>   </div>
+  </div>
   );
 };
 
