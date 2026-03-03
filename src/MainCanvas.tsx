@@ -160,7 +160,7 @@ const MainCanvas = () => {
 
     const totalScroll = 16000;
     const centerLogoWidth = isMobile ? "280px" : "420px";
-    const cornerLogoWidth = isMobile ? "56px" : "120px";
+    const cornerLogoWidth = isMobile ? "76px" : "120px";
 
     gsap.set(logoRef.current, {
       autoAlpha: 0, scale: 0.8, top: "50%", left: "50%",
@@ -263,7 +263,7 @@ const MainCanvas = () => {
   return (
     <div ref={containerRef} className="relative w-full h-screen bg-black overflow-hidden">
       {showCornerActions && (
-        <div className="fixed top-8 right-4 md:top-12 md:right-6 z-[2147483647] flex items-center gap-3 md:gap-5 pointer-events-none">
+        <div className="fixed !top-18 right-4 md:top-12 md:right-6 z-[2147483647] flex items-center gap-3 md:gap-5 pointer-events-none">
          
           <button
             type="button"
