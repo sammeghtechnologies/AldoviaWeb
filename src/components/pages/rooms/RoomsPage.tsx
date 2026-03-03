@@ -140,7 +140,7 @@ const RoomsPage = () => {
           )}
 
           {view === 'footer' && (
-            <div className="h-full w-full overflow-y-auto bg-[#0F1A2A]">
+            <div className="h-full w-full overflow-y-auto bg-[var(--color-secondary)]">
               <Footer />
             </div>
           )}

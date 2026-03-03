@@ -5,6 +5,7 @@ import AnimatedImageHero from "../../ui/AnimatedImageHero";
 import HeroBreadcrumb from "../../ui/HeroBreadcrumb";
 import AcitivityDetails from "./AcitivityDetails";
 import type { AcitivityDetailItem } from "./AcitivityDetails";
+import Footer from "../../sections/Footer";
 
 const ActivitiesHeroPage: React.FC = () => {
   const navigate = useNavigate();
@@ -299,6 +300,7 @@ const ActivitiesHeroPage: React.FC = () => {
         defaultTab="Indoor"
         backgroundImage="/assets/herobackgrounds/herobanner/corridor.jpg"
       />
+      <Footer/>
     </section>
     
   );

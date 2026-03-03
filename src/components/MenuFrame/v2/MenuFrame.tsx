@@ -7,9 +7,11 @@ import { useLocation, useNavigate } from "react-router";
 // ✅ FIX 1: Added introFinished prop to resolve 'isVisible' name error
 const Logo_top = ({
   introFinished,
+  logoSrc = "assets/logo/brown-logo.svg",
   onClick,
 }: {
   introFinished?: boolean;
+  logoSrc?: string;
   onClick?: () => void;
 }) => {
   const isVisible = introFinished ?? true;
@@ -18,12 +20,12 @@ const Logo_top = ({
       type="button"
       onClick={onClick}
       aria-label="Go to landing page"
-      className={`logo-top relative z-[5000] transition-opacity duration-300 cursor-pointer ${isVisible ? "opacity-100" : "opacity-0"}`}
+      className={`!mt-2 logo-top relative z-[5000] transition-opacity duration-300 cursor-pointer ${isVisible ? "opacity-100" : "opacity-0"}`}
     >
       <img
-        src="assets/logo/aldovialogo.svg"
+        src={logoSrc}
         alt="Aldovia"
-        className="logo-image w-[5em] lg:w-[6rem] h-auto object-contain block brightness-0 invert"
+        className="logo-image w-[6em] lg:w-[8rem] h-auto object-contain block"
       />
     </button>
   );
@@ -137,7 +139,9 @@ const MenuFrame = ({
   const isHeroSection = !isBeyondHero;
   const isHomeBeyondHero = location.pathname === "/home" && isBeyondHero;
   const isAboutUsPage = location.pathname === "/aboutus";
-  const hamburgerIconSrc = isHomeExperienceInView
+  const hamburgerIconSrc = isOpen
+    ? "assets/icons/feet-beige.png"
+    : isHomeExperienceInView
     ? "assets/icons/feet-beige.png"
     : isAboutAwardsInView
     ? "assets/icons/feet-beige.png"
@@ -150,6 +154,9 @@ const MenuFrame = ({
     : shouldShowTopBarBackground
       ? "assets/icons/feet-beige.png"
       : "assets/icons/feet-brown.png";
+  const topLogoSrc = hamburgerIconSrc.includes("feet-beige")
+    ? "assets/logo/beige-logo.svg"
+    : "assets/logo/brown-logo.svg";
 
   // Logo animation
   useLayoutEffect(() => {
@@ -362,12 +369,16 @@ const MenuFrame = ({
     >
       {/* TOP BAR */}
       <div
-        className={`h-[12vh] !p-3 absolute left-0 right-0 top-0 z-[2147483647]  transition-all duration-300 ${shouldShowTopBarBackground ? " backdrop-blur-xl  shadow-[0_10px_30px_rgba(0,0,0,0.45)]" : "bg-transparent"} ${isTopBarVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "-translate-y-12 opacity-0 pointer-events-none"
+        className={`h-[12vh] !p-1 absolute left-0 right-0 top-0 z-[2147483647]  transition-all duration-300 ${shouldShowTopBarBackground ? " backdrop-blur-xl  shadow-[0_10px_30px_rgba(0,0,0,0.45)]" : "bg-transparent"} ${isTopBarVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "-translate-y-12 opacity-0 pointer-events-none"
           }`}
       >
-        <div className="flex items-center justify-between px-3 py-2">
+        <div className="flex h-full items-center justify-between px-3 py-2 -translate-y-1">
         {/* ✅ Pass introFinished here */}
-        <Logo_top introFinished={introFinished} onClick={() => navigate("/")} />
+        <Logo_top
+          introFinished={introFinished}
+          logoSrc={topLogoSrc}
+          onClick={() => navigate("/")}
+        />
 
         <div className="flex items-center gap-10">
           {/* BOOK NOW BUTTON */}
@@ -592,7 +603,7 @@ const MenuFrame = ({
                     style={{ filter: "brightness(0) invert(1)" }}
                   />
                 </div>
-                <span>+91 80000 00000</span>
+                <span>+91 8071777000</span>
               </div>
 
               <div className="flex items-center gap-4">
@@ -604,7 +615,7 @@ const MenuFrame = ({
                     style={{ filter: "brightness(0) invert(1)" }}
                   />
                 </div>
-                <span>info@aldovia.com</span>
+                <span>info.blr@aldovia.in </span>
               </div>
             </div>
           </div>

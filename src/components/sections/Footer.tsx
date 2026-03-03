@@ -4,14 +4,20 @@ import { Instagram, Facebook, Twitter, Phone, Mail, MapPin } from "lucide-react"
 const Footer: React.FC = () => {
   return (
     <footer
-      className="w-full bg-[var(--color-secondary)] bg-no-repeat text-[var(--color-primary)] font-area font-normal !pt-20 !pb-10 !px-6 md:!px-12 lg:!px-20"
-      style={{
-        backgroundImage:
-          "url('/assets/logo/logo-wet-trans.png')",
-        backgroundSize: "min(54vw, 620px)",
-        backgroundPosition: "calc(100% + 86px) calc(100% + 15vh)",
-      }}
+      className="relative w-full overflow-hidden bg-[var(--color-secondary)] bg-no-repeat text-[var(--color-primary)] font-area font-normal !pt-20 !pb-10 !px-6 md:!px-12 lg:!px-20"
     >
+
+<div
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-0 right-[-12%] z-0 translate-y-[28%] bg-no-repeat opacity-10 md:opacity-[0.15]"
+        style={{
+          backgroundImage: "url('/assets/logo/logo-wet-earth.png')",
+          backgroundSize: "min(64vw, 100vh)",
+          backgroundPosition: "right bottom",
+          width: "min(64vw, 100vh)",
+          height: "min(64vw, 100vh)",
+        }}
+      />
       <div className="max-w-6xl mx-auto">
 
         {/* Brand */}
@@ -29,11 +35,13 @@ const Footer: React.FC = () => {
             <h4 className="font-lust text-sm tracking-wider uppercase !mb-4 text-[var(--color-primary)]">
               Stay
             </h4>
+            <span className="block !mt-3 !mb-2 h-[2px] w-16 rounded-full bg-[var(--color-primary)]" />
+
             <ul className="space-y-2 text-sm">
               <li>Rooms & Suites</li>
-              <li>Amenities</li>
-              <li>Dining</li>
-              <li>Spa</li>
+              <li className="!pt-3">Amenities</li>
+              <li className="!pt-3">Dining</li>
+              <li className="!pt-3">Spa</li>
             </ul>
           </div>
 
@@ -42,11 +50,13 @@ const Footer: React.FC = () => {
             <h4 className="font-lust text-sm tracking-wider uppercase !mb-4 text-[var(--color-primary)]">
               Weddings
             </h4>
+            <span className="block !mt-3 !mb-2 h-[2px] w-16 rounded-full bg-[var(--color-primary)]" />
+
             <ul className="space-y-2 text-sm">
               <li>Venues</li>
-              <li>Packages</li>
-              <li>Gallery</li>
-              <li>Testimonials</li>
+              <li className="!pt-3">Packages</li>
+              <li className="!pt-3">Gallery</li>
+              <li className="!pt-3">Testimonials</li>
             </ul>
           </div>
 
@@ -55,11 +65,13 @@ const Footer: React.FC = () => {
             <h4 className="font-lust text-sm tracking-wider uppercase !mb-4 text-[var(--color-primary)]">
               Corporate
             </h4>
+            <span className="block !mt-3 !mb-2 h-[2px] w-16 rounded-full bg-[var(--color-primary)]" />
+
             <ul className="space-y-2 text-sm">
               <li>Conference Halls</li>
-              <li>Team Retreats</li>
-              <li>Facilities</li>
-              <li>Request Proposal</li>
+              <li className="!pt-3">Team Retreats</li>
+              <li className="!pt-3">Facilities</li>
+              <li className="!pt-3">Request Proposal</li>
             </ul>
           </div>
 
@@ -68,14 +80,16 @@ const Footer: React.FC = () => {
             <h4 className="font-lust text-sm tracking-wider uppercase !mb-4 text-[var(--color-primary)]">
               Contact
             </h4>
+            <span className="block !mt-3 !mb-2 h-[2px] w-16 rounded-full bg-[var(--color-primary)]" />
+
             <ul className="space-y-3 text-sm">
               <li className="flex items-center gap-2">
-                <Phone size={16} /> +91 80000 00000
+                <Phone size={16} /> +91 8071777000
               </li>
-              <li className="flex items-center gap-2">
-                <Mail size={16} /> info@aldovia.com
+              <li className="!pt-3 flex items-center gap-2">
+                <Mail size={16} /> info.blr@aldovia.in
               </li>
-              <li className="flex items-start gap-2">
+              <li className="!pt-3 flex items-start gap-2">
                 <MapPin size={16} /> Bangalore, Karnataka
               </li>
             </ul>

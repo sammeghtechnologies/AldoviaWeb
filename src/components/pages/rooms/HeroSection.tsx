@@ -12,17 +12,7 @@ interface Props {
 
 const HeroSection = ({ activeRoom, setActiveRoom }: Props) => {
   const roomItems = roomsData.map((room) => room.navLabel || room.title);
-  const mobileBgImage = '/assets/rooms/mobile/bg.png';
   const [isMobile, setIsMobile] = useState(false);
-  const mobileAnimatedLayers = [
-    { id: 'm-chair', src: '/assets/rooms/mobile/chair.png', slideFrom: 'left' as const, className: 'bottom-[10%] left-[-6%] w-[46%] object-contain' },
-    { id: 'm-table', src: '/assets/rooms/mobile/table.png', slideFrom: 'right' as const, className: 'bottom-[10%] left-[60%] -translate-x-1/2 w-[44%] object-contain' },
-    { id: 'm-bulbL', src: '/assets/rooms/mobile/bulbL.png', slideFrom: 'top' as const, className: 'top-[28%] left-[10%] w-[12%] object-contain' },
-    { id: 'm-bulbR', src: '/assets/rooms/mobile/bulbR.png', slideFrom: 'top' as const, className: 'top-[27%] right-[10%] w-[10%] object-contain' },
-    { id: 'm-drawer', src: '/assets/rooms/mobile/drawer.png', slideFrom: 'left' as const, className: 'bottom-[37%] left-[10%] w-[30%] object-contain' },
-    { id: 'm-bed', src: '/assets/rooms/mobile/bed.png', slideFrom: 'top' as const, className: 'bottom-[36%] left-[76%] -translate-x-1/2 w-[100%] object-contain' },
-    { id: 'm-bedbench', src: '/assets/rooms/mobile/bedbench.png', slideFrom: 'right' as const, className: 'bottom-[30%] right-[-10%] w-[24%] object-contain' },
-  ];
 
   const handleRoomTabChange = (label: string) => {
     const selected = roomsData.find((room) => (room.navLabel || room.title) === label);
@@ -50,7 +40,6 @@ const HeroSection = ({ activeRoom, setActiveRoom }: Props) => {
     <section className="relative h-screen w-full overflow-hidden bg-[#18110e]">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(195,136,66,0.30),rgba(27,18,14,0.92)_55%,rgba(18,12,10,1)_100%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(22,13,10,0.92)_0%,rgba(22,13,10,0.35)_20%,rgba(22,13,10,0.15)_50%,rgba(22,13,10,0.35)_80%,rgba(22,13,10,0.92)_100%)]" />
-
       <div className="relative z-10 flex h-full w-full items-center justify-center px-0 pt-0 md:px-10 md:pt-20">
         <motion.div
           className="relative h-screen w-full max-w-full overflow-hidden rounded-none border-0 shadow-none md:h-[80vh] md:max-w-[1340px] md:rounded-[28px] md:border md:border-white/25 md:shadow-[0_30px_80px_rgba(0,0,0,0.55)]"
@@ -68,8 +57,12 @@ const HeroSection = ({ activeRoom, setActiveRoom }: Props) => {
                 transition={{ duration: 0.4, ease: "easeInOut" }}
                 className="absolute inset-0 w-full h-full overflow-hidden"
               >
-                <img src={mobileBgImage} alt="Background" className="absolute inset-0 w-full h-full object-cover" />
-                {mobileAnimatedLayers.map((layer) => (
+                <img
+                  src={activeRoom.mobileBgImage || '/assets/rooms/mobile/empty.png'}
+                  alt="Background"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                {(activeRoom.mobileLayers || []).map((layer) => (
                   <motion.img
                     key={layer.id}
                     src={layer.src}
@@ -114,37 +107,15 @@ const HeroSection = ({ activeRoom, setActiveRoom }: Props) => {
                 ) : (
                   <>
                     <img src={activeRoom.bgImage} alt="Background" className="absolute inset-0 w-full h-full object-cover" />
-                    {activeRoom.finalImage && (
-                      <motion.img
-                        src={activeRoom.finalImage}
-                        alt={`${activeRoom.title} final`}
-                        initial={{ opacity: 0, scale: 1.16 }}
-                        animate={{ opacity: [0, 0.42, 1], scale: [1.16, 1.07, 1] }}
-                        transition={{ duration: 1.55, delay: 0.05, ease: "easeOut", times: [0, 0.55, 1] }}
-                        className="absolute inset-0 z-[1] w-full h-full object-cover"
-                      />
-                    )}
                     {activeRoom.layers?.map((layer) => (
                       <motion.img
                         key={layer.id}
                         src={layer.src}
                         draggable={false}
                         initial={getInitialPosition(layer.slideFrom)}
-                        animate={{
-                          x: "0%",
-                          y: "0%",
-                          opacity: activeRoom.finalImage ? [1, 0.9, 0.14] : 1,
-                        }}
-                        transition={
-                          activeRoom.finalImage
-                            ? {
-                                x: { type: 'tween', ease: 'easeOut', duration: 0.65, delay: 0.08 },
-                                y: { type: 'tween', ease: 'easeOut', duration: 0.65, delay: 0.08 },
-                                opacity: { duration: 1.35, delay: 0.08, ease: 'easeInOut', times: [0, 0.5, 1] },
-                              }
-                            : { type: 'tween', ease: 'easeOut', duration: 0.65, delay: 0.08 }
-                        }
-                        className={`absolute z-[4] ${layer.className || 'inset-0 w-full h-full object-contain'}`}
+                        animate={{ x: "0%", y: "0%", opacity: 1 }}
+                        transition={{ type: 'tween', ease: 'easeOut', duration: 0.6, delay: 0.1 }}
+                        className={`absolute ${layer.className || 'inset-0 w-full h-full object-contain'}`}
                       />
                     ))}
                     {activeRoom.textLayer && (
@@ -164,6 +135,7 @@ const HeroSection = ({ activeRoom, setActiveRoom }: Props) => {
 
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(13,8,6,0.32)_0%,rgba(20,12,8,0.28)_36%,rgba(19,11,8,0.55)_100%)] pointer-events-none" />
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.08),rgba(255,255,255,0)_60%)]" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[22%] bg-[linear-gradient(180deg,rgba(8,5,4,0)_0%,rgba(8,5,4,0.20)_48%,rgba(8,5,4,0.46)_100%)]" />
         </motion.div>
       </div>
 

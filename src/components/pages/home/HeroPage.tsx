@@ -44,7 +44,7 @@ const HeroPage: React.FC = () => {
           initial={{ scale: 1.1 }}
           animate={{ scale: 1 }}
           transition={{ duration: 8, ease: "easeOut" }}
-          className="absolute inset-0 h-full w-full object-cover brightness-[1.08] contrast-[1.06] saturate-[1.08]"
+          className="absolute inset-0 h-full w-full object-cover"
         >
           <source src="/assets/herobackgrounds/home/home.mp4" type="video/mp4" />
         </motion.video>

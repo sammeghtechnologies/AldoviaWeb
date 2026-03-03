@@ -75,13 +75,13 @@ const RoomsSection: React.FC = () => {
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 right-[-6%] z-0 translate-y-[49%] bg-no-repeat opacity-10 md:opacity-[0.15]"
+        className="pointer-events-none absolute bottom-0 right-[-16%] z-0 translate-y-[44%] bg-no-repeat opacity-10 md:opacity-[0.15]"
         style={{
           backgroundImage: "url('/assets/logo/logo-wet-earth.png')",
-          backgroundSize: "min(64vw, 820px)",
+          backgroundSize: "min(64vw, 920px)",
           backgroundPosition: "right bottom",
-          width: "min(64vw, 820px)",
-          height: "min(64vw, 820px)",
+          width: "min(64vw, 920px)",
+          height: "min(64vw, 920px)",
         }}
       />
 
@@ -136,8 +136,8 @@ const RoomsSection: React.FC = () => {
             <motion.div
               key={`mobile-prev-${roomsData[mobilePrevIndex].id}-${introCycle}`}
               className="absolute left-[-28%] top-[92px] w-[84%] lg:hidden"
-              initial={{ x: isIntroAnimating ? -220 : -40, opacity: 0 }}
-              animate={{ x: 0, opacity: 0.9, rotate: -8, scale: 0.96 }}
+              initial={{ x: isIntroAnimating ? -220 : -40 }}
+              animate={{ x: 0, rotate: -8, scale: 0.96 }}
               transition={{
                 duration: isIntroAnimating ? 0.62 : 0.42,
                 delay: isIntroAnimating ? 0.1 : 0,
@@ -153,8 +153,8 @@ const RoomsSection: React.FC = () => {
             <motion.div
               key={`mobile-next-${roomsData[mobileNextIndex].id}-${introCycle}`}
               className="absolute right-[-28%] top-[92px] w-[84%] lg:hidden"
-              initial={{ x: isIntroAnimating ? 220 : 40, opacity: 0 }}
-              animate={{ x: 0, opacity: 0.9, rotate: 8, scale: 0.96 }}
+              initial={{ x: isIntroAnimating ? 220 : 40 }}
+              animate={{ x: 0, rotate: 8, scale: 0.96 }}
               transition={{
                 duration: isIntroAnimating ? 0.62 : 0.42,
                 delay: isIntroAnimating ? 0.18 : 0,
@@ -172,13 +172,11 @@ const RoomsSection: React.FC = () => {
               className="absolute left-1/2 top-10 hidden -translate-x-1/2 !w-[380px] !min-w-[380px] lg:block"
               initial={{
                 x: -desktopEdgeCenterOffset - 92 + (direction > 0 ? -110 : 110),
-                opacity: 0.28,
                 scale: 0.8,
               }}
               animate={{
                 x: -desktopEdgeCenterOffset - 92,
                 y: 0,
-                opacity: 0.5,
                 scale: 0.84,
               }}
               transition={{
@@ -203,13 +201,11 @@ const RoomsSection: React.FC = () => {
               className="absolute left-1/2 top-10 hidden -translate-x-1/2 !w-[380px] !min-w-[380px] lg:block"
               initial={{
                 x: desktopEdgeCenterOffset + 92 + (direction > 0 ? -110 : 110),
-                opacity: 0.28,
                 scale: 0.8,
               }}
               animate={{
                 x: desktopEdgeCenterOffset + 92,
                 y: 0,
-                opacity: 0.5,
                 scale: 0.84,
               }}
               transition={{
@@ -234,10 +230,9 @@ const RoomsSection: React.FC = () => {
               className="absolute left-1/2 top-6 w-[92%] -translate-x-1/2 lg:hidden"
               initial={{
                 x: isIntroAnimating ? (activeIndex % 2 === 0 ? -260 : 260) : direction > 0 ? 130 : -130,
-                opacity: 1,
                 scale: 0.96,
               }}
-              animate={{ x: 0, opacity: 1, scale: 1 }}
+              animate={{ x: 0, scale: 1 }}
               transition={{
                 duration: isIntroAnimating ? 0.66 : 0.46,
                 delay: isIntroAnimating ? 0.26 : 0,
@@ -264,13 +259,11 @@ const RoomsSection: React.FC = () => {
                   initial={{
                     x: direction > 0 ? 160 : -160,
                     y: 12,
-                    opacity: 1,
                     scale: 0.92,
                   }}
                   animate={{
                     x: 0,
                     y: 0,
-                    opacity: 1,
                     scale: 1,
                     rotateY:
                       idx === 0

@@ -118,34 +118,28 @@ const TeamSection: React.FC = () => {
     return (
       <section
         ref={sectionRef}
-        className="relative h-[400vh] w-full text-[var(--color-primary)]"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(244,239,227,0.9), rgba(244,239,227,0.92))",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          backgroundAttachment: "fixed",
-        }}
+        className="relative h-[400vh] w-full text-[var(--color-primary)] bg-[var(--color-secondary)]"
       >
+         {/* Background */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute bottom-0 right-[-8%] z-[1] translate-y-[26%] bg-no-repeat opacity-10 md:opacity-[0.16]"
+          className="pointer-events-none absolute bottom-0 right-[-14%] z-0 -translate-y-[69%] bg-no-repeat opacity-10 md:opacity-[0.15]"
           style={{
             backgroundImage: "url('/assets/logo/logo-wet-earth.png')",
-            backgroundSize: "min(60vw, 760px)",
-            backgroundPosition: "right bottom",
-            width: "min(60vw, 760px)",
-            height: "min(60vw, 760px)",
+            backgroundSize: "min(64vw, 920px)",
+            backgroundPosition: "right top",
+            width: "min(64vw, 920px)",
+            height: "min(64vw, 920px)",
           }}
         />
-        <div className="!pt-15 !pb-1 text-center">
+     
+        <div className="!pt-8 !pb-0 text-center">
           <h2 className="font-lust-medium text-[2em] md:text-[3em] leading-tight text-[var(--color-primary)]">
             The Management
           </h2>
          
         </div>
-        <div className="sticky top-0 flex h-screen w-full items-center justify-center !px-4 md:!px-1 lg:items-center lg:!px-12">
+        <div className="sticky top-0 flex h-screen w-full items-center justify-center !px-4 md:!px-1 lg:!px-12">
           <div
             className="relative w-full max-w-6xl min-h-[760px] md:min-h-[520px]"
             style={{

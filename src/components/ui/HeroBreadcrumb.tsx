@@ -24,8 +24,8 @@ const HeroBreadcrumb: React.FC<HeroBreadcrumbProps> = ({
       >
         <House className="h-4 w-4" />
       </button>
-      <ChevronRight className="h-4 w-4 text-white/70" />
-      <span className="text-[15px] font-medium tracking-[0.02em]">{label}</span>
+      <ChevronRight className="h-4 w-4" />
+      <span className="text-[.9em] font-medium tracking-[0.02em]">{label}</span>
     </div>
   );
 };

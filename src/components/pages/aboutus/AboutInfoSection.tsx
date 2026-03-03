@@ -67,13 +67,14 @@ const AboutInfoSection = () => {
 
       {/* Background */}
       <div
-        className="absolute inset-0"
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-0 right-[-16%] z-0 translate-y-[44%] bg-no-repeat opacity-23 md:opacity-[0.8]"
         style={{
-          backgroundImage:
-            "linear-gradient(rgba(33,20,15,0.88), rgba(33,20,15,0.92)), url('/assets/backgrounds/swanbg.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "center bottom",
-          backgroundRepeat: "no-repeat",
+          backgroundImage: "url('/assets/logo/logo-wet-earth.png')",
+          backgroundSize: "min(64vw, 920px)",
+          backgroundPosition: "right bottom",
+          width: "min(64vw, 920px)",
+          height: "min(64vw, 920px)",
         }}
       />
 
