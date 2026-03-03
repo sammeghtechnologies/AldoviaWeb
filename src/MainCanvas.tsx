@@ -11,43 +11,33 @@ import NaturalFeather from "./components/NaturalFeather/NaturalFeather";
 import CameraFocusController from "./components/CameraFocusController/CameraFocusController";
 import WaterSurface from "./components/WaterSurface/WaterSurface";
 
-// Room Details Panel
+// UI Components
 import RoomDetailsPanel from "./components/pages/home/RoomDetailsPanel";
 import { roomData } from "./components/roomDetailsPanel/RoomData";
 
 gsap.registerPlugin(ScrollTrigger);
-
 const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
-// 🚀 ADVANCED CONTROLLER: Manages scroll-zooming and click-zooming smoothly
+// --- ADVANCED CAMERA CONTROLLER ---
 const CameraZoomController = ({ mountFeathers, activeId, startOffset }: { mountFeathers: boolean, activeId: number | null, startOffset: number }) => {
   const { camera } = useThree();
-  
-  // 🚀 Proxy: Stores where the scroll *wants* the camera to be
   const scrollProxy = useRef({ x: 0, y: 0, z: 70 });
-  
-  // Track activeId for GSAP onUpdate without re-triggering the hook
   const activeIdRef = useRef(activeId);
+  const isReturning = useRef(false);
+  const hasOpened = useRef(false);
+
   useEffect(() => { activeIdRef.current = activeId; }, [activeId]);
 
-  // Track state so the scroll doesn't fight the glide-back animation
-  const isReturning = useRef(false);
-  const hasOpened = useRef(false); 
-
-  // 1. SCROLL-BASED ZOOM TO GHOST SWAN
+  // Handle Scroll Zoom
   useGSAP(() => {
     if (!mountFeathers) return;
 
-    // Reset proxy starting position
     scrollProxy.current = { x: 0, y: 0, z: 70 };
-
     const zoomStart = startOffset + 900;
     const zoomEnd = startOffset + 2000;
 
     gsap.to(scrollProxy.current, {
-      x: 7.0,
-      y: 5.0,
-      z: 24, // Zooms in right over feather ID 3 and the reflection
+      x: 7.0, y: 5.0, z: 24,
       ease: "power2.inOut",
       scrollTrigger: {
         trigger: document.body,
@@ -56,7 +46,7 @@ const CameraZoomController = ({ mountFeathers, activeId, startOffset }: { mountF
         scrub: 1.5,
       },
       onUpdate: () => {
-        // Only apply scroll updates if no panel is open AND we aren't currently flying back
+        // Only move camera with scroll if NO feather is selected and we aren't currently gliding back
         if (activeIdRef.current === null && !isReturning.current) {
           camera.position.set(scrollProxy.current.x, scrollProxy.current.y, scrollProxy.current.z);
         }
@@ -64,17 +54,13 @@ const CameraZoomController = ({ mountFeathers, activeId, startOffset }: { mountF
     });
   }, [mountFeathers, startOffset, camera]);
 
-  // 2. CLICK-BASED RETURN LOGIC
+  // Handle Return from Click-Zoom
   useEffect(() => {
     if (activeId !== null) {
-      // User clicked a feather! Stop applying scroll updates directly.
       hasOpened.current = true;
       isReturning.current = false;
     } else if (activeId === null && hasOpened.current && mountFeathers) {
-      // User closed the feather! Glide back to wherever the scroll proxy is NOW.
       isReturning.current = true;
-
-      // Fly Position back to Scroll Proxy
       gsap.to(camera.position, {
         x: scrollProxy.current.x,
         y: scrollProxy.current.y,
@@ -82,12 +68,8 @@ const CameraZoomController = ({ mountFeathers, activeId, startOffset }: { mountF
         duration: 1.5,
         ease: "expo.inOut",
         overwrite: "auto",
-        onComplete: () => {
-          isReturning.current = false;
-        }
+        onComplete: () => { isReturning.current = false; }
       });
-
-      // Reset Rotation 
       gsap.to(camera.rotation, {
         x: 0, y: 0, z: 0,
         duration: 1.5,
@@ -109,28 +91,32 @@ const MainCanvas = () => {
   const [images, setImages] = useState<HTMLImageElement[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
+  // Core Toggles
   const [mount3D, setMount3D] = useState(false);
   const [mountFeathers, setMountFeathers] = useState(false);
+  const [mountWater, setMountWater] = useState(false);
+  const [mountEndSwan, setMountEndSwan] = useState(false);
 
+  // Animation Progress States
   const [scrollProgress, setScrollProgress] = useState(0);
   const [transformProgress, setTransformProgress] = useState(0);
   const [splashProgress, setSplashProgress] = useState(0);
+  const [fallProgress, setFallProgress] = useState(0);
+  const [swanProgress, setSwanProgress] = useState(0);
+  
+  // Visual States
+  const [swanOpacity, setSwanOpacity] = useState(1);
+  const [endSwanOpacity, setEndSwanOpacity] = useState(0);
 
-  // States for Feathers, Burst, and Click Target
+  // Interaction States
   const [activeId, setActiveId] = useState<number | null>(null);
   const [focusTarget, setFocusTarget] = useState<THREE.Vector3 | null>(null);
   const [allBubblesReady, setAllBubblesReady] = useState(false);
   const [burstAll, setBurstAll] = useState(false);
 
-  const [mountWater, setMountWater] = useState(false);
-  const [fallProgress, setFallProgress] = useState(0);
-  const [swanProgress, setSwanProgress] = useState(0);
   const feather3Ref = useRef<any>(null);
 
-  const [swanOpacity, setSwanOpacity] = useState(1);
-  const [mountEndSwan, setMountEndSwan] = useState(false);
-  const [endSwanOpacity, setEndSwanOpacity] = useState(0);
-
+  // Image Sequence Loading
   const TOTAL_FRAMES = 499;
   const BLUR_START_FRAME = TOTAL_FRAMES - 25;
   const FRAME_PATH = (i: number) => `/assets/swarn_60/frame_${String(i).padStart(4, "0")}.jpg`;
@@ -150,8 +136,17 @@ const MainCanvas = () => {
     }
   }, []);
 
-  // 🚀 TRIGGER ZOOM + PANEL
+  // --- 🚀 TRIGGER ZOOM + PANEL (NOW WITH LOCK LOGIC) ---
   const handleBubbleClick = (id: number, target: THREE.Vector3) => {
+    // 🛑 If the user has scrolled down into the swan reflection sequence, BLOCK the click
+    const currentScrollY = window.scrollY;
+    
+    // The swan mounts at 13900, we add a buffer for safety
+    if (currentScrollY > 13800) {
+        console.log("Click blocked! Reflection animation is active.");
+        return; 
+    }
+
     setActiveId(id);
     setFocusTarget(new THREE.Vector3(target.x + 3.5, target.y, target.z + 8.0));
   };
@@ -159,12 +154,12 @@ const MainCanvas = () => {
   useGSAP(() => {
     if (!isLoaded || images.length === 0) return;
 
-    const totalScroll = 16000; 
+    const totalScroll = 16000;
     const centerLogoWidth = isMobile ? "280px" : "420px";
 
-    gsap.set(logoRef.current, { 
-      autoAlpha: 0, scale: 0.8, top: "50%", left: "50%", 
-      xPercent: -50, yPercent: -50, filter: "blur(60px)", width: centerLogoWidth 
+    gsap.set(logoRef.current, {
+      autoAlpha: 0, scale: 0.8, top: "50%", left: "50%",
+      xPercent: -50, yPercent: -50, filter: "blur(60px)", width: centerLogoWidth
     });
     gsap.set(canvasWrapperRef.current, { autoAlpha: 0, filter: "blur(120px)" });
 
@@ -178,12 +173,13 @@ const MainCanvas = () => {
         onUpdate: (self) => {
           const raw = self.progress;
           const currentScroll = raw * 16000;
-          
+
+          // Swan Opacity Fade
           const fadeStart = 0.70;
           const fadeEnd = 0.75;
-          const opacity = raw < fadeStart ? 1 : Math.max(0, 1 - (raw - fadeStart) / (fadeEnd - fadeStart));
-          setSwanOpacity(opacity);
+          setSwanOpacity(raw < fadeStart ? 1 : Math.max(0, 1 - (raw - fadeStart) / (fadeEnd - fadeStart)));
 
+          // Base Swan Animations
           const swanRaw = Math.min(raw / 0.75, 1.0);
           if (swanRaw > 0.4) {
             setScrollProgress(swanRaw < 0.60 ? 0 : (swanRaw - 0.60) / 0.40);
@@ -191,56 +187,48 @@ const MainCanvas = () => {
             setSplashProgress(swanRaw < 0.90 ? 0 : (swanRaw - 0.90) / 0.10);
           }
 
+          // Feathers Mount
           if (raw >= 0.73 && raw < 0.99) {
-              setMountFeathers(true);
-              setAllBubblesReady(true);
-              setBurstAll(raw > 0.732); 
+            setMountFeathers(true);
+            setAllBubblesReady(true);
+            setBurstAll(raw > 0.732);
           } else {
-              setMountFeathers(false);
-              setAllBubblesReady(false);
+            setMountFeathers(false);
+            setAllBubblesReady(false);
           }
 
-          const waterMountThreshold = 0.83; 
-          if (raw >= waterMountThreshold) {
+          // Water Mount
+          if (raw >= 0.83) {
             setMountWater(true);
           } else {
             setMountWater(false);
           }
 
+          // End Sequence
           const riseStart = 13280;
           const riseEnd = 13380;
-          const fProg = THREE.MathUtils.clamp((currentScroll - riseStart) / (riseEnd - riseStart), 0, 1);
-          setFallProgress(fProg);
+          setFallProgress(THREE.MathUtils.clamp((currentScroll - riseStart) / (riseEnd - riseStart), 0, 1));
 
           const landStart = 13980;
           const landEnd = 15800;
           const sProg = THREE.MathUtils.clamp((currentScroll - landStart) / (landEnd - landStart), 0, 1);
           setSwanProgress(sProg);
 
-          if (currentScroll >= 13900) {
-            setMountEndSwan(true);
-          } else {
-            setMountEndSwan(false);
-          }
-          
-          const endSwanFade = THREE.MathUtils.smoothstep(sProg, 0.05, 0.50);
-          setEndSwanOpacity(endSwanFade);
+          setMountEndSwan(currentScroll >= 13900);
+          setEndSwanOpacity(THREE.MathUtils.smoothstep(sProg, 0.05, 0.50));
 
           if (raw >= 0.75) {
-              setMount3D(false); 
+            setMount3D(false);
           } else if (raw > 0.4) {
-              setMount3D(true);
+            setMount3D(true);
           }
         }
       }
     });
 
+    // Sequence Timeline
     const frameObj = { frame: 0 };
-    tl.to(frameObj, {
-      frame: TOTAL_FRAMES - 1, snap: "frame", duration: 4.0,
-      onUpdate: () => renderHero(frameObj.frame)
-    });
-
+    tl.to(frameObj, { frame: TOTAL_FRAMES - 1, snap: "frame", duration: 4.0, onUpdate: () => renderHero(frameObj.frame) });
     tl.to({}, { duration: 0.1, onStart: () => setMount3D(true), onReverseComplete: () => setMount3D(false) }, ">");
     tl.to(canvasWrapperRef.current, { autoAlpha: 1, filter: "blur(40px)", duration: 0.5 }, ">");
     tl.to(logoRef.current, { autoAlpha: 1, scale: 1, filter: "blur(0px)", duration: 0.5 }, "<");
@@ -248,7 +236,7 @@ const MainCanvas = () => {
     tl.to(logoRef.current, { top: "37px", left: "48px", xPercent: 0, yPercent: 0, width: "56px", duration: 1.5, ease: "power2.inOut" }, ">");
     tl.to(canvasWrapperRef.current, { filter: "blur(0px)", duration: 1.5, ease: "power2.inOut" }, "<");
     tl.to({}, { duration: 4.0 });
-    tl.to({}, { duration: 3.366 }); 
+    tl.to({}, { duration: 3.366 });
 
     function renderHero(index: number) {
       const ctx = frameCanvasRef.current?.getContext("2d", { alpha: false });
@@ -256,12 +244,7 @@ const MainCanvas = () => {
       frameCanvasRef.current!.width = 1920;
       frameCanvasRef.current!.height = 1080;
       const frameIndex = Math.min(TOTAL_FRAMES - 1, Math.max(0, Math.round(index)));
-      if (frameIndex >= BLUR_START_FRAME) {
-        const progress = (frameIndex - BLUR_START_FRAME) / 25;
-        ctx.filter = `blur(${progress * 100}px)`;
-      } else {
-        ctx.filter = "none";
-      }
+      ctx.filter = frameIndex >= BLUR_START_FRAME ? `blur(${((frameIndex - BLUR_START_FRAME) / 25) * 100}px)` : "none";
       ctx.drawImage(images[index], 0, 0);
     }
   }, [isLoaded, images]);
@@ -271,30 +254,26 @@ const MainCanvas = () => {
       <canvas ref={frameCanvasRef} className="absolute inset-0 z-10 w-full h-full object-cover" />
 
       <div ref={canvasWrapperRef} className="absolute inset-0 z-20 overflow-hidden">
-        <Canvas gl={{ antialias: true, toneMapping: THREE.NoToneMapping, powerPreference: "high-performance" , localClippingEnabled: true}}>
+        <Canvas gl={{ antialias: true, toneMapping: THREE.NoToneMapping, powerPreference: "high-performance", localClippingEnabled: true }}>
           <color attach="background" args={["#000000"]} />
           <Suspense fallback={null}>
             <PerspectiveCamera makeDefault position={[0, 0, 70]} fov={isMobile ? 65 : 40} />
             <ambientLight intensity={0.5} />
-            <Environment preset="city" />             
+            <Environment preset="city" />
 
-             <CameraZoomController mountFeathers={mountFeathers} activeId={activeId} startOffset={11680} />
-            
+            <CameraZoomController mountFeathers={mountFeathers} activeId={activeId} startOffset={11680} />
+
             {mount3D && (
-                <group>
-                  <SwanModel scrollProgress={scrollProgress} transformProgress={transformProgress} />
-                  <WaterPlane splashProgress={splashProgress} opacity={swanOpacity} />
-                  <SplashWalls splashProgress={splashProgress} opacity={swanOpacity} />
-                  <SplashDroplets splashProgress={splashProgress} opacity={swanOpacity} />
-                </group>
+              <group>
+                <SwanModel scrollProgress={scrollProgress} transformProgress={transformProgress} />
+                <WaterPlane splashProgress={splashProgress} opacity={swanOpacity} />
+                <SplashWalls splashProgress={splashProgress} opacity={swanOpacity} />
+                <SplashDroplets splashProgress={splashProgress} opacity={swanOpacity} />
+              </group>
             )}
 
             {mountWater && (
-              <WaterSurface 
-                fallProgress={fallProgress} 
-                swanProgress={swanProgress} 
-                id3Ref={feather3Ref} 
-              />
+              <WaterSurface fallProgress={fallProgress} swanProgress={swanProgress} id3Ref={feather3Ref} />
             )}
 
             {mountFeathers && (
@@ -310,18 +289,8 @@ const MainCanvas = () => {
             )}
 
             {mountEndSwan && (
-              <group
-                 position={[6.0, -5.5, -3.0]} 
-                rotation={[Math.PI,Math.PI/40, 0]}   
-                scale={0.32}                        
-              >
-                <SwanModel 
-                  scrollProgress={0.0}     
-                  transformProgress={0.0} 
-                  opacity={endSwanOpacity}   
-                  isReflection={true}  
-                  clipY={-0.01}      
-                />
+              <group position={[6.0, -5.5, -3.0]} rotation={[Math.PI, Math.PI / 40, 0]} scale={0.32}>
+                <SwanModel scrollProgress={0.0} transformProgress={0.0} opacity={endSwanOpacity} isReflection={true} clipY={-0.01} />
               </group>
             )}
           </Suspense>
@@ -332,15 +301,14 @@ const MainCanvas = () => {
         <img src="assets/logo/aldovialogo.svg" alt="Logo" className="w-full h-auto brightness-0 invert" />
       </div>
 
-      {/* 🚀 THE PANEL */}
-      <RoomDetailsPanel 
-        activeId={activeId} 
-        content={activeId ? roomData[activeId] : null} 
-        onClose={() => { 
-          setActiveId(null); 
-          setFocusTarget(null); 
-        }} 
-      />   
+      <RoomDetailsPanel
+        activeId={activeId}
+        content={activeId ? roomData[activeId] : null}
+        onClose={() => {
+          setActiveId(null);
+          setFocusTarget(null);
+        }}
+      />
     </div>
   );
 };
