@@ -619,7 +619,15 @@ export const WaterPlane = ({ splashProgress, opacity = 1  }: { splashProgress: n
 /* =========================================================
    🎬 MAIN COMBINED COMPONENT
 ========================================================= */
-const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
+const LogoRevealNew = ({
+  onComplete,
+  onLogoCornerReached,
+  onBookNowVisibilityChange,
+}: {
+  onComplete?: () => void;
+  onLogoCornerReached?: () => void;
+  onBookNowVisibilityChange?: (visible: boolean) => void;
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
@@ -630,6 +638,8 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
   const [transformProgress, setTransformProgress] = useState(0);
   const [splashProgress, setSplashProgress] = useState(0);
   const [images, setImages] = useState<HTMLImageElement[]>([]);
+  const hasReachedCornerRef = useRef(false);
+  const isBookNowVisibleRef = useRef(false);
 
   const TOTAL_FRAMES = 499;
   const BLUR_START_FRAME = TOTAL_FRAMES - 25;
@@ -666,6 +676,19 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
         scrub: 1.5,
         onUpdate: (self) => {
           const raw = self.progress;
+          const isCornerReached = raw >= 0.6;
+
+          if (isBookNowVisibleRef.current !== isCornerReached) {
+            isBookNowVisibleRef.current = isCornerReached;
+            onBookNowVisibilityChange?.(isCornerReached);
+          }
+
+          if (isCornerReached && !hasReachedCornerRef.current) {
+            hasReachedCornerRef.current = true;
+            onLogoCornerReached?.();
+          } else if (!isCornerReached) {
+            hasReachedCornerRef.current = false;
+          }
           
 
           // --- PHASE 1: Video executes first (0% to 40% of scroll) ---
@@ -770,7 +793,7 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
 
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     }
-  }, [isReady, images.length]);
+  }, [isReady, images.length, onLogoCornerReached, onBookNowVisibilityChange]);
 
   return (
     <section ref={containerRef} className="relative w-full h-screen overflow-hidden bg-black">

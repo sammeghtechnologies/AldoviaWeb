@@ -1,5 +1,5 @@
-import { Suspense, lazy } from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router";
+import { Suspense, lazy, useEffect } from "react";
+import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router";
 import RoomsPage from "../components/pages/rooms/RoomsPage";
 
 const ProjectRoot = lazy(() => import("../ProjectRoot"));
@@ -13,9 +13,20 @@ const AboutUsHeroPage = lazy(() => import("../components/pages/aboutus/HeroPage"
 
 const RouteFallback = <div className="min-h-screen w-full bg-black" />;
 
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
+
 const AppRoutes = () => {
   return (
     <Router>
+      <ScrollToTop />
       <Suspense fallback={RouteFallback}>
         <Routes>
           {/* The main path "/" now loads your actual App */}

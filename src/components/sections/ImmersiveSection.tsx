@@ -29,7 +29,7 @@ const ImmersiveSection: React.FC = () => {
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute right-[-14%] top-[-7%] z-0 -translate-y-[22%] bg-no-repeat opacity-20 md:right-[-13%] md:-translate-y-[44%] md:opacity-[0.15]"
+        className="pointer-events-none absolute right-[-14%] top-[-7%] z-0 -translate-y-[22%] bg-no-repeat opacity-20 md:right-[-12.5%] md:-translate-y-[44%] md:opacity-[0.15]"
         style={{
           backgroundImage: "url('/assets/logo/logo-wet-earth.png')",
           backgroundSize: "min(64vw, 920px)",

@@ -4,6 +4,7 @@ import { PerspectiveCamera, Environment } from "@react-three/drei";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import ScrollTrigger from "gsap/ScrollTrigger";
+import { useNavigate } from "react-router";
 import * as THREE from "three";
 
 import { SwanModel, WaterPlane, SplashWalls, SplashDroplets } from "./Sections/LogoReveal/LogoRevealNew";
@@ -83,6 +84,7 @@ const CameraZoomController = ({ mountFeathers, activeId, startOffset }: { mountF
 };
 
 const MainCanvas = () => {
+  const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const frameCanvasRef = useRef<HTMLCanvasElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
@@ -113,8 +115,10 @@ const MainCanvas = () => {
   const [focusTarget, setFocusTarget] = useState<THREE.Vector3 | null>(null);
   const [allBubblesReady, setAllBubblesReady] = useState(false);
   const [burstAll, setBurstAll] = useState(false);
+  const [showCornerActions, setShowCornerActions] = useState(false);
 
   const feather3Ref = useRef<any>(null);
+  const cornerActionsVisibleRef = useRef(false);
 
   // Image Sequence Loading
   const TOTAL_FRAMES = 499;
@@ -174,6 +178,12 @@ const MainCanvas = () => {
         onUpdate: (self) => {
           const raw = self.progress;
           const currentScroll = raw * 16000;
+          const shouldShowCornerActions = raw >= 0.4;
+
+          if (cornerActionsVisibleRef.current !== shouldShowCornerActions) {
+            cornerActionsVisibleRef.current = shouldShowCornerActions;
+            setShowCornerActions(shouldShowCornerActions);
+          }
 
           // Swan Opacity Fade
           const fadeStart = 0.70;
@@ -252,6 +262,20 @@ const MainCanvas = () => {
 
   return (
     <div ref={containerRef} className="relative w-full h-screen bg-black overflow-hidden">
+      {showCornerActions && (
+        <div className="fixed top-12 right-6 z-[2147483647] flex items-center gap-5 pointer-events-none">
+         
+          <button
+            type="button"
+            onClick={() => navigate("/home")}
+            className="group pointer-events-auto relative inline-flex items-center justify-center min-w-[180px] md:min-w-[180px] h-10 md:h-10 px-8 md:px-8 rounded-full bg-[#07090d] text-white text-[1em] !md:text-[1em] font-lust tracking-[0.06em] uppercase border-[2px] border-[var(--color-secondary)] shadow-[0_0_0_2px_#07090d] transition-all duration-300 overflow-hidden"
+          >
+            <span className="absolute inset-y-0 left-0 w-0 bg-[var(--color-secondary)] transition-all duration-500 ease-out group-hover:w-full" />
+            <span className="relative z-10 !text-white transition-colors duration-300 group-hover:!text-[var(--color-primary)]">Book Now</span>
+          </button>
+        </div>
+      )}
+
       <canvas ref={frameCanvasRef} className="absolute inset-0 z-10 w-full h-full object-cover" />
 
       <div ref={canvasWrapperRef} className="absolute inset-0 z-20 overflow-hidden">

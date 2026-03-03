@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import type { RoomContent } from "../../roomDetailsPanel/RoomData";
 
 interface PanelProps {
@@ -7,17 +8,37 @@ interface PanelProps {
 }
 
 const RoomDetailsPanel = ({ activeId, content, onClose }: PanelProps) => {
+  useEffect(() => {
+    const body = document.body;
+    const html = document.documentElement;
+    const prevBodyOverflow = body.style.overflow;
+    const prevHtmlOverflow = html.style.overflow;
+
+    if (activeId) {
+      body.style.overflow = "hidden";
+      html.style.overflow = "hidden";
+    } else {
+      body.style.overflow = prevBodyOverflow;
+      html.style.overflow = prevHtmlOverflow;
+    }
+
+    return () => {
+      body.style.overflow = prevBodyOverflow;
+      html.style.overflow = prevHtmlOverflow;
+    };
+  }, [activeId]);
+
   return (
     <div
       style={{ pointerEvents: activeId ? 'auto' : 'none' }}
       className={`fixed top-[90px] pt-5 !pl-5 right-0 h-[calc(100vh-90px)] w-full md:w-[50%] bg-[#f5f5dc] border-l border-white/5
         transform transition-transform duration-700 ease-[0.22,1,0.36,1]
-        z-[99999] flex flex-col
+        z-[99999] flex flex-col rounded-[10px] !p-4
         ${activeId ? "translate-x-0" : "translate-x-full"}`}
     >
       {content && (
         /* 🚀 INCREASED LEFT PADDING: Changed from px-8 to pl-16 (mobile) and pl-24 (desktop) */
-        <div className="font-sans text-[#49261c] h-full relative flex flex-col justify-between pl-16 md:pl-24 pr-10 md:pr-14 pt-24 pb-10">
+        <div className="font-area-regular text-[#49261c] h-full relative flex flex-col justify-between pl-16 md:pl-24 pr-10 md:pr-14 pt-24 pb-10">
 
           {/* Fixed Close Button - Shifted right to left-10/14 to stay aligned with new padding */}
           <button
@@ -33,7 +54,7 @@ const RoomDetailsPanel = ({ activeId, content, onClose }: PanelProps) => {
 
         {/* Header - Kept right aligned but added slight right padding for balance */}
         <div className="mb-14 text-right pt-12 pr-4">
-          <h2 className="text-3xl md:text-4xl font-light uppercase tracking-[0.2em] text-[#49261c] mb-3 leading-tight">
+          <h2 className="font-lust text-3xl md:text-4xl font-light uppercase tracking-[0.2em] text-[#49261c] mb-3 leading-tight">
             {content.title}
           </h2>
           <p className="text-[10px] tracking-[0.3em] text-[#49261c]/60 uppercase border-b border-[#49261c]/10 pb-4 inline-block">
@@ -87,7 +108,7 @@ const RoomDetailsPanel = ({ activeId, content, onClose }: PanelProps) => {
             </span>
           </div>
           
-          <button className="border border-[#49261c]/30 rounded-full px-10 md:px-14 py-4 md:py-5 text-xs font-medium tracking-[0.2em] uppercase hover:bg-[#49261c] hover:text-[#f5f5dc] transition-all duration-300">
+          <button className="!p-3 border border-[#49261c]/30 rounded-full px-10 md:px-14 py-4 md:py-5 text-xs font-medium tracking-[0.2em] uppercase hover:bg-[#49261c] hover:text-[#f5f5dc] transition-all duration-300">
             Book Now
           </button>
         </div>
