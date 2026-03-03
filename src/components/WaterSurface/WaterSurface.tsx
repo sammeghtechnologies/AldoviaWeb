@@ -28,20 +28,85 @@ const WaterSurface = ({ fallProgress, swanProgress, id3Ref }: any) => {
     const material = refl.material as THREE.ShaderMaterial;
     material.transparent = true;
     
-    // 🚀 THE MAGIC FIX: Injecting opacity support directly into the Three.js Reflector shader
+    // 🚀 Inject our Uniforms
     material.uniforms.globalOpacity = { value: 0.0 };
+    material.uniforms.uTime = { value: 0.0 };
+
+    // 🌟 1. Grab World Position in the Vertex Shader
+    material.vertexShader = `
+      varying vec3 vWorldPos;
+      ${material.vertexShader}
+    `.replace(
+      'void main() {',
+      `void main() {
+        vWorldPos = (modelMatrix * vec4(position, 1.0)).xyz;
+      `
+    );
+
+    // 🌟 2. Add the Masked Moonlight Shimmer in the Fragment Shader
     material.fragmentShader = `
       uniform float globalOpacity;
+      uniform float uTime;
+      varying vec3 vWorldPos;
       ${material.fragmentShader}
     `.replace(
       'gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 );',
-      'gl_FragColor = vec4( blendOverlay( base.rgb, color ), globalOpacity );'
+      `
+      // Base reflection color (your dark water)
+      vec3 finalBase = blendOverlay( base.rgb, color );
+      
+      // --- 🌙 LOCALIZED MOONLIGHT LOGIC ---
+      
+      // 🚀 SHIFT THE SPOTLIGHT HERE:
+      // vec2(X, Z). Positive X moves it Right. Negative X moves it Left.
+      // Positive Z moves it Backward. Negative Z moves it Forward.
+      vec2 spotlightOffset = vec2(2.5, 0.0); 
+      
+      // Calculate distance from our NEW shifted center
+      float dist = length(vWorldPos.xz - spotlightOffset);
+      
+      // smoothstep(outer_radius, inner_radius, distance)
+      float centerMask = smoothstep(12.0, 0.0, dist); 
+      
+      // 2. Light setup
+      vec3 lightDir = normalize(vec3(0.0, 1.5, 1.0)); 
+      vec3 viewDir = normalize(cameraPosition - vWorldPos);
+      vec3 halfVector = normalize(lightDir + viewDir);
+      
+      vec3 normal = vec3(0.0, 1.0, 0.0);
+      
+      // 3. Fake waves
+      vec2 p = vWorldPos.xz * 0.5;
+      float wave1 = sin(p.x * 2.0 + uTime) * cos(p.y * 2.0 - uTime * 0.8);
+      float wave2 = sin(p.x * 3.0 - uTime * 1.2) * cos(p.y * 3.0 + uTime);
+      
+      // Perturb normal for specular highlights
+      normal.x += (wave1 + wave2) * 0.1;
+      normal.z += (wave1 - wave2) * 0.1;
+      normal = normalize(normal);
+      
+      // 4. Calculate Shine and Glow
+      float specular = pow(max(dot(normal, halfVector), 0.0), 32.0);
+      float softBaseGlow = 0.04; 
+      
+      // Moon color
+      vec3 moonGlow = vec3(0.3, 0.6, 0.9); 
+      
+      // Combine specular and soft glow, then MULTIPLY BY THE MASK
+      vec3 addedLight = moonGlow * (specular * 1.5 + softBaseGlow) * centerMask;
+      
+      // Add it to the dark base
+      vec3 finalColor = finalBase + addedLight;
+      // ----------------------------------
+
+      gl_FragColor = vec4( finalColor, globalOpacity );
+      `
     );
 
     return refl;
   }, [geometry, isMobile]);
 
-  // 🎨 YOUR EXACT SHADER LOGIC
+  // 🎨 YOUR EXACT RIPPLE SHADER LOGIC
   const rippleMaterial = useMemo(() => new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,
@@ -90,6 +155,8 @@ const WaterSurface = ({ fallProgress, swanProgress, id3Ref }: any) => {
   useFrame(() => {
     if (!reflector) return;
 
+    const time = clock.getElapsedTime();
+
     const targetY = THREE.MathUtils.lerp(WATER_LEVEL - START_OFFSET, WATER_LEVEL, fallProgress);
     reflector.position.y = THREE.MathUtils.lerp(reflector.position.y, targetY, 0.1);
 
@@ -97,13 +164,15 @@ const WaterSurface = ({ fallProgress, swanProgress, id3Ref }: any) => {
     
     // 🌊 FORCED FADE LOGIC
     const baseOpacity = THREE.MathUtils.smoothstep(fallProgress, 0.1, 0.5);
-    
-    // Starts fading the moment landing starts (0.01) and finishes halfway through (0.5)
     const fadeOutMultiplier = 1.0 - THREE.MathUtils.smoothstep(swanProgress, 0.05, 0.5);
     
-    // 🚀 Apply fade to our injected custom uniform! The reflection MUST disappear now.
     if (material.uniforms.globalOpacity) {
         material.uniforms.globalOpacity.value = baseOpacity * fadeOutMultiplier;
+    }
+
+    // 🌟 Pass the clock time to the Reflector so the moonlight glints animate!
+    if (material.uniforms.uTime) {
+        material.uniforms.uTime.value = time;
     }
 
     if (material.uniforms.color) {
@@ -126,12 +195,9 @@ const WaterSurface = ({ fallProgress, swanProgress, id3Ref }: any) => {
       
       ripplePlaneRef.current.position.set(tailX - 5, reflector.position.y + 0.001, tailZ);
 
-      // 🚀 Delay ripples until 0.05 so they don't fire while feather is still hovering
       if (swanProgress > 0.05) {
         ripplePlaneRef.current.visible = true;
-        
-        // 🚀 AUTOMATIC TIME (Uses clock instead of swanProgress)
-        rippleMaterial.uniforms.uTime.value = clock.getElapsedTime();
+        rippleMaterial.uniforms.uTime.value = time;
         
         const fadeIn = THREE.MathUtils.smoothstep(swanProgress, 0.05, 0.15);
         rippleMaterial.uniforms.uOpacity.value = fadeIn * fadeOutMultiplier * 1.5;

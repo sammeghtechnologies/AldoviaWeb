@@ -6,21 +6,20 @@ import { useLocation, useNavigate } from "react-router";
 // --- LOGO COMPONENT ---
 // ✅ FIX 1: Added introFinished prop to resolve 'isVisible' name error
 const Logo_top = ({
-  introFinished,
+  isVisible = true,
   logoSrc = "assets/logo/brown-logo.svg",
   onClick,
 }: {
-  introFinished?: boolean;
+  isVisible?: boolean;
   logoSrc?: string;
   onClick?: () => void;
 }) => {
-  const isVisible = introFinished ?? true;
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label="Go to landing page"
-      className={`!mt-2 logo-top relative z-[5000] transition-opacity duration-300 cursor-pointer ${isVisible ? "opacity-100" : "opacity-0"}`}
+      className={`logo-top absolute left-3 top-1/2 -translate-y-1/2 z-[5000] transition-opacity duration-500 cursor-pointer ${isVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}
     >
       <img
         src={logoSrc}
@@ -106,14 +105,18 @@ const MenuFrame = ({
   masterTl,
   introFinished,
   showBookNow = true,
+  showTopLogo = true,
   forceTopBarBackground = false,
   disableTopBarBackground = false,
+  disableBackdropBlur = false,
 }: {
   masterTl?: any;
   introFinished?: boolean;
   showBookNow?: boolean;
+  showTopLogo?: boolean;
   forceTopBarBackground?: boolean;
   disableTopBarBackground?: boolean;
+  disableBackdropBlur?: boolean;
 }) => {
   const { icons } = useAssets();
   const navigate = useNavigate();
@@ -372,10 +375,9 @@ const MenuFrame = ({
         className={`h-[12vh] !p-1 absolute left-0 right-0 top-0 z-[2147483647]  transition-all duration-300 ${shouldShowTopBarBackground ? " backdrop-blur-xl  shadow-[0_10px_30px_rgba(0,0,0,0.45)]" : "bg-transparent"} ${isTopBarVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "-translate-y-12 opacity-0 pointer-events-none"
           }`}
       >
-        <div className="flex h-full items-center justify-between px-3 py-2 -translate-y-1">
-        {/* ✅ Pass introFinished here */}
+        <div className="relative flex h-full items-center justify-end px-3 py-2 -translate-y-1">
         <Logo_top
-          introFinished={introFinished}
+          isVisible={showTopLogo}
           logoSrc={topLogoSrc}
           onClick={() => navigate("/")}
         />
@@ -412,7 +414,7 @@ const MenuFrame = ({
       <div
         ref={overlayRef}
         onClick={() => setIsOpen(false)}
-        className="fixed inset-0 bg-black/60 backdrop-blur-md opacity-0 invisible pointer-events-auto"
+        className={`fixed inset-0 bg-black/60 ${disableBackdropBlur ? "" : "backdrop-blur-md"} opacity-0 invisible pointer-events-auto`}
       />
 
       {/* SIDEBAR */}
@@ -420,7 +422,7 @@ const MenuFrame = ({
         ref={sidebarRef}
         className="fixed !top-0 !right-0 !h-full w-[380px] md:w-[420px] lg:w-[460px] max-w-[95%] translate-x-full pointer-events-auto !p-0 md:!p-0 lg:!p-0"
       >
-        <div className="!h-full bg-gradient-to-b from-[#4b2f23]/75 via-[#4b2f23]/75 to-[#4b2f23]/75 backdrop-blur-xl !px-8 !py-10 md:!px-10 md:!py-12 lg:!px-5 lg:!py-1 relative overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+        <div className={`!h-full bg-gradient-to-b from-[#4b2f23]/75 via-[#4b2f23]/75 to-[#4b2f23]/75 ${disableBackdropBlur ? "" : "backdrop-blur-xl"} !px-8 !py-10 md:!px-10 md:!py-12 lg:!px-5 lg:!py-1 relative overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.6)]`}>
 
           {/* Spacer so Home starts below hamburger icon area */}
           <div className="h-16 md:h-20 lg:h-16" />

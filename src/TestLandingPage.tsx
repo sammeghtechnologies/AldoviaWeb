@@ -1,10 +1,8 @@
-import MenuFrame from "./components/MenuFrame/v2/MenuFrame";
 import MainCanvas from "./MainCanvas";
 
 const TestLandingPage = () => {
   return (
     <main className="relative w-full bg-black">
-      <MenuFrame/>
       {/* The Permanent 3D Layer */}
       <MainCanvas />
 

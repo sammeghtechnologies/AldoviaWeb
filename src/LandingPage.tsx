@@ -1,21 +1,12 @@
-import { useRef, useState } from "react";
-import MenuFrame from "./components/MenuFrame/v2/MenuFrame";
+import { useState } from "react";
 import BubbleFeather_Interaction from "./Sections/BubbleFeathersInteraction/v3/BubbleFeather_Interaction";
 import LogoRevealNew from "./Sections/LogoReveal/LogoRevealNew";
 
 const Main = () => {
-  const masterTl = useRef<gsap.core.Timeline | null>(null);
   const [introFinished, setIntroFinished] = useState(false);
 
   return (
     <div className="relative w-full min-h-screen bg-black">
-      {/* PERSISTENT NAVBAR 
-          Visible during both phases. 'introFinished' toggles its internal states.
-      */}
-      <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
-        <MenuFrame masterTl={masterTl} introFinished={introFinished} disableTopBarBackground />
-      </div>
-
       <div id="landing-page" className="relative w-full">
         {/* PHASE 1: LOGO REVEAL (VIDEO + SWAN COMBINED)
             This is now the starting point of the application.
