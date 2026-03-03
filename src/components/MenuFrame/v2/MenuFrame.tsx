@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { useAssets } from "../../../app/hooks/useAssets";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 
 // --- LOGO COMPONENT ---
 // ✅ FIX 1: Added introFinished prop to resolve 'isVisible' name error
@@ -115,6 +115,7 @@ const MenuFrame = ({
 }) => {
   const { icons } = useAssets();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const frameRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -129,8 +130,26 @@ const MenuFrame = ({
   const [openSection, setOpenSection] = useState("stay");
   const [isTopBarVisible, setIsTopBarVisible] = useState(true);
   const [isBeyondHero, setIsBeyondHero] = useState(false);
+  const [isHomeExperienceInView, setIsHomeExperienceInView] = useState(false);
+  const [isAboutAwardsInView, setIsAboutAwardsInView] = useState(false);
   const shouldShowTopBarBackground =
     !isOpen && !disableTopBarBackground && (forceTopBarBackground || isBeyondHero);
+  const isHeroSection = !isBeyondHero;
+  const isHomeBeyondHero = location.pathname === "/home" && isBeyondHero;
+  const isAboutUsPage = location.pathname === "/aboutus";
+  const hamburgerIconSrc = isHomeExperienceInView
+    ? "assets/icons/feet-beige.png"
+    : isAboutAwardsInView
+    ? "assets/icons/feet-beige.png"
+    : isHeroSection
+    ? "assets/icons/feet-beige.png"
+    : isAboutUsPage
+    ? "assets/icons/feet-brown.png"
+    : isHomeBeyondHero
+    ? "assets/icons/feet-brown.png"
+    : shouldShowTopBarBackground
+      ? "assets/icons/feet-beige.png"
+      : "assets/icons/feet-brown.png";
 
   // Logo animation
   useLayoutEffect(() => {
@@ -253,17 +272,67 @@ const MenuFrame = ({
     const onScroll = () => {
       const currentY = window.scrollY || 0;
       setIsBeyondHero(currentY > window.innerHeight * 0.6);
+      if (location.pathname === "/home") {
+        const experience = document.getElementById("home-experience-section");
+        if (experience) {
+          const rect = experience.getBoundingClientRect();
+          const checkY = window.innerHeight * 0.45;
+          const inView = rect.top <= checkY && rect.bottom >= checkY;
+          setIsHomeExperienceInView(inView);
+        } else {
+          setIsHomeExperienceInView(false);
+        }
+      } else {
+        setIsHomeExperienceInView(false);
+      }
+      if (location.pathname === "/aboutus") {
+        const awards = document.getElementById("about-awards-section");
+        if (awards) {
+          const rect = awards.getBoundingClientRect();
+          const checkY = window.innerHeight * 0.45;
+          const inView = rect.top <= checkY && rect.bottom >= checkY;
+          setIsAboutAwardsInView(inView);
+        } else {
+          setIsAboutAwardsInView(false);
+        }
+      } else {
+        setIsAboutAwardsInView(false);
+      }
       setIsTopBarVisible(true);
     };
 
     setIsBeyondHero((window.scrollY || 0) > window.innerHeight * 0.6);
+    if (location.pathname === "/home") {
+      const experience = document.getElementById("home-experience-section");
+      if (experience) {
+        const rect = experience.getBoundingClientRect();
+        const checkY = window.innerHeight * 0.45;
+        setIsHomeExperienceInView(rect.top <= checkY && rect.bottom >= checkY);
+      } else {
+        setIsHomeExperienceInView(false);
+      }
+    } else {
+      setIsHomeExperienceInView(false);
+    }
+    if (location.pathname === "/aboutus") {
+      const awards = document.getElementById("about-awards-section");
+      if (awards) {
+        const rect = awards.getBoundingClientRect();
+        const checkY = window.innerHeight * 0.45;
+        setIsAboutAwardsInView(rect.top <= checkY && rect.bottom >= checkY);
+      } else {
+        setIsAboutAwardsInView(false);
+      }
+    } else {
+      setIsAboutAwardsInView(false);
+    }
     setIsTopBarVisible(true);
     window.addEventListener("scroll", onScroll, { passive: true });
 
     return () => {
       window.removeEventListener("scroll", onScroll);
     };
-  }, [isOpen]);
+  }, [isOpen, location.pathname]);
 
   // Prevent page scroll when menu is open.
   useEffect(() => {
@@ -305,7 +374,7 @@ const MenuFrame = ({
           {showBookNow && (
             <button
               onClick={() => navigate("/home")}
-              className="px-14 py-7 text-white text-[16px] md:text-[18px] lg:text-[17px] tracking-[0.25em] uppercase transition-all duration-300 hover:opacity-70 font-medium bg-transparent border-none"
+              className="font-lust px-14 py-7 text-white text-[16px] md:text-[18px] lg:text-[17px] tracking-[0.25em] uppercase transition-all duration-300 hover:opacity-70 font-medium bg-transparent border-none"
             >
               Book Now
             </button>
@@ -314,14 +383,14 @@ const MenuFrame = ({
           {/* FEET MENU ICON */}
           <div
             id="hamburger"
-            className={`cursor-pointer translate-x-2 transition-transform duration-300 active:scale-90 ${isOpen ? "rotate-90" : "rotate-0"
+            className={`!pr-8 cursor-pointer translate-x-2 transition-transform duration-300 active:scale-90 ${isOpen ? "rotate-90" : "rotate-0"
               }`}
             onClick={() => setIsOpen((prev) => !prev)}
           >
             <img
-              src="assets/icons/feet-icon.png"
+              src={hamburgerIconSrc}
               alt="Menu"
-              className="w-16 h-16 object-contain brightness-0 invert transition-all"
+              className="w-16 h-16 object-contain transition-all"
             />
           </div>
         </div>
@@ -472,7 +541,7 @@ const MenuFrame = ({
               showToggleIcon={false}
               onClick={() => {
                 setIsOpen(false);
-                navigate("/aboutus");
+                navigate("/venues", { state: { mode: "convention" } });
               }}
             />
             </div>

@@ -22,6 +22,7 @@ const HeroContent: React.FC = () => {
           leading-[1.15] 
           tracking-tight
           text-[var(--color-secondary)]
+          drop-shadow-[0_8px_24px_rgba(0,0,0,0.60)]
         ">
           Where Every Moment Is Crafted In Excellence
         </h1>
@@ -37,6 +38,7 @@ const HeroContent: React.FC = () => {
           leading-6
           text-white/90
           text-[var(--color-secondary)]
+          drop-shadow-[0_6px_18px_rgba(0,0,0,0.55)]
         ">
           A destination resort 40 minutes from Bangalore, where world-class venues, refined dining, and timeless hospitality come together.
         </p>

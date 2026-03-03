@@ -137,7 +137,7 @@ export default function VenueInfo({
       />
       <div className="absolute" />
 
-      <div className="relative z-10 mx-auto max-h-[56vh] max-w-3xl overflow-y-auto overflow-x-hidden overscroll-y-auto !px-4 !pt-6 !pb-24 md:!px-7 md:!pt-8 md:!pb-28 lg:max-h-[72vh] lg:!pt-6 text-white [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className="relative z-10 mx-auto max-h-[56vh] max-w-3xl overflow-y-auto overflow-x-hidden overscroll-y-auto !px-4 !pt-6 !pb-24 md:!px-7 md:!pt-8 md:!pb-28 lg:max-h-[72vh] lg:!pt-6 text-white [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.6)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/55 [&::-webkit-scrollbar-track]:bg-transparent">
         <AnimatePresence mode="wait">
           <motion.div
             key={animationKey}

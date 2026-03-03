@@ -120,7 +120,7 @@ const AnimatedImageHero: React.FC<AnimatedImageHeroProps> = ({
         );
       })}
 
-      <div className="absolute inset-0 bg-[color:#1C1917] opacity-70" />
+      <div className="absolute inset-0 bg-[color:#1C1917] opacity-40" />
 
       {(topLeftContent || topRightContent) && (
         <div className="relative z-20 mx-auto flex w-full max-w-6xl items-center justify-between px-6 pt-8 md:px-10">
@@ -205,7 +205,11 @@ const AnimatedImageHero: React.FC<AnimatedImageHeroProps> = ({
             <button
               type="button"
               onClick={isPlanYourEvent ? planEventSecondaryClick : onSecondaryButtonClick}
-              className="!rounded-[999px] h-10 !w-[220px] lg:!w-[260px] !border !border-[rgba(255,255,255,0.30)] !bg-[rgba(255,255,255,0.10)] !px-7 !py-2 text-sm font-normal !text-[var(--color-secondary)] backdrop-blur-md transition duration-300 hover:!bg-[rgba(255,255,255,0.18)] md:text-base"
+              className={`!rounded-[999px] h-10 !w-[220px] lg:!w-[260px] !px-7 !py-2 text-sm font-normal transition duration-300 md:text-base ${
+                isPlanYourEvent
+                  ? "!border !border-[var(--color-primary)] !bg-[var(--color-primary)] !text-[var(--color-secondary)] hover:opacity-90"
+                  : "!border !border-[rgba(255,255,255,0.30)] !bg-[rgba(255,255,255,0.10)] !text-[var(--color-secondary)] backdrop-blur-md hover:!bg-[rgba(255,255,255,0.18)]"
+              }`}
             >
               <span className="inline-flex items-center gap-2">
                 {secondaryButtonLabel === "Download Brochure" && <Download className="h-4 w-4" />}

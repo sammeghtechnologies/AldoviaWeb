@@ -30,7 +30,7 @@ const WaterSurface = ({
   const featherMirrorCloneRef = useRef<THREE.Object3D | null>(null);
   const hasTouchedWater = useRef(false);
   
-  const { scene: swanScene, animations } = useGLTF("/models/Swan_anim_v13.glb") as any;
+  const { scene: swanScene, animations } = useGLTF("/models/Swan_anim_v14.glb") as any;
 
   // random seeds for each ripple ring
   const ringSeeds = useMemo(

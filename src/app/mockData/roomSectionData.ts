@@ -44,8 +44,8 @@ export interface RoomLayer {
        isStatic: false,
        // bgImage: '/assets/rooms/luxury-room/bg.png',
        // textLayer: '/assets/rooms/luxury-room/RoomsSuits.png',
-        bgImage: '/assets/rooms/executive-suite/bg.png',
-       textLayer: '/assets/rooms/executive-suite/RoomsSuits.png',
+        bgImage: '/assets/rooms/room1/room1.jpg',
+       textLayer: '/assets/rooms/room1/room1.jpg',
        textClassName: 'absolute bottom-[-5%] left-[60%] -translate-x-1/2 w-[40%] object-contain z-20 pointer-events-none',
       
        layers: [
@@ -54,12 +54,9 @@ export interface RoomLayer {
        //   { id: 'chair', src: '/assets/rooms/luxury-room/chair.png', slideFrom: 'left', className: 'bottom-[10%] right-[20%] w-[25%] object-contain' },
        //   { id: 'table', src: '/assets/rooms/luxury-room/table.png', slideFrom: 'right', className: 'bottom-[5%] right-[5%] w-[15%] object-contain' },
        //
-         { id: 'dressing', src: '/assets/rooms/executive-suite/dressing.png', slideFrom: 'top', className: 'bottom-[26%] left-[40%] w-[13%] object-contain' },
-         { id: 'bed', src: '/assets/rooms/executive-suite/bed.png', slideFrom: 'left', className: 'bottom-[-10%] left-[0%] w-[60%] object-contain' },
-         { id: 'chairL', src: '/assets/rooms/executive-suite/chairL.png', slideFrom: 'top', className: 'bottom-[41%] right-[31.2%] w-[11%] object-contain' },
-         { id: 'table', src: '/assets/rooms/executive-suite/table.png', slideFrom: 'top', className: 'bottom-[32%] right-[27.3%] w-[9.5%] object-contain' },
-         { id: 'chairR', src: '/assets/rooms/executive-suite/chairR.png', slideFrom: 'top', className: 'bottom-[29%] right-[16.2%] w-[11.2%] object-contain' },
-         { id: 'chairTable', src: '/assets/rooms/executive-suite/chair-table.png', slideFrom: 'right', className: 'bottom-[-5%] right-[0%] w-[20.1%] object-contain' }
+         { id: 'bed', src: '/assets/rooms/room1/bed.png', slideFrom: 'left', className: 'bottom-[-10%] left-[0%] w-[60%] object-contain' },
+         { id: 'table', src: '/assets/rooms/room1/table.png', slideFrom: 'top', className: 'bottom-[32%] right-[27.3%] w-[9.5%] object-contain' },
+         { id: 'chairR', src: '/assets/rooms/room1/chair.png', slideFrom: 'top', className: 'bottom-[29%] right-[16.2%] w-[11.2%] object-contain' },
       
         ],
        gallery: [

@@ -15,6 +15,7 @@ export interface RoomData {
   isStatic: boolean;
   staticImage?: string; 
   bgImage?: string;
+  finalImage?: string;
   textLayer?: string;
   textClassName?: string;
   layers?: RoomLayer[];
@@ -48,14 +49,7 @@ export const roomsData: RoomData[] = [
     bgImage: '/assets/rooms/1-bedroom-suite/bg.png',
     textLayer: '/assets/rooms/1-bedroom-suite/RoomsSuits.png',
     textClassName: 'absolute -translate-x-1/2 object-contain z-20 pointer-events-none w-[75%] bottom-[15%] left-[50%] md:w-[35%] md:bottom-[44%] md:left-[18%]',
-    layers: [
-       { id: 'dressing', src: '/assets/rooms/1-bedroom-suite/dressing.png', slideFrom: 'top', className: 'bottom-[26%] left-[40%] w-[13%] object-contain' },
-      { id: 'bed', src: '/assets/rooms/1-bedroom-suite/bed.png', slideFrom: 'left', className: 'bottom-[-10%] left-[0%] w-[60%] object-contain' },
-      { id: 'chairL', src: '/assets/rooms/1-bedroom-suite/chairL.png', slideFrom: 'top', className: 'bottom-[41%] right-[31.2%] w-[11%] object-contain' },
-      { id: 'table', src: '/assets/rooms/1-bedroom-suite/table.png', slideFrom: 'top', className: 'bottom-[32%] right-[27.3%] w-[9.5%] object-contain' },
-      { id: 'chairR', src: '/assets/rooms/1-bedroom-suite/chairR.png', slideFrom: 'top', className: 'bottom-[29%] right-[16.2%] w-[11.2%] object-contain' },
-      { id: 'chairTable', src: '/assets/rooms/1-bedroom-suite/chair-table.png', slideFrom: 'right', className: 'bottom-[-5%] right-[0%] w-[20.1%] object-contain' }
-    ],
+  
     gallery: [
       '/assets/rooms/deluxe-room/s1.jpg',
       '/assets/rooms/deluxe-room/s2.jpg',
@@ -73,17 +67,14 @@ export const roomsData: RoomData[] = [
     mobileBgImage: '/assets/rooms/mobile/bg.png',
     mobileLayers: defaultMobileLayers,
     isStatic: false,
-    bgImage: '/assets/rooms/executive-suite/bg.png',
-    textLayer: '/assets/rooms/executive-suite/RoomsSuits.png',
+    bgImage: '/assets/rooms/room1/emptyroom.png',
+    finalImage: '/assets/rooms/room1/room1.jpg',
+    textLayer: '',
     textClassName: 'absolute -translate-x-1/2 object-contain z-20 pointer-events-none w-[75%] bottom-[15%] left-[50%] md:w-[35%] md:bottom-[44%] md:left-[18%]',
     layers: [
-      { id: 'dressing', src: '/assets/rooms/executive-suite/dressing.png', slideFrom: 'top', className: 'bottom-[26%] left-[40%] w-[13%] object-contain' },
-      { id: 'bed', src: '/assets/rooms/executive-suite/bed.png', slideFrom: 'left', className: 'bottom-[-10%] left-[0%] w-[60%] object-contain' },
-      { id: 'chairL', src: '/assets/rooms/executive-suite/chairL.png', slideFrom: 'top', className: 'bottom-[41%] right-[31.2%] w-[11%] object-contain' },
-      { id: 'table', src: '/assets/rooms/executive-suite/table.png', slideFrom: 'top', className: 'bottom-[32%] right-[27.3%] w-[9.5%] object-contain' },
-      { id: 'chairR', src: '/assets/rooms/executive-suite/chairR.png', slideFrom: 'top', className: 'bottom-[29%] right-[16.2%] w-[11.2%] object-contain' },
-      { id: 'chairTable', src: '/assets/rooms/executive-suite/chair-table.png', slideFrom: 'right', className: 'bottom-[-5%] right-[0%] w-[20.1%] object-contain' }
-     ],
+      { id: 'bed', src: '/assets/rooms/room1/bed.png', slideFrom: 'left', className: 'bottom-[-7%] left-[40%] w-[38%] object-contain drop-shadow-[50px_25px_80px_rgba(0,0,0,0.45)] -rotate-2' },
+      { id: 'table', src: '/assets/rooms/room1/table.png', slideFrom: 'top', className: 'bottom-[-18%] left-[12%] w-[20%] object-contain rotate-6' },
+      { id: 'chairR', src: '/assets/rooms/room1/chair.png', slideFrom: 'top', className: 'bottom-[-45%] left-[-12%] w-[20%] object-contain' },     ],
     gallery: [
       '/assets/rooms/luxury-room/s1.jpg',
       '/assets/rooms/luxury-room/s2.jpg',

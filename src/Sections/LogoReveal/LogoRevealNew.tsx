@@ -25,8 +25,7 @@ const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 /* =========================================================
    💦 WATER WALLS
 ========================================================= */
-
-export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: number, opacity?: number }) => {
+const SplashWalls = ({ splashProgress }: { splashProgress: number }) => {
   const count = 6;
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const shaderRef = useRef<any>(null);
@@ -54,13 +53,7 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
       const activeT = t / duration;
       const heightCurve = Math.sin(activeT * Math.PI);
       let height = heightCurve * (6.5 + layerIndex * 2.5);
-      
       let outwardExpansion = 1.0 + activeT * 0.35;
-
-      if (activeT > 0.4) {
-        const flareProgress = (activeT - 0.4) / 0.6; 
-        outwardExpansion += Math.pow(flareProgress, 1.5) * 0.6; 
-      }
 
       if (isInner) {
         outwardExpansion *= 0.45;
@@ -89,104 +82,71 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
     shader.vertexShader = shader.vertexShader.replace(
       `void main() {`,
       `varying vec2 vMyUv;
-       varying vec3 vPos;
-       void main() {
-         vMyUv = uv;
-         vPos = position;
-      `
+varying vec3 vPos;
+void main() {
+vMyUv = uv;
+vPos = position;
+`
     );
 
     shader.vertexShader = shader.vertexShader.replace(
       `#include <begin_vertex>`,
       `
-      vec3 transformed = vec3( position );
-      float angle = atan(position.z, position.x);
-      float flareCurve = pow(vMyUv.y, 3.0);
-      float bendNoise = sin(angle * 4.0) * 0.5 + 0.5;
-      float outwardPush = flareCurve * (2.0 + bendNoise * 3.0); 
-      transformed.x += normal.x * outwardPush;
-      transformed.z += normal.z * outwardPush;
-      float heightNoise = sin(angle * 2.0) * 0.5 + sin(angle * 6.0) * 0.5;
-      transformed.y += heightNoise * vMyUv.y * 1.5; 
-      `
+vec3 transformed = vec3( position );
+float angle = atan(position.z, position.x);
+float flareCurve = pow(vMyUv.y, 3.0);
+float bendNoise = sin(angle * 4.0) * 0.5 + 0.5;
+float outwardPush = flareCurve * (2.0 + bendNoise * 3.0);
+transformed.x += normal.x * outwardPush;
+transformed.z += normal.z * outwardPush;
+float heightNoise = sin(angle * 2.0) * 0.5 + sin(angle * 6.0) * 0.5;
+transformed.y += heightNoise * vMyUv.y * 1.5;
+`
     );
 
     shader.fragmentShader = shader.fragmentShader
       .replace(
         `void main() {`,
         `varying vec2 vMyUv;
-       varying vec3 vPos;
-       uniform float uProgress; 
-       void main() {
-      `
+varying vec3 vPos;
+uniform float uProgress;
+void main() {
+`
       )
       .replace(
         `vec4 diffuseColor = vec4( diffuse, opacity );`,
         `vec4 diffuseColor = vec4( diffuse, opacity );
-       float angle = atan(vPos.z, vPos.x);
-       
-       // --- HOLE CATEGORIZATION ---
-       // Use a pseudo-random hash based on angle to bucket holes
-       float holeBucket = fract(sin(floor(angle * 8.0) * 12.9898) * 43758.5453);
-       
-       float tearNoise = sin(angle * 15.0 + uProgress * 5.0) * cos(vMyUv.y * 15.0 - uProgress * 5.0);
-       tearNoise = tearNoise * 0.5 + 0.5;
-
-       float holes = 0.0;
-       float holeRims = 0.0;
-       float rimWidth = 0.04; // Tightened border for 3D look
-
-       if (holeBucket < 0.3) {
-         // 30% DYNAMIC HOLES: Threshold moves with scroll
-         float dynThreshold = mix(0.95, 0.45, uProgress);
-         holes = smoothstep(dynThreshold, dynThreshold + 0.1, tearNoise);
-         holeRims = smoothstep(dynThreshold - rimWidth, dynThreshold, tearNoise) * smoothstep(dynThreshold + 0.1, dynThreshold + 0.1 - rimWidth, tearNoise);
-       } 
-       else if (holeBucket < 0.4) {
-         // 10% STATIC HOLES: Fixed size
-         float staticThreshold = 0.72;
-         holes = smoothstep(staticThreshold, staticThreshold + 0.1, tearNoise);
-         holeRims = smoothstep(staticThreshold - rimWidth, staticThreshold, tearNoise) * smoothstep(staticThreshold + 0.1, staticThreshold + 0.1 - rimWidth, tearNoise);
-       }
-       // 60% REMOVED: holes remains 0.0
-
-       float wave1 = sin(angle * 3.0);
-       float wave2 = sin(angle * 7.0);
-       float combinedWaves = (wave1 * 0.7 + wave2 * 0.3) * 0.5 + 0.5;
-       float lobes = pow(combinedWaves, 1.5);
-       float edgeLimit = 0.20 + (0.55 * lobes);
-       float bodyAlpha = smoothstep(edgeLimit + 0.15, edgeLimit - 0.05, vMyUv.y);
-
-       float beadNoise = sin(angle * 50.0 - uProgress * 20.0) * cos(vMyUv.y * 40.0 + uProgress * 10.0);
-       beadNoise = smoothstep(0.85, 1.0, beadNoise * 0.5 + 0.5);
-       float holeZone = smoothstep(0.1, edgeLimit - 0.05, vMyUv.y);
-       
-       bodyAlpha = max(0.0, bodyAlpha - (holes * holeZone));
-       
-       float wallDrops = (holeRims * 1.8 + beadNoise * 2.2) * holeZone;
-       float heavyRim = smoothstep(edgeLimit - 0.08, edgeLimit, vMyUv.y) * smoothstep(edgeLimit + 0.08, edgeLimit, vMyUv.y);
-       
-       float dropZone = smoothstep(edgeLimit, edgeLimit + 0.12, vMyUv.y) * smoothstep(edgeLimit + 0.25, edgeLimit + 0.08, vMyUv.y);
-       float dropNoise = sin(angle * 30.0) * 0.5 + 0.5; 
-       float crownDrops = dropZone * smoothstep(0.4, 1.0, lobes) * smoothstep(0.4, 1.0, dropNoise); 
-       
-       float bottomAlpha = smoothstep(0.0, 0.1, vMyUv.y);
-       float weightGradient = mix(1.0, 0.5, vMyUv.y);
-       float finalAlpha = (max(0.0, bodyAlpha * 0.25) + (heavyRim * 2.0) + (crownDrops * 2.5) + wallDrops) * bottomAlpha * weightGradient;
-       
-       // --- 3D SPECULAR LOOK ---
-       // Use high RGB values (> 1.0) on the rims to simulate depth and light refraction
-       vec3 waterTint = vec3(0.9, 0.96, 1.0);
-       vec3 rimHighlight = vec3(1.6, 1.8, 2.0) * (holeRims + heavyRim * 0.5 + crownDrops);
-       diffuseColor.rgb = waterTint + rimHighlight;
-       
-       diffuseColor.a *= finalAlpha;
-      `
+float angle = atan(vPos.z, vPos.x);
+float wave1 = sin(angle * 3.0);
+float wave2 = sin(angle * 7.0);
+float combinedWaves = (wave1 * 0.7 + wave2 * 0.3) * 0.5 + 0.5;
+float lobes = pow(combinedWaves, 1.5);
+float edgeLimit = 0.20 + (0.55 * lobes);
+float bodyAlpha = smoothstep(edgeLimit + 0.15, edgeLimit - 0.05, vMyUv.y);
+float tearNoise = sin(angle * 15.0 + uProgress * 5.0) * cos(vMyUv.y * 15.0 - uProgress * 5.0);
+tearNoise = tearNoise * 0.5 + 0.5;
+float holes = smoothstep(0.7, 0.9, tearNoise);
+float holeRims = smoothstep(0.6, 0.7, tearNoise) * smoothstep(0.9, 0.7, tearNoise);
+float beadNoise = sin(angle * 50.0 - uProgress * 20.0) * cos(vMyUv.y * 40.0 + uProgress * 10.0);
+beadNoise = smoothstep(0.85, 1.0, beadNoise * 0.5 + 0.5);
+float holeZone = smoothstep(0.1, edgeLimit - 0.05, vMyUv.y);
+bodyAlpha = max(0.0, bodyAlpha - (holes * holeZone));
+float wallDrops = (holeRims * 1.5 + beadNoise * 2.0) * holeZone;
+float heavyRim = smoothstep(edgeLimit - 0.10, edgeLimit, vMyUv.y) * smoothstep(edgeLimit + 0.10, edgeLimit, vMyUv.y);
+float dropZone = smoothstep(edgeLimit, edgeLimit + 0.12, vMyUv.y) * smoothstep(edgeLimit + 0.25, edgeLimit + 0.08, vMyUv.y);
+float dropNoise = sin(angle * 30.0) * 0.5 + 0.5;
+float crownDrops = dropZone * smoothstep(0.4, 1.0, lobes) * smoothstep(0.4, 1.0, dropNoise);
+float bottomAlpha = smoothstep(0.0, 0.1, vMyUv.y);
+float weightGradient = mix(1.0, 0.5, vMyUv.y);
+float finalAlpha = (max(0.0, bodyAlpha * 0.25) + (heavyRim * 2.0) + (crownDrops * 2.5) + wallDrops) * bottomAlpha * weightGradient;
+diffuseColor.rgb = vec3(1.0);
+diffuseColor.a *= finalAlpha;
+`
       );
   };
 
   return (
-    <instancedMesh ref={meshRef} args={[undefined, undefined, count]} frustumCulled={false}>
+    <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
       <cylinderGeometry args={[baseRadius * 1.05, baseRadius, 1, 64, 12, true]} />
       <meshPhysicalMaterial
         color="#eaf6ff"
@@ -200,8 +160,8 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
         envMapIntensity={3}
         attenuationColor="#bfe3ff"
         attenuationDistance={0.6}
-        transparent={true}
-        opacity={opacity}
+        transparent
+        opacity={1}
         depthWrite={true}
         depthTest={true}
         side={THREE.DoubleSide}
@@ -211,12 +171,10 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
   );
 };
 
-
-
 /* =========================================================
    🦢 SWAN (INTERACTIVE + CAMERA TRACKING)
 ========================================================= */
-export const SwanModel = ({
+const SwanModel = ({
   scrollProgress,
   transformProgress,
 }: {
@@ -224,14 +182,13 @@ export const SwanModel = ({
   transformProgress: number;
 }) => {
   const group = useRef<THREE.Group>(null);
-  const { scene, animations } = useGLTF("/models/Swan_anim_v13.glb");
+  const { scene, animations } = useGLTF("/models/Swan_anim_v14.glb");
   const { actions } = useAnimations(animations, group);
 
-  // --- DRAG INTERACTION STATE ---
   const isDragging = useRef(false);
   const previousX = useRef(0);
-  const previousY = useRef(0); // Tracks vertical mouse position
-  const targetCamY = useRef(0); // Tracks desired camera height
+  const previousY = useRef(0);
+  const targetCamY = useRef(0);
   const [targetRotY, setTargetRotY] = useState(-Math.PI / 160);
 
   useLayoutEffect(() => {
@@ -308,23 +265,26 @@ export const SwanModel = ({
     }
   }, [scrollProgress, actions]);
 
-  // --- SMOOTH ROTATION & CAMERA FRAME ---
   useFrame(({ camera }) => {
-    // 1. Rotate the Swan
     if (group.current) {
       group.current.rotation.x = 0.1;
       group.current.rotation.z = 0;
-      group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, targetRotY, 0.1);
+      group.current.rotation.y = THREE.MathUtils.lerp(
+        group.current.rotation.y,
+        targetRotY,
+        0.1
+      );
     }
 
-    // 2. Move the Camera vertically based on drag
-    camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetCamY.current, 0.05);
+    camera.position.y = THREE.MathUtils.lerp(
+      camera.position.y,
+      targetCamY.current,
+      0.05
+    );
 
-    // 3. Keep camera focused on the Swan area (Y = -5 centers it nicely over the water)
     camera.lookAt(0, -5, 0);
   });
 
-  // --- DRAG HANDLERS ---
   useEffect(() => {
     const handleGlobalPointerUp = () => {
       isDragging.current = false;
@@ -337,14 +297,9 @@ export const SwanModel = ({
       const deltaX = e.clientX - previousX.current;
       const deltaY = e.clientY - previousY.current;
 
-      // Horizontal Drag -> Rotates Swan
       setTargetRotY((prev) => prev + deltaX * 0.015);
 
-      // Vertical Drag -> Moves Camera
-      // Moving mouse down pulls the camera up (over the swan)
       targetCamY.current += deltaY * 0.15;
-
-      // Prevent camera from going underwater or flying out of orbit
       targetCamY.current = THREE.MathUtils.clamp(targetCamY.current, -10, 40);
 
       previousX.current = e.clientX;
@@ -373,7 +328,7 @@ export const SwanModel = ({
         e.stopPropagation();
         isDragging.current = true;
         previousX.current = e.clientX;
-        previousY.current = e.clientY; // Start tracking Y position
+        previousY.current = e.clientY;
         document.body.style.cursor = "grabbing";
       }}
       onPointerOver={() => {
@@ -389,7 +344,7 @@ export const SwanModel = ({
 /* =========================================================
    💦 SPLASH DROPLETS
 ========================================================= */
-export const SplashDroplets = ({ splashProgress, opacity = 1  }: { splashProgress: number, opacity?: number }) => {
+const SplashDroplets = ({ splashProgress }: { splashProgress: number }) => {
   const count = 3000;
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
@@ -442,7 +397,16 @@ export const SplashDroplets = ({ splashProgress, opacity = 1  }: { splashProgres
       const drag = 0.92 + Math.random() * 0.05;
 
       temp.push({
-        startX, startZ, vx, vy, vz, delay, baseScale, drag, isStreakType, evaporates,
+        startX,
+        startZ,
+        vx,
+        vy,
+        vz,
+        delay,
+        baseScale,
+        drag,
+        isStreakType,
+        evaporates,
       });
     }
     return temp;
@@ -466,22 +430,38 @@ export const SplashDroplets = ({ splashProgress, opacity = 1  }: { splashProgres
       const currentVz = p.vz * Math.pow(p.drag, time * 10);
       const currentVy = p.vy - 90 * time;
 
-      let currentX = p.startX + currentVx * time;
-      let currentZ = p.startZ + currentVz * time + 4;
-      let currentY = -14 + p.vy * time - 0.5 * 90 * time * time;
+      const currentX = p.startX + currentVx * time;
+      const currentZ = p.startZ + currentVz * time + 4;
+      const currentY = -14 + p.vy * time - 0.5 * 90 * time * time;
 
-      const speed = Math.sqrt(currentVx * currentVx + currentVy * currentVy + currentVz * currentVz);
+      const speed = Math.sqrt(
+        currentVx * currentVx +
+          currentVy * currentVy +
+          currentVz * currentVz
+      );
 
-      let stretch = p.isStreakType ? Math.max(1.0, speed * 0.04) : 0.9 + Math.random() * 0.2;
+      const stretch = p.isStreakType
+        ? Math.max(1.0, speed * 0.04)
+        : 0.9 + Math.random() * 0.2;
       let scale = p.baseScale;
       if (currentY <= -14) scale = 0;
-      else scale *= p.evaporates ? Math.max(0, 1.0 - time * 1.5) : Math.max(0, 1.0 - time * 0.2);
+      else {
+        scale *= p.evaporates
+          ? Math.max(0, 1.0 - time * 1.5)
+          : Math.max(0, 1.0 - time * 0.2);
+      }
 
       dummy.position.set(currentX, currentY, currentZ);
       dummy.scale.set(scale, scale * stretch, scale);
 
-      const velocityDir = new THREE.Vector3(currentVx, currentVy, currentVz).normalize();
-      if (velocityDir.lengthSq() > 0.0001) dummy.quaternion.setFromUnitVectors(upVector, velocityDir);
+      const velocityDir = new THREE.Vector3(
+        currentVx,
+        currentVy,
+        currentVz
+      ).normalize();
+      if (velocityDir.lengthSq() > 0.0001) {
+        dummy.quaternion.setFromUnitVectors(upVector, velocityDir);
+      }
 
       dummy.updateMatrix();
       meshRef.current!.setMatrixAt(i, dummy.matrix);
@@ -495,25 +475,18 @@ export const SplashDroplets = ({ splashProgress, opacity = 1  }: { splashProgres
       <sphereGeometry args={[1, 28, 28]} />
       <meshPhysicalMaterial
         color="#000"
-
         transmission={1}
-        thickness={1.2}          // ⭐ thicker = stronger depth
+        thickness={1.2}
         ior={1.33}
-
-        roughness={0.01}         // sharper reflections
+        roughness={0.01}
         metalness={0}
-
         clearcoat={1}
         clearcoatRoughness={0}
-
-        envMapIntensity={4}      // ⭐ stronger reflections
-
-        attenuationColor="#bfe3ff"     // inner water tint
-        attenuationDistance={0.35}     // core darkening
-    
-        transparent={true}
-        opacity={opacity}
-
+        envMapIntensity={4}
+        attenuationColor="#bfe3ff"
+        attenuationDistance={0.35}
+        transparent
+        opacity={1}
         depthWrite
       />
     </instancedMesh>
@@ -523,9 +496,9 @@ export const SplashDroplets = ({ splashProgress, opacity = 1  }: { splashProgres
 /* =========================================================
    🌊 WATER PLANE
 ========================================================= */
-export const WaterPlane = ({ splashProgress, opacity = 1  }: { splashProgress: number, opacity?: number }) => {
+const WaterPlane = ({ splashProgress }: { splashProgress: number }) => {
   const reflectorRef = useRef<any>(null);
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const timeRef = useRef(0);
   const geometry = useMemo(() => new THREE.PlaneGeometry(5000, 5000), []);
 
   const reflector = useMemo(() => {
@@ -537,13 +510,12 @@ export const WaterPlane = ({ splashProgress, opacity = 1  }: { splashProgress: n
     refl.rotation.x = -Math.PI / 2;
     refl.position.y = -15;
     const material = refl.material as THREE.ShaderMaterial;
-    material.transparent = true;
-    material.opacity = opacity;
 
     material.onBeforeCompile = (shader) => {
       shader.uniforms.uTime = { value: 0 };
       shader.uniforms.uTakeoff = { value: 0 };
-      shader.fragmentShader = `uniform float uTime; uniform float uTakeoff;\n` + shader.fragmentShader;
+      shader.fragmentShader =
+        `uniform float uTime; uniform float uTakeoff;\n` + shader.fragmentShader;
 
       shader.fragmentShader = shader.fragmentShader.replace(
         `vec4 base = texture2DProj( tDiffuse, vUv );`,
@@ -602,21 +574,17 @@ export const WaterPlane = ({ splashProgress, opacity = 1  }: { splashProgress: n
         vec2 totalDistortion = vec2(ambientRipple * rippleStrength) + waveDistortion + wakeDistortion + splashChaos + rainDistortion;
 
         vec4 base = texture2DProj(tDiffuse, vec4(vUv.xy + (totalDistortion * vUv.w), vUv.zw));
-        base.rgb = mix(base.rgb, vec3(0.38), 0.20); // make mirror slightly gray
-        base.rgb *= 0.72; // reduce reflection opacity/strength
         `
       );
       reflectorRef.current = { userData: { shader } };
     };
     return refl;
-  }, [geometry, isMobile]);
+  }, [geometry]);
 
-  useFrame(() => {
+  useFrame((_, delta) => {
+    timeRef.current += delta;
     if (reflectorRef.current?.userData.shader) {
-      // ✅ Multiply splashProgress so the waves scrub rapidly back and forth as you scroll
-      const scrollSpeedMultiplier = 30.0; 
-      
-      reflectorRef.current.userData.shader.uniforms.uTime.value = splashProgress * scrollSpeedMultiplier;
+      reflectorRef.current.userData.shader.uniforms.uTime.value = timeRef.current;
       reflectorRef.current.userData.shader.uniforms.uTakeoff.value = splashProgress;
     }
   });
@@ -644,7 +612,6 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
   const FRAME_PATH = (i: number) =>
     `/assets/swarn_60/frame_${String(i).padStart(4, "0")}.jpg`;
 
-  // Preload Video Frames
   useEffect(() => {
     const loadedArray: HTMLImageElement[] = new Array(TOTAL_FRAMES);
     let loadedCount = 0;
@@ -661,7 +628,14 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
   }, []);
 
   useGSAP(() => {
-    if (!isReady || images.length === 0 || !logoRef.current || !canvasWrapperRef.current) return;
+    if (
+      !isReady ||
+      images.length === 0 ||
+      !logoRef.current ||
+      !canvasWrapperRef.current
+    ) {
+      return;
+    }
 
     const totalScroll = 12000;
 
@@ -674,39 +648,32 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
         scrub: 1.5,
         onUpdate: (self) => {
           const raw = self.progress;
-          
 
-          // --- PHASE 1: Video executes first (0% to 40% of scroll) ---
           if (raw <= 0.4) {
             setScrollProgress(0);
             setTransformProgress(0);
             setSplashProgress(0);
-          }
-          // --- PHASE 2: 3D Scene Takes Over ---
-          else {
-            // 1. SWAN ANIMATION: Starts EXACTLY when Logo finishes moving (60%) and goes to 100%
-            if (raw < 0.60) {
+          } else {
+            if (raw < 0.6) {
               setScrollProgress(0);
             } else {
-              setScrollProgress((raw - 0.60) / 0.40);
+              setScrollProgress((raw - 0.6) / 0.4);
             }
 
-            // 2. SWAN SCALE: Scales up smoothly right as it starts moving (60% to 85%)
-            if (raw < 0.60) {
+            if (raw < 0.6) {
               setTransformProgress(0);
             } else if (raw > 0.85) {
               setTransformProgress(1);
             } else {
-              setTransformProgress((raw - 0.60) / 0.25);
+              setTransformProgress((raw - 0.6) / 0.25);
             }
 
-            // 3. SPLASH PHYSICS: Pushed back to trigger at the very end (90% to 100%)
-            if (raw < 0.90) {
+            if (raw < 0.9) {
               setSplashProgress(0);
             } else if (raw >= 1.0) {
               setSplashProgress(1);
             } else {
-              setSplashProgress((raw - 0.90) / 0.10);
+              setSplashProgress((raw - 0.9) / 0.1);
             }
           }
         },
@@ -716,45 +683,64 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
 
     const centerLogoWidth = isMobile ? "280px" : "420px";
 
-    // Set Initial CSS States
-    gsap.set(logoRef.current, { autoAlpha: 0, scale: 0.8, top: "50%", left: "50%", xPercent: -50, yPercent: -50, filter: "blur(60px)", width: centerLogoWidth });
+    gsap.set(logoRef.current, {
+      autoAlpha: 0,
+      scale: 0.8,
+      top: "50%",
+      left: "50%",
+      xPercent: -50,
+      yPercent: -50,
+      filter: "blur(60px)",
+      width: centerLogoWidth,
+    });
     gsap.set(canvasWrapperRef.current, { autoAlpha: 0, filter: "blur(120px)" });
 
-    // 1. Play Video Sequence (Takes exactly 4.0 units = 40% of total timeline)
     const frameObj = { frame: 0 };
     tl.to(frameObj, {
       frame: TOTAL_FRAMES - 1,
       snap: "frame",
       ease: "none",
       duration: 4.0,
-      onUpdate: () => renderHero(frameObj.frame)
+      onUpdate: () => renderHero(frameObj.frame),
     });
 
-    // 2. Video ends -> Fade in 3D Scene (blurred) and Logo (sharp) (Takes 0.5 units = 5%)
-    tl.to(canvasWrapperRef.current, { autoAlpha: 1, filter: "blur(40px)", duration: 0.5 }, ">");
-    tl.to(logoRef.current, { autoAlpha: 1, scale: 1, filter: "blur(0px)", duration: 0.5 }, "<");
+    tl.to(
+      canvasWrapperRef.current,
+      { autoAlpha: 1, filter: "blur(40px)", duration: 0.5 },
+      ">"
+    );
+    tl.to(
+      logoRef.current,
+      { autoAlpha: 1, scale: 1, filter: "blur(0px)", duration: 0.5 },
+      "<"
+    );
 
-    // 3. Move Logo to corner AND unblur the Swan simultaneously (Takes 1.5 units = 15%)
-    tl.to(logoRef.current, {
-      top: "37px",
-      left: "48px",
-      xPercent: 0,
-      yPercent: 0,
-      width: "56px",
-      duration: 1.5,
-      ease: "power2.inOut",
-    }, ">");
+    tl.to(
+      logoRef.current,
+      {
+        top: "37px",
+        left: "48px",
+        xPercent: 0,
+        yPercent: 0,
+        width: "56px",
+        duration: 1.5,
+        ease: "power2.inOut",
+      },
+      ">"
+    );
 
-    tl.to(canvasWrapperRef.current, {
-      filter: "blur(0px)",
-      duration: 1.5,
-      ease: "power2.inOut",
-    }, "<");
+    tl.to(
+      canvasWrapperRef.current,
+      {
+        filter: "blur(0px)",
+        duration: 1.5,
+        ease: "power2.inOut",
+      },
+      "<"
+    );
 
-    // 4. Pad the rest of the timeline (Takes 4.0 units = 40%)
     tl.to({}, { duration: 4.0 });
 
-    // Video Renderer
     function renderHero(index: number) {
       const canvas = canvasRef.current;
       if (!canvas) return;
@@ -764,7 +750,10 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
       canvas.width = 1920;
       canvas.height = 1080;
 
-      const frameIndex = Math.min(TOTAL_FRAMES - 1, Math.max(0, Math.round(index)));
+      const frameIndex = Math.min(
+        TOTAL_FRAMES - 1,
+        Math.max(0, Math.round(index))
+      );
       const img = images[frameIndex];
       if (!img) return;
 
@@ -781,16 +770,16 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
   }, [isReady, images.length]);
 
   return (
-    <section ref={containerRef} className="relative w-full h-screen overflow-hidden bg-black">
-
-      {/* --- 2D HERO VIDEO --- */}
+    <section
+      ref={containerRef}
+      className="relative w-full h-screen overflow-hidden bg-black"
+    >
       <canvas
         ref={canvasRef}
         className="absolute inset-0 z-10 w-full h-full object-cover"
         style={{ display: "block" }}
       />
 
-      {/* --- 3D SCENE --- */}
       <div
         ref={canvasWrapperRef}
         className="absolute inset-0 z-20"
@@ -813,29 +802,17 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
           }}
         >
           <color attach="background" args={["#000000"]} />
-          <hemisphereLight args={["#f4f6ff", "#0d1218", 0.1]} />
-          <directionalLight
-            position={[14, 20, 12]}
-            intensity={0.95}
-            color="#fff8ee"
-            castShadow
-            shadow-mapSize-width={2048}
-            shadow-mapSize-height={2048}
-            shadow-bias={-0.00008}
-          />
-          <directionalLight position={[-12, 10, 4]} intensity={0.3} color="#d8e5ff" />
-          <spotLight
-            position={[-8, 14, -12]}
-            angle={0.34}
-            penumbra={1}
-            intensity={0.45}
-            color="#eef4ff"
-          />
+          <ambientLight intensity={0.2} />
+          <pointLight position={[10, 10, 10]} intensity={1.5} />
+          <spotLight position={[-10, 20, 10]} angle={0.2} penumbra={1} intensity={2} />
           {/* Base position is [0,0,70], interaction takes over Y via useFrame */}
           <PerspectiveCamera makeDefault position={[0, 0, 70]} fov={isMobile ? 65 : 40} />
 
           <Suspense fallback={null}>
-            <SwanModel scrollProgress={scrollProgress} transformProgress={transformProgress} />
+            <SwanModel
+              scrollProgress={scrollProgress}
+              transformProgress={transformProgress}
+            />
             <WaterPlane splashProgress={splashProgress} />
             <SplashDroplets splashProgress={splashProgress} />
             <SplashWalls splashProgress={splashProgress} />
@@ -844,19 +821,21 @@ const LogoRevealNew = ({ onComplete }: { onComplete?: () => void }) => {
         </Canvas>
       </div>
 
-      {/* --- LOGO --- */}
       <div
         ref={logoRef}
         className="absolute z-30 pointer-events-none"
         style={{ opacity: 0, visibility: "hidden" }}
       >
-        <img src="assets/logo/aldovialogo.svg" alt="Logo" className="w-full h-auto brightness-0 invert" />
+        <img
+          src="assets/logo/aldovialogo.svg"
+          alt="Logo"
+          className="w-full h-auto brightness-0 invert"
+        />
       </div>
-
     </section>
   );
 };
 
-useGLTF.preload("/models/Swan_anim_v13.glb");
+useGLTF.preload("/models/Swan_anim_v14.glb");
 
 export default LogoRevealNew;

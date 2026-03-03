@@ -233,6 +233,7 @@ const AwardsSection: React.FC = () => {
 
   return (
     <section
+      id="about-awards-section"
       className="relative w-full overflow-hidden !py-10 md:!py-12"
       style={{
         backgroundImage:

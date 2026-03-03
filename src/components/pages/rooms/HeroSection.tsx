@@ -114,15 +114,37 @@ const HeroSection = ({ activeRoom, setActiveRoom }: Props) => {
                 ) : (
                   <>
                     <img src={activeRoom.bgImage} alt="Background" className="absolute inset-0 w-full h-full object-cover" />
+                    {activeRoom.finalImage && (
+                      <motion.img
+                        src={activeRoom.finalImage}
+                        alt={`${activeRoom.title} final`}
+                        initial={{ opacity: 0, scale: 1.16 }}
+                        animate={{ opacity: [0, 0.42, 1], scale: [1.16, 1.07, 1] }}
+                        transition={{ duration: 1.55, delay: 0.05, ease: "easeOut", times: [0, 0.55, 1] }}
+                        className="absolute inset-0 z-[1] w-full h-full object-cover"
+                      />
+                    )}
                     {activeRoom.layers?.map((layer) => (
                       <motion.img
                         key={layer.id}
                         src={layer.src}
                         draggable={false}
                         initial={getInitialPosition(layer.slideFrom)}
-                        animate={{ x: "0%", y: "0%", opacity: 1 }}
-                        transition={{ type: 'tween', ease: 'easeOut', duration: 0.6, delay: 0.1 }}
-                        className={`absolute ${layer.className || 'inset-0 w-full h-full object-contain'}`}
+                        animate={{
+                          x: "0%",
+                          y: "0%",
+                          opacity: activeRoom.finalImage ? [1, 0.9, 0.14] : 1,
+                        }}
+                        transition={
+                          activeRoom.finalImage
+                            ? {
+                                x: { type: 'tween', ease: 'easeOut', duration: 0.65, delay: 0.08 },
+                                y: { type: 'tween', ease: 'easeOut', duration: 0.65, delay: 0.08 },
+                                opacity: { duration: 1.35, delay: 0.08, ease: 'easeInOut', times: [0, 0.5, 1] },
+                              }
+                            : { type: 'tween', ease: 'easeOut', duration: 0.65, delay: 0.08 }
+                        }
+                        className={`absolute z-[4] ${layer.className || 'inset-0 w-full h-full object-contain'}`}
                       />
                     ))}
                     {activeRoom.textLayer && (

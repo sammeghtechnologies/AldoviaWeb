@@ -42,7 +42,7 @@ const MemberCardContent: React.FC<{ member: TeamMember }> = ({ member }) => {
         <img
           src={member.image}
           alt={member.name}
-          className="h-[40vh] w-full object-cover md:h-[420px]"
+          className="h-[420px] w-full object-cover"
           loading="lazy"
         />
       </div>
@@ -121,15 +121,16 @@ const TeamSection: React.FC = () => {
         className="relative h-[400vh] w-full text-[var(--color-primary)]"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(244,239,227,0.9), rgba(244,239,227,0.92)), url('/assets/backgrounds/swanbg.png')",
+            "linear-gradient(rgba(244,239,227,0.9), rgba(244,239,227,0.92))",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
+          backgroundAttachment: "fixed",
         }}
       >
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute bottom-0 right-[-8%] z-[1] translate-y-[46%] bg-no-repeat opacity-10 md:opacity-[0.16]"
+          className="pointer-events-none absolute bottom-0 right-[-8%] z-[1] translate-y-[26%] bg-no-repeat opacity-10 md:opacity-[0.16]"
           style={{
             backgroundImage: "url('/assets/logo/logo-wet-earth.png')",
             backgroundSize: "min(60vw, 760px)",
@@ -138,13 +139,13 @@ const TeamSection: React.FC = () => {
             height: "min(60vw, 760px)",
           }}
         />
-        <div className="!pt-5 !pb-1 text-center">
+        <div className="!pt-15 !pb-1 text-center">
           <h2 className="font-lust-medium text-[2em] md:text-[3em] leading-tight text-[var(--color-primary)]">
             The Management
           </h2>
          
         </div>
-        <div className="sticky top-0 flex h-screen w-full items-center justify-center !px-4 md:!px-1 lg:items-start lg:!px-12 lg:!pt-12">
+        <div className="sticky top-0 flex h-screen w-full items-center justify-center !px-4 md:!px-1 lg:items-center lg:!px-12">
           <div
             className="relative w-full max-w-6xl min-h-[760px] md:min-h-[520px]"
             style={{
@@ -155,7 +156,7 @@ const TeamSection: React.FC = () => {
             }}
           >
             <div className="relative h-full w-full rounded-[18px] border border-[var(--color-secondary)] bg-[#f4efe3] !p-5 shadow-[0_16px_40px_rgba(44,20,12,0.12)] md:!p-8 lg:!p-10">
-              <div className="relative h-full min-h-[700px] overflow-hidden md:min-h-[460px]">
+              <div className="relative h-full min-h-[700px] overflow-visible md:min-h-[460px]">
                 <MemberCardContent member={members[displayedIndex]} />
               </div>
             </div>

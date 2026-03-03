@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import MenuFrame from "../../MenuFrame/v2/MenuFrame";
 import AnimatedImageHero from "../../ui/AnimatedImageHero";
 import HeroBreadcrumb from "../../ui/HeroBreadcrumb";
 import CarouselCards from "../../ui/CarouselCardEvents";
+import CarouselControls from "../../ui/CarouselControls";
 import StartPlanEventModal from "../../ui/StartPlanEventModal";
 import EventDetailsModal from "../../ui/EventDetailsModal";
 import Footer from "../../sections/Footer";
@@ -49,8 +50,44 @@ const corporateImages = [
   "/assets/herobackgrounds/corporate/corporate2.jpg",
   "/assets/herobackgrounds/corporate/corporate3.jpg",
 ];
+const conventionImages = [
+  "/assets/herobackgrounds/convention/ocean1.webp",
+  "/assets/herobackgrounds/convention/ocean2.webp",
+  "/assets/herobackgrounds/convention/ocean3.webp",
+];
 const herobackgroundsSectionBg = "/assets/backgrounds/swanbrown.png";
-
+const weddingReasons = [
+  {
+    title: "Stunning Venues",
+    description:
+      "Choose from expansive indoor ballrooms and open-air lawns, each designed for unforgettable wedding moments.",
+    image: "/assets/herobackgrounds/wedding/wedding1.jpg",
+  },
+  {
+    title: "Customizable Themes",
+    description:
+      "Our event experts help you shape every detail, from decor palette to ceremony flow, around your vision.",
+    image: "/assets/herobackgrounds/wedding/wedding2.jpg",
+  },
+  {
+    title: "Luxurious Accommodations",
+    description:
+      "Comfortable premium suites and rooms for families, close friends, and your full wedding party.",
+    image: "/assets/rooms/luxury-room/s1.jpg",
+  },
+  {
+    title: "Gourmet Dining",
+    description:
+      "Curated menus and signature service for welcome dinners, wedding feasts, and post-event brunches.",
+    image: "/assets/pages/dining/ambrosia.jpg",
+  },
+  {
+    title: "Complete Event Planning",
+    description:
+      "Curated menus and signature service for welcome dinners, wedding feasts, and post-event brunches.",
+    image: "/assets/pages/dining/ambrosia.jpg",
+  }
+];
 const venueTabs = [
   "Galaxy Grand Ballroom",
   "Galaxy Grand Courtyard",
@@ -64,6 +101,7 @@ const venueTabs = [
   "Tulip",
   "Lily",
   "Geneva Boardroom",
+  "Ocean Convention Centre",
 ] as const;
 
 type VenueTab = (typeof venueTabs)[number];
@@ -265,6 +303,21 @@ const venueContentByTab: Record<VenueTab, VenueTabContent> = {
       seater: "70",
     },
   },
+  "Ocean Convention Centre": {
+    subtitle: "Grand Convention Destination",
+    description:
+      "A purpose-built convention venue crafted for large gatherings, industry expos, and high-impact conferences with seamless service and scale.",
+    dimensions: {
+      area: "1,29,065 sq.ft",
+      height: "21 ft",
+      width: "311 ft",
+      length: "415 ft",
+    },
+    seating: {
+      theater: "3000",
+      classroom: "1200",
+    },
+  },
 };
 
 const venueImagesByTab: Partial<Record<VenueTab, string[]>> = {
@@ -328,6 +381,10 @@ const venueImagesByTab: Partial<Record<VenueTab, string[]>> = {
     "/assets/herobackgrounds/herobanner/lotus.jpg",
     "/assets/herobackgrounds/herobanner/galaxy1.jpg",
   ],
+  "Ocean Convention Centre": [
+    "/assets/herobackgrounds/convention/ocean1.webp",
+    "/assets/herobackgrounds/convention/ocean2.webp",
+  ],
 };
 
 const venueCardsByTab: Record<VenueTab, VenueCard[]> = venueTabs.reduce(
@@ -385,23 +442,41 @@ const HeroPage: React.FC = () => {
       ? "wedding"
       : location.state?.mode === "corporate"
         ? "corporate"
+        : location.state?.mode === "convention"
+          ? "convention"
         : "venue";
   const heroImages =
-    pageMode === "wedding" ? weddingImages : pageMode === "corporate" ? corporateImages : defaultVenueImages;
+    pageMode === "wedding"
+      ? weddingImages
+      : pageMode === "corporate"
+        ? corporateImages
+        : pageMode === "convention"
+          ? conventionImages
+          : defaultVenueImages;
   const heroTitle =
     pageMode === "wedding"
       ? "Your Wedding, Your Way"
       : pageMode === "corporate"
         ? "Your professional Event Destination"
+        : pageMode === "convention"
+          ? "Ocean Convention Centre"
         : "Opulent Celebrations & Galas";
   const heroSubtitle =
     pageMode === "wedding"
       ? "Forty-five acres of grounds, twelve curated venues, and a team that understands that no two weddings should look the same. At Aldovia, we do not offer packages. We offer possibilities."
       : pageMode === "corporate"
         ? "State-of-the-art facilities for conferences, offsites, and team building. Forty minutes from Bangalore, but far enough to think clearly."
+        : pageMode === "convention"
+          ? "Designed for conventions, exhibitions, and large-scale summits with premium infrastructure and seamless event execution."
       : "Spacious and versatile venue is ideal for large-scale events, from glamorous weddings to corporate galas.";
   const breadcrumbLabel =
-    pageMode === "wedding" ? "Weddings" : pageMode === "corporate" ? "Corporate Events" : "Venues";
+    pageMode === "wedding"
+      ? "Weddings"
+      : pageMode === "corporate"
+        ? "Corporate Events"
+        : pageMode === "convention"
+          ? "Convention"
+          : "Venues";
   const handleRequestProposal = () => {
     if (pageMode === "wedding") {
       setSelectedEventType("Wedding");
@@ -418,12 +493,27 @@ const HeroPage: React.FC = () => {
   const handlePlanEvent = () => {
     setOpen(true);
   };
-  const [active, setActive] = useState<(typeof venueTabs)[number]>(
-    "Galaxy Grand Ballroom"
+  const [active, setActive] = useState<(typeof venueTabs)[number]>("Galaxy Grand Ballroom");
+  const tabsForCurrentMode = useMemo(
+    () =>
+      pageMode === "convention"
+        ? (["Ocean Convention Centre"] as (typeof venueTabs)[number][])
+        : ([...venueTabs] as (typeof venueTabs)[number][]),
+    [pageMode]
   );
-  const selectedCards = venueCardsByTab[active];
+  useEffect(() => {
+    if (pageMode === "convention") {
+      setActive("Ocean Convention Centre");
+      return;
+    }
+    if (!tabsForCurrentMode.includes(active)) {
+      setActive("Galaxy Grand Ballroom");
+    }
+  }, [active, pageMode, tabsForCurrentMode]);
+  const selectedCards =
+    venueCardsByTab[active] ?? venueCardsByTab[tabsForCurrentMode[0]];
   const handleTabChange = (value: string) => {
-    if (venueTabs.includes(value as (typeof venueTabs)[number])) {
+    if (tabsForCurrentMode.includes(value as (typeof venueTabs)[number])) {
       setActive(value as (typeof venueTabs)[number]);
     }
   };
@@ -431,6 +521,13 @@ const HeroPage: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [selectedEventType, setSelectedEventType] = useState("Wedding");
+  const [weddingWindowStart, setWeddingWindowStart] = useState(0);
+  const [isMobileViewport, setIsMobileViewport] = useState(
+    typeof window !== "undefined" ? window.matchMedia("(max-width: 767px)").matches : false
+  );
+  const weddingCardsRailRef = useRef<HTMLDivElement | null>(null);
+  const weddingVisibleCards = isMobileViewport ? 1 : 4;
+  const maxWeddingStartIndex = Math.max(0, weddingReasons.length - weddingVisibleCards);
   const venueMaxGuestsByTab = venueTabs.reduce<Record<string, number>>((acc, tab) => {
     const maxSeats =
       venueContentByTab[tab]?.seating?.theater ??
@@ -441,6 +538,54 @@ const HeroPage: React.FC = () => {
     acc[tab] = parseSeaterCount(maxSeats);
     return acc;
   }, {});
+  const getWeddingCardStep = () => {
+    const rail = weddingCardsRailRef.current;
+    if (!rail) return 0;
+    const firstCard = rail.firstElementChild as HTMLElement | null;
+    if (!firstCard) return 0;
+    const styles = window.getComputedStyle(rail);
+    const gap = Number.parseFloat(styles.columnGap || styles.gap || "0") || 0;
+    return firstCard.offsetWidth + gap;
+  };
+  const handleWeddingRailScroll = () => {
+    const rail = weddingCardsRailRef.current;
+    if (!rail) return;
+    const step = getWeddingCardStep();
+    if (!step) return;
+    const nextStart = Math.round(rail.scrollLeft / step);
+    setWeddingWindowStart(Math.max(0, Math.min(maxWeddingStartIndex, nextStart)));
+  };
+  const scrollWeddingCards = (direction: "prev" | "next") => {
+    const rail = weddingCardsRailRef.current;
+    if (!rail) return;
+    const targetIndex =
+      direction === "next"
+        ? Math.min(maxWeddingStartIndex, weddingWindowStart + 1)
+        : Math.max(0, weddingWindowStart - 1);
+    setWeddingWindowStart(targetIndex);
+    if (isMobileViewport) {
+      const targetCard = rail.children[targetIndex] as HTMLElement | undefined;
+      if (!targetCard) return;
+      const targetLeft =
+        targetCard.offsetLeft - (rail.clientWidth - targetCard.clientWidth) / 2;
+      rail.scrollTo({ left: Math.max(0, targetLeft), behavior: "smooth" });
+      return;
+    }
+    const step = getWeddingCardStep();
+    if (!step) return;
+    rail.scrollTo({ left: targetIndex * step, behavior: "smooth" });
+  };
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+    const handleViewportChange = (event: MediaQueryListEvent) => {
+      setIsMobileViewport(event.matches);
+      setWeddingWindowStart(0);
+      weddingCardsRailRef.current?.scrollTo({ left: 0, behavior: "auto" });
+    };
+    setIsMobileViewport(mediaQuery.matches);
+    mediaQuery.addEventListener("change", handleViewportChange);
+    return () => mediaQuery.removeEventListener("change", handleViewportChange);
+  }, []);
 
 
 
@@ -467,12 +612,95 @@ const HeroPage: React.FC = () => {
         controlsClassName="!mt-0 !px-0"
         controlsProgressBarClassName="!w-[140px] !max-w-[140px] shrink-0"
       />
+      {pageMode === "wedding" && (
+        <section className="my-10 w-screen bg-[var(--color-secondary)] px-4 !py-12 sm:my-12 sm:px-6 sm:!py-14 md:my-14 md:px-8 md:!py-16 lg:my-16 lg:px-12 lg:!py-20 justify-center">
+          <div className="mx-auto flex w-full max-w-[1500px] flex-col items-center md:relative md:left-1/2 md:-translate-x-1/2">
+            <h2 className="font-lust !mb-8 text-center text-3xl text-[var(--color-primary)] sm:mb-10 md:text-4xl">
+              Why Choose Aldovia for Your Wedding?
+            </h2>
+            <div className="relative mx-auto w-full !bg-transparent">
+              <div
+                ref={weddingCardsRailRef}
+                onScroll={handleWeddingRailScroll}
+                className="mx-auto flex w-full max-w-full gap-4 overflow-x-auto px-4 pb-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:w-[80vw] md:max-w-[80vw] md:gap-5 md:px-0"
+                style={{ perspective: "1400px" }}
+              >
+              {weddingReasons.map((reason, index) => {
+                const leftCenter = weddingWindowStart + 1;
+                const rightCenter = weddingWindowStart + 2;
+                const isCenterActive = isMobileViewport
+                  ? index === weddingWindowStart
+                  : index === leftCenter || index === rightCenter;
+                const isSideInactive = isMobileViewport
+                  ? Math.abs(index - weddingWindowStart) === 1
+                  : index === weddingWindowStart || index === weddingWindowStart + 3;
+                const sideRotate = isMobileViewport
+                  ? 0
+                  : index < leftCenter ? 10 : index > rightCenter ? -10 : 0;
+
+                return (
+                  <article
+                    key={reason.title}
+                    className="group relative min-h-[360px] w-[92%] basis-[92%] min-w-[92%] shrink-0 overflow-hidden rounded-[24px]  md:min-h-[500px] md:min-w-[calc((80vw-3*1.25rem)/4)] md:basis-[calc((80vw-3*1.25rem)/4)]"
+                    style={{
+                      transform: isCenterActive
+                        ? "rotateY(0deg) scale(1)"
+                        : isSideInactive
+                          ? `rotateY(${sideRotate}deg) scale(0.93)`
+                          : "rotateY(0deg) scale(0.86)",
+                      transformOrigin: "center center",
+                      transition: "transform 500ms ease, opacity 500ms ease, filter 500ms ease",
+                      opacity: isCenterActive ? 1 : isSideInactive ? 0.72 : 0.45,
+                      filter: isCenterActive ? "none" : "saturate(0.8)",
+                    }}
+                  >
+                    <img
+                      src={reason.image}
+                      alt={reason.title}
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-[#1b2530]/55 via-[#2b1d18]/35 to-[#2a0f08]/92" />
+                    <div className="absolute inset-0 flex items-end !p-7 sm:!p-8">
+                      <div>
+                        <p className=" font-area text-[.7em] uppercase tracking-[0.14em] text-[#f6d796]/90">
+                          Weddings &amp; Social Events
+                        </p>
+                        <h3 className="font-lust !mt-4 text-[1.5em] leading-[0.98] text-[#f7f0e5]">
+                          {reason.title}
+                        </h3>
+                        <p className="font-area !mt-5 max-w-[30ch] text-[15px] leading-[1.45] text-[#f3dfcf]/95">
+                          {reason.description}
+                        </p>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+              </div>
+              {maxWeddingStartIndex > 0 && (
+                <CarouselControls
+                  total={maxWeddingStartIndex + 1}
+                  index={weddingWindowStart}
+                  onNext={() => scrollWeddingCards("next")}
+                  onPrev={() => scrollWeddingCards("prev")}
+                  progressTrackColor="rgba(80, 44, 34, 0.25)"
+                  progressFillColor="var(--color-primary)"
+                  buttonColor="var(--color-primary)"
+                  iconColor="var(--color-primary)"
+                  className="!mt-6 !max-w-none !justify-center !gap-6 !px-0 [&_button]:!bg-black/7 [&_button]:!border-white/30 [&_button]:!backdrop-blur-lg"
+                  progressBarClassName="w-[180px] max-w-[180px] shrink-0"
+                />
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="w-full" >
         <CarouselCards
           items={selectedCards}
           sectionBackgroundImage={herobackgroundsSectionBg}
-          tabs={[...venueTabs]}
+          tabs={pageMode === "convention" ? [] : tabsForCurrentMode}
           activeTab={active}
           onTabChange={handleTabChange}
         />
@@ -500,7 +728,7 @@ const HeroPage: React.FC = () => {
         }}
         eventType={selectedEventType}
         venue={active}
-        venueOptions={[...venueTabs]}
+        venueOptions={tabsForCurrentMode}
         venueMaxGuestsByTab={venueMaxGuestsByTab}
         eventTypeOptions={[
           "Wedding",

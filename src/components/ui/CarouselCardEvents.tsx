@@ -209,6 +209,9 @@ export default function CarouselCards({
         style={{
           backgroundImage:
             "linear-gradient(rgba(14, 1, 1, 0.78), rgba(65, 52, 47, 0.78)), url('/assets/herobackgrounds/herobanner/corridor.jpg')",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
         }}
       />
       <div className="relative z-10 !pt-8">

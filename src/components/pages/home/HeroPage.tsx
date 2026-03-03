@@ -44,13 +44,14 @@ const HeroPage: React.FC = () => {
           initial={{ scale: 1.1 }}
           animate={{ scale: 1 }}
           transition={{ duration: 8, ease: "easeOut" }}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover brightness-[1.08] contrast-[1.06] saturate-[1.08]"
         >
           <source src="/assets/herobackgrounds/home/home.mp4" type="video/mp4" />
         </motion.video>
 
-        {/* Dark Luxury Overlay */}
-        <div className="absolute inset-0 bg-black/20" />
+        {/* Keep center lights visible while preserving text readability */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(255,220,160,0.14)_0%,rgba(255,220,160,0.06)_28%,rgba(0,0,0,0)_56%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.46)_0%,rgba(0,0,0,0.20)_38%,rgba(0,0,0,0.28)_72%,rgba(0,0,0,0.52)_100%)]" />
 
         {/* Content */}
         <div className="relative z-10 h-full px-6 py-8 md:px-16">
@@ -85,11 +86,13 @@ const HeroPage: React.FC = () => {
         </Suspense>
       </DeferredSection>
 
-      <DeferredSection placeholderClassName="min-h-[70vh] bg-[#FBF6E6]" rootMargin="300px 0px">
-        <Suspense fallback={<div className="min-h-[70vh] bg-[#FBF6E6]" />}>
-          <ExperienceSection/>
-        </Suspense>
-      </DeferredSection>
+      <div id="home-experience-section">
+        <DeferredSection placeholderClassName="min-h-[70vh] bg-[#FBF6E6]" rootMargin="300px 0px">
+          <Suspense fallback={<div className="min-h-[70vh] bg-[#FBF6E6]" />}>
+            <ExperienceSection/>
+          </Suspense>
+        </DeferredSection>
+      </div>
 
       <DeferredSection placeholderClassName="min-h-[70vh] bg-[#FBF6E6]" rootMargin="300px 0px">
         <Suspense fallback={<div className="min-h-[70vh] bg-[#FBF6E6]" />}>

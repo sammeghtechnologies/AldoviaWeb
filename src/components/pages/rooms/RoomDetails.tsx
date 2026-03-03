@@ -39,7 +39,7 @@ const RoomDetails = ({ room, setActiveRoom }: Props) => {
     >
       
       {/* Tabs in details section */}
-      <div className="absolute top-[96px] left-0 right-0 z-50 pointer-events-auto">
+      <div className="absolute top-[20vh] left-0 right-0 z-50 pointer-events-auto">
         <ScrollSelectTabs
           items={roomItems}
           active={displayRoom.navLabel || displayRoom.title}
@@ -50,14 +50,14 @@ const RoomDetails = ({ room, setActiveRoom }: Props) => {
         />
       </div>
 
-      <div className="!w-full !max-w-12xl !mx-auto !min-h-full flex flex-col md:flex-row items-center justify-center md:!gap-8 relative z-10">
+      <div className="top-[10vh] w-full md:w-[90%] max-w-[1280px] mx-auto min-h-full md:min-h-screen flex flex-col md:flex-row items-center justify-center md:gap-8 relative md:left-1/2 md:-translate-x-1/2 z-10">
         
         {/* Gallery: Desktop expands | Mobile stays as equal strips */}
-        <div className="group flex h-[30vh] md:h-[62vh] w-full md:w-1/2 gap-2 md:gap-4 z-10 mb-8 md:mb-0 px-4 md:px-0 !mt-[50px] md:mt-0">
+        <div className="group flex h-[30vh] md:h-[62vh] w-full md:w-[90%] gap-2 md:gap-4 z-10 mb-8 md:mb-0 px-4 md:px-0 !mt-[50px] md:mt-0">
           {images.slice(0, 3).map((img, i) => (
             <motion.div 
               key={`${displayRoom.id}-${i}`} 
-              initial={{ y: 50, opacity: 0, scale: 0.85 }} 
+              initial={{ y: 50, opacity: 0, scale: 0.95 }} 
               animate={{ y: 0, opacity: 1, scale: 1 }} 
               transition={{ duration: 0.8, delay: i * 0.1, ease: "easeOut" }}
               onClick={() =>
@@ -71,12 +71,12 @@ const RoomDetails = ({ room, setActiveRoom }: Props) => {
         </div>
 
         {/* Text Details & Split-Title */}
-        <div className="!mt-5 !pl-2 flex flex-col relative w-full md:w-1/2 z-10 px-6 md:px-4 md:pl-0 pb-20 md:pb-0 !text-[var(--color-primary)] justify-center">
+        <div className="!mt-5 !pl-2 flex flex-col relative w-full md:w-[48%] z-10 px-6 md:px-4 md:pl-0 pb-20 md:pb-0 !text-[var(--color-primary)] justify-center">
           <h2 className="font-lust text-[2.5rem] leading-[0.9] tracking-tight !text-[var(--color-primary)] md:hidden">
             {displayRoom.title}
           </h2>
 
-          <div className="relative hidden md:block max-md:-translate-x-[40px] md:-translate-x-[200px] lg:-translate-x-[280px] translate-y-[20px] pointer-events-none z-20 whitespace-nowrap left-[10.5%]">
+          <div className="relative hidden md:block translate-y-[20px] pointer-events-none z-20 whitespace-nowrap">
             
             {/* Base Layer: Dark Brown (Visible on all devices) */}
             <h2 className="font-lust text-[2.5rem] md:text-[8rem] lg:text-[6.5rem] leading-[0.85] tracking-tight !text-[var(--color-primary)]">
@@ -85,16 +85,16 @@ const RoomDetails = ({ room, setActiveRoom }: Props) => {
             
           </div>
           
-          <h2 className="hidden md:block font-lust text-[2.5rem] md:text-[6rem] lg:text-[4.5rem] leading-none !text-[var(--color-primary)] !ml-[30px] !mt-[15px] md:mt-[5px]">
+          <h2 className="hidden md:block font-lust text-[2.5rem] md:text-[6rem] lg:text-[4.5rem] leading-none !text-[var(--color-primary)] !mt-[15px] md:mt-[5px]">
             {secondPart}
           </h2>          
           
-          <p className="font-area text-[15px] md:text-[17px] !text-[var(--color-primary)] max-w-sm leading-relaxed !mt-4 md:!mt-8 !ml-0 md:!ml-7">
+          <p className="font-area text-[15px] md:text-[17px] !text-[var(--color-primary)] max-w-sm leading-relaxed !mt-4 md:!mt-8">
             {displayRoom.description}
           </p>
 
           {/* --- AMENITIES: Occupancy and Bed Type --- */}
-          <div className="font-area-regular flex items-center gap-10 !mt-4 !mb-4 !ml-0 md:!ml-7 !text-[var(--color-primary)]/80 text-[15px] md:text-[16px]">
+          <div className="font-area-regular flex items-center gap-10 !mt-4 !mb-4 !text-[var(--color-primary)]/80 text-[15px] md:text-[16px]">
             <div className="flex items-center gap-3">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
@@ -109,7 +109,7 @@ const RoomDetails = ({ room, setActiveRoom }: Props) => {
             </div>
           </div>
 
-          <button className="font-area-semibold bg-[#00000000] border-2 !text-[var(--color-primary)] rounded-full uppercase w-fit !px-12 !py-5 mx-0 md:mx-0 !ml-0 md:!ml-7 text-[12px] tracking-[0.1em] mt-10 shadow-lg transition-transform hover:scale-105 active:scale-95">
+          <button className="font-area-semibold bg-[#00000000] border-2 !text-[var(--color-primary)] rounded-full uppercase w-fit !px-12 !py-5 mx-0 md:mx-0 text-[12px] tracking-[0.1em] mt-10 shadow-lg transition-transform hover:scale-105 active:scale-95">
             Book Now
           </button>
         </div>

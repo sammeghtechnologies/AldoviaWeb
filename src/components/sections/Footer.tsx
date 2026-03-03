@@ -3,12 +3,20 @@ import { Instagram, Facebook, Twitter, Phone, Mail, MapPin } from "lucide-react"
 
 const Footer: React.FC = () => {
   return (
-    <footer className="w-full bg-[#0F1A2A] text-[#C8D0DA] !pt-20 !pb-10 !px-6 md:!px-12 lg:!px-20">
+    <footer
+      className="w-full bg-[var(--color-secondary)] bg-no-repeat text-[var(--color-primary)] font-area font-normal !pt-20 !pb-10 !px-6 md:!px-12 lg:!px-20"
+      style={{
+        backgroundImage:
+          "url('/assets/logo/logo-wet-trans.png')",
+        backgroundSize: "min(54vw, 620px)",
+        backgroundPosition: "calc(100% + 86px) calc(100% + 15vh)",
+      }}
+    >
       <div className="max-w-6xl mx-auto">
 
         {/* Brand */}
         <div className="text-center !mb-14">
-          <h2 className="text-[#D4AF37] text-[28px] font-medium [font-family:'Playfair_Display']">
+          <h2 className="font-lust text-[3em] text-[var(--color-primary)]">
             Aldovia
           </h2>
         </div>
@@ -18,7 +26,7 @@ const Footer: React.FC = () => {
 
           {/* Stay */}
           <div>
-            <h4 className="text-[#D4AF37] text-sm tracking-wider uppercase !mb-4">
+            <h4 className="font-lust text-sm tracking-wider uppercase !mb-4 text-[var(--color-primary)]">
               Stay
             </h4>
             <ul className="space-y-2 text-sm">
@@ -31,7 +39,7 @@ const Footer: React.FC = () => {
 
           {/* Weddings */}
           <div>
-            <h4 className="text-[#D4AF37] text-sm tracking-wider uppercase !mb-4">
+            <h4 className="font-lust text-sm tracking-wider uppercase !mb-4 text-[var(--color-primary)]">
               Weddings
             </h4>
             <ul className="space-y-2 text-sm">
@@ -44,7 +52,7 @@ const Footer: React.FC = () => {
 
           {/* Corporate */}
           <div>
-            <h4 className="text-[#D4AF37] text-sm tracking-wider uppercase !mb-4">
+            <h4 className="font-lust text-sm tracking-wider uppercase !mb-4 text-[var(--color-primary)]">
               Corporate
             </h4>
             <ul className="space-y-2 text-sm">
@@ -57,7 +65,7 @@ const Footer: React.FC = () => {
 
           {/* Contact */}
           <div>
-            <h4 className="text-[#D4AF37] text-sm tracking-wider uppercase !mb-4">
+            <h4 className="font-lust text-sm tracking-wider uppercase !mb-4 text-[var(--color-primary)]">
               Contact
             </h4>
             <ul className="space-y-3 text-sm">
@@ -76,34 +84,34 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Divider */}
-        <div className="border-t border-[#1E2B3C] !my-12" />
+        <div className="border-t border-[var(--color-secondary)]/25 !my-12" />
 
         {/* Social Icons */}
         <div className="flex justify-center gap-6 !mb-8">
           <a
             href="#"
-            className="w-10 h-10 rounded-full bg-[#1B2736] flex items-center justify-center hover:bg-[#D4AF37] hover:text-black transition duration-300"
+            className="w-10 h-10 rounded-full bg-[var(--color-secondary)]/20 flex items-center justify-center hover:bg-[var(--color-secondary)] hover:text-[var(--color-primary)] transition duration-300"
           >
             <Instagram size={18} />
           </a>
 
           <a
             href="#"
-            className="w-10 h-10 rounded-full bg-[#1B2736] flex items-center justify-center hover:bg-[#D4AF37] hover:text-black transition duration-300"
+            className="w-10 h-10 rounded-full bg-[var(--color-secondary)]/20 flex items-center justify-center hover:bg-[var(--color-secondary)] hover:text-[var(--color-primary)] transition duration-300"
           >
             <Facebook size={18} />
           </a>
 
           <a
             href="#"
-            className="w-10 h-10 rounded-full bg-[#1B2736] flex items-center justify-center hover:bg-[#D4AF37] hover:text-black transition duration-300"
+            className="w-10 h-10 rounded-full bg-[var(--color-secondary)]/20 flex items-center justify-center hover:bg-[var(--color-secondary)] hover:text-[var(--color-primary)] transition duration-300"
           >
             <Twitter size={18} />
           </a>
         </div>
 
         {/* Bottom Text */}
-        <div className="text-center text-xs text-[#7F8A99]">
+        <div className="text-center text-xs text-[var(--color-secondary)]/70">
           © 2025 Aldovia. All rights reserved.
         </div>
 
