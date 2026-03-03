@@ -250,32 +250,39 @@ export const SwanModel = ({
   const materialsRef = useRef<THREE.Material[]>([]);
 
   useLayoutEffect(() => {
-    materialsRef.current = []; // Clear array on mount
-    scene.traverse((child: any) => {
-      if (child.isMesh && child.material) {
-        child.castShadow = true;
-        child.receiveShadow = true;
+    materialsRef.current = []; // Clear array on mount
+    scene.traverse((child: any) => {
+      if (child.isMesh && child.material) {
+        child.castShadow = true;
+        child.receiveShadow = true;
 
-        child.material.side = THREE.DoubleSide; 
-        // Lower alpha test for the reflection so the fade is buttery smooth
-        child.material.alphaTest = isReflection ? 0.01 : 0.5; 
-        
-        child.material.depthWrite = true;
-        child.material.depthTest = true;
-        child.material.transparent = true; 
-        
-        child.material.roughness = 0.4;
-        child.material.metalness = 0.0;
-        child.material.envMapIntensity = 1.5;
-        if (clipPlane) {
-          child.material.clippingPlanes = [clipPlane];
+        // 🚀 THE FIX: Give this specific swan its own unique material clone!
+        const mat = child.material.clone();
+
+        mat.side = THREE.DoubleSide; 
+        mat.alphaTest = isReflection ? 0.01 : 0.5; 
+        mat.depthWrite = true;
+        mat.depthTest = true;
+        mat.transparent = true; 
+        
+        mat.roughness = 0.4;
+        mat.metalness = 0.0;
+        mat.envMapIntensity = 1.5;
+
+        // 🚀 Now, if this is the reflection, it only cuts THIS clone's feet off
+        if (clipPlane) {
+          mat.clippingPlanes = [clipPlane];
+        } else {
+          // Explicitly clear it for the main swan just to be safe
+          mat.clippingPlanes = []; 
         }
-        
-        child.material.needsUpdate = true;
-        materialsRef.current.push(child.material);
-      }
-    });
-  }, [scene, isReflection, clipPlane]);
+        
+        mat.needsUpdate = true;
+        child.material = mat; // Apply the new unique skin back to the mesh
+        materialsRef.current.push(mat);
+      }
+    });
+  }, [scene, isReflection, clipPlane]);
 
   useEffect(() => {
     const action = actions["rigAction"] || actions[Object.keys(actions)[0]];

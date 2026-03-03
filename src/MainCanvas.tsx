@@ -11,37 +11,91 @@ import NaturalFeather from "./components/NaturalFeather/NaturalFeather";
 import CameraFocusController from "./components/CameraFocusController/CameraFocusController";
 import WaterSurface from "./components/WaterSurface/WaterSurface";
 
+// Room Details Panel
+import RoomDetailsPanel from "./components/pages/home/RoomDetailsPanel";
+import { roomData } from "./components/roomDetailsPanel/RoomData";
+
 gsap.registerPlugin(ScrollTrigger);
 
 const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
-
-
-const CameraZoomController = ({ mountFeathers, startOffset }: { mountFeathers: boolean, startOffset: number }) => {
+// 🚀 ADVANCED CONTROLLER: Manages scroll-zooming and click-zooming smoothly
+const CameraZoomController = ({ mountFeathers, activeId, startOffset }: { mountFeathers: boolean, activeId: number | null, startOffset: number }) => {
   const { camera } = useThree();
+  
+  // 🚀 Proxy: Stores where the scroll *wants* the camera to be
+  const scrollProxy = useRef({ x: 0, y: 0, z: 70 });
+  
+  // Track activeId for GSAP onUpdate without re-triggering the hook
+  const activeIdRef = useRef(activeId);
+  useEffect(() => { activeIdRef.current = activeId; }, [activeId]);
 
+  // Track state so the scroll doesn't fight the glide-back animation
+  const isReturning = useRef(false);
+  const hasOpened = useRef(false); 
+
+  // 1. SCROLL-BASED ZOOM TO GHOST SWAN
   useGSAP(() => {
     if (!mountFeathers) return;
+
+    // Reset proxy starting position
+    scrollProxy.current = { x: 0, y: 0, z: 70 };
 
     const zoomStart = startOffset + 900;
     const zoomEnd = startOffset + 2000;
 
-    const tl = gsap.timeline({
+    gsap.to(scrollProxy.current, {
+      x: 7.0,
+      y: 5.0,
+      z: 24, // Zooms in right over feather ID 3 and the reflection
+      ease: "power2.inOut",
       scrollTrigger: {
         trigger: document.body,
         start: `${zoomStart}px top`,
         end: `${zoomEnd}px top`,
         scrub: 1.5,
+      },
+      onUpdate: () => {
+        // Only apply scroll updates if no panel is open AND we aren't currently flying back
+        if (activeIdRef.current === null && !isReturning.current) {
+          camera.position.set(scrollProxy.current.x, scrollProxy.current.y, scrollProxy.current.z);
+        }
       }
     });
-
-    tl.to(camera.position, {
-      x: 7.0,
-      y: 5.0,
-      z: 24, 
-      ease: "power2.inOut"
-    });
   }, [mountFeathers, startOffset, camera]);
+
+  // 2. CLICK-BASED RETURN LOGIC
+  useEffect(() => {
+    if (activeId !== null) {
+      // User clicked a feather! Stop applying scroll updates directly.
+      hasOpened.current = true;
+      isReturning.current = false;
+    } else if (activeId === null && hasOpened.current && mountFeathers) {
+      // User closed the feather! Glide back to wherever the scroll proxy is NOW.
+      isReturning.current = true;
+
+      // Fly Position back to Scroll Proxy
+      gsap.to(camera.position, {
+        x: scrollProxy.current.x,
+        y: scrollProxy.current.y,
+        z: scrollProxy.current.z,
+        duration: 1.5,
+        ease: "expo.inOut",
+        overwrite: "auto",
+        onComplete: () => {
+          isReturning.current = false;
+        }
+      });
+
+      // Reset Rotation 
+      gsap.to(camera.rotation, {
+        x: 0, y: 0, z: 0,
+        duration: 1.5,
+        ease: "expo.inOut",
+        overwrite: "auto"
+      });
+    }
+  }, [activeId, mountFeathers, camera]);
 
   return null;
 };
@@ -62,6 +116,7 @@ const MainCanvas = () => {
   const [transformProgress, setTransformProgress] = useState(0);
   const [splashProgress, setSplashProgress] = useState(0);
 
+  // States for Feathers, Burst, and Click Target
   const [activeId, setActiveId] = useState<number | null>(null);
   const [focusTarget, setFocusTarget] = useState<THREE.Vector3 | null>(null);
   const [allBubblesReady, setAllBubblesReady] = useState(false);
@@ -73,8 +128,6 @@ const MainCanvas = () => {
   const feather3Ref = useRef<any>(null);
 
   const [swanOpacity, setSwanOpacity] = useState(1);
-  
-  // 🚀 NEW: States for the tiny ending swan
   const [mountEndSwan, setMountEndSwan] = useState(false);
   const [endSwanOpacity, setEndSwanOpacity] = useState(0);
 
@@ -96,6 +149,12 @@ const MainCanvas = () => {
       };
     }
   }, []);
+
+  // 🚀 TRIGGER ZOOM + PANEL
+  const handleBubbleClick = (id: number, target: THREE.Vector3) => {
+    setActiveId(id);
+    setFocusTarget(new THREE.Vector3(target.x + 3.5, target.y, target.z + 8.0));
+  };
 
   useGSAP(() => {
     if (!isLoaded || images.length === 0) return;
@@ -142,7 +201,6 @@ const MainCanvas = () => {
           }
 
           const waterMountThreshold = 0.83; 
-          // 🚀 FIX: Removed the early unmount bug (raw < 0.98) so it doesn't snap!
           if (raw >= waterMountThreshold) {
             setMountWater(true);
           } else {
@@ -159,15 +217,12 @@ const MainCanvas = () => {
           const sProg = THREE.MathUtils.clamp((currentScroll - landStart) / (landEnd - landStart), 0, 1);
           setSwanProgress(sProg);
 
-          // 🚀 NEW: The Swan Returns Logic
-         // 🚀 NEW: The Swan Returns Logic
           if (currentScroll >= 13900) {
             setMountEndSwan(true);
           } else {
             setMountEndSwan(false);
           }
           
-          // 🚀 CHANGE THIS: Match the exact 0.05 to 0.5 timing from the water shader
           const endSwanFade = THREE.MathUtils.smoothstep(sProg, 0.05, 0.50);
           setEndSwanOpacity(endSwanFade);
 
@@ -223,7 +278,7 @@ const MainCanvas = () => {
             <ambientLight intensity={0.5} />
             <Environment preset="city" />             
 
-             <CameraZoomController mountFeathers={mountFeathers} startOffset={11680} />
+             <CameraZoomController mountFeathers={mountFeathers} activeId={activeId} startOffset={11680} />
             
             {mount3D && (
                 <group>
@@ -245,29 +300,20 @@ const MainCanvas = () => {
             {mountFeathers && (
               <group>
                 <CameraFocusController target={focusTarget} enabled={!!focusTarget} />
-                <NaturalFeather id={5} variant="mid-drift" startPos={[-11.0, 12, 1]} targetPos={[-17.0, 2.5, 1]} started={true} delay={0.8} activeId={activeId} burstAll={burstAll}  allBubblesReady={allBubblesReady} startOffset={11680} />
-                <NaturalFeather id={2} variant="small-drag" startPos={[-6.5, 14, -2]} targetPos={[-16.5, -19.0, -2]} started={true} delay={0.6} activeId={activeId} burstAll={burstAll}  allBubblesReady={allBubblesReady} startOffset={11680} />
-                
-                {/* 🚀 CRITICAL FIX: The missing ref is now attached here! */}
-                <NaturalFeather ref={feather3Ref} id={3} variant="upper-pendulum" startPos={[-2.0, 10, -3]} targetPos={[7.0, 5.0, -3]} started={true} delay={0.3} activeId={activeId} burstAll={burstAll}  allBubblesReady={allBubblesReady} startOffset={11680} />
-                
-                <NaturalFeather id={1} variant="main" startPos={[2.5, 16, 0]} targetPos={[2.5, -10.0, 0]} started={true} activeId={activeId} burstAll={burstAll}  allBubblesReady={allBubblesReady} startOffset={11680} />
-                <NaturalFeather id={4} variant="side-roll-upper" startPos={[7.0, 12, -1]} targetPos={[30.0, -4.0, -1]} started={true} delay={0.5} activeId={activeId} burstAll={burstAll}  allBubblesReady={allBubblesReady} startOffset={11680} />
-                <NaturalFeather id={6} variant="high-drag-zig" startPos={[11.5, 18, 0]} targetPos={[17.5, -20.0, 0]} started={true} delay={0.2} activeId={activeId} burstAll={burstAll}  allBubblesReady={allBubblesReady} startOffset={11680} />
+                <NaturalFeather id={5} variant="mid-drift" startPos={[-11.0, 12, 1]} targetPos={[-17.0, 2.5, 1]} started={true} delay={0.8} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} />
+                <NaturalFeather id={2} variant="small-drag" startPos={[-6.5, 14, -2]} targetPos={[-16.5, -19.0, -2]} started={true} delay={0.6} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} />
+                <NaturalFeather ref={feather3Ref} id={3} variant="upper-pendulum" startPos={[-2.0, 10, -3]} targetPos={[7.0, 5.0, -3]} started={true} delay={0.3} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} />
+                <NaturalFeather id={1} variant="main" startPos={[2.5, 16, 0]} targetPos={[2.5, -10.0, 0]} started={true} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} />
+                <NaturalFeather id={4} variant="side-roll-upper" startPos={[7.0, 12, -1]} targetPos={[30.0, -4.0, -1]} started={true} delay={0.5} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} />
+                <NaturalFeather id={6} variant="high-drag-zig" startPos={[11.5, 18, 0]} targetPos={[17.5, -20.0, 0]} started={true} delay={0.2} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} />
               </group>
             )}
 
-           {/* 🚀 THE GHOST SWAN (Upside down reflection) */}
-           {/* 🚀 THE GHOST SWAN (Upside down reflection) */}
             {mountEndSwan && (
               <group
-                // 🚀 FIXED: The feather lands at Y: 5.0, so the swan must be at Y: 4.8!
-                position={[5.0, -3.5, -3.0]} 
-                
+                 position={[6.0, -5.5, -3.0]} 
                 rotation={[Math.PI,Math.PI/40, 0]}   
-                
-                // Set to a safe, visible scale so you can see it and adjust later
-                scale={0.22}               
+                scale={0.32}                        
               >
                 <SwanModel 
                   scrollProgress={0.0}     
@@ -278,8 +324,6 @@ const MainCanvas = () => {
                 />
               </group>
             )}
-
-          
           </Suspense>
         </Canvas>
       </div>
@@ -287,7 +331,17 @@ const MainCanvas = () => {
       <div ref={logoRef} className="absolute z-30 pointer-events-none" style={{ visibility: "hidden" }}>
         <img src="assets/logo/aldovialogo.svg" alt="Logo" className="w-full h-auto brightness-0 invert" />
       </div>
-  </div>
+
+      {/* 🚀 THE PANEL */}
+      <RoomDetailsPanel 
+        activeId={activeId} 
+        content={activeId ? roomData[activeId] : null} 
+        onClose={() => { 
+          setActiveId(null); 
+          setFocusTarget(null); 
+        }} 
+      />   
+    </div>
   );
 };
 

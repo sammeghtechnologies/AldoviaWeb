@@ -20,13 +20,18 @@ const NaturalFeather = forwardRef(({
   const localGroupRef = useRef<THREE.Group>(null!);
   const groupRef = ref || localGroupRef; 
   const rotateRef = useRef<THREE.Group>(null!);
+  
+  // 🚀 NEW: Inner group strictly for mouse interaction
+  const innerRotateRef = useRef<THREE.Group>(null!); 
   const bubbleGroupRef = useRef<THREE.Group>(null!); 
   const rotTimelineRef = useRef<gsap.core.Timeline | null>(null);
 
   const [showBurst, setShowBurst] = useState(false);
-  const [rotation, setRotation] = useState([0, 0, 0]);
+  
+  // 🚀 DRAG STATE (Moved to refs for better 60fps performance without re-renders)
   const isDragging = useRef(false);
   const previousPointer = useRef({ x: 0, y: 0 });
+  const targetDragRot = useRef({ x: 0, y: 0 });
 
   const isBurst = activeId === id; 
   const wasClicked = useRef(false);
@@ -54,69 +59,62 @@ const NaturalFeather = forwardRef(({
     }
   };
 
-  // ✅ HANDLERS FOR MOUSE ROTATION
+  // 🚀 UPDATED HANDLERS FOR MOUSE ROTATION (Now works on ALL feathers)
   const handlePointerDown = (e: any) => {
-    if (!isBurst) return;
     e.stopPropagation();
     isDragging.current = true;
     previousPointer.current = { x: e.clientX, y: e.clientY };
+    document.body.style.cursor = "grabbing";
   };
 
   const handlePointerUp = () => {
     isDragging.current = false;
+    document.body.style.cursor = "auto";
   };
 
   const handlePointerMove = (e: any) => {
-    if (!isDragging.current || !isBurst) return;
+    if (!isDragging.current) return;
 
     const deltaX = e.clientX - previousPointer.current.x;
     const deltaY = e.clientY - previousPointer.current.y;
 
-    setRotation((prev) => [
-      prev[0] + deltaY * 0.01, 
-      prev[1] + deltaX * 0.01, 
-      0
-    ]);
+    // Apply drag to target rotation
+    targetDragRot.current.x += deltaY * 0.01;
+    targetDragRot.current.y += deltaX * 0.01;
 
     previousPointer.current = { x: e.clientX, y: e.clientY };
   };
 
-  // Inside NaturalFeather.tsx
-useEffect(() => {
-  let timer: any;
-  
-  if (isBurst) {
-    // 💥 BURST LOGIC
-    wasClicked.current = true;
-    setShowBurst(true);
-    if (bubbleGroupRef.current) {
-      // Scale down before hiding to keep it smooth
-      gsap.to(bubbleGroupRef.current.scale, { 
-        x: 0, y: 0, z: 0, 
-        duration: 0.3, 
-        onComplete: () => { bubbleGroupRef.current.visible = false; }
-      });
-    }
-  } else {
-    // 🫧 RE-WRAP LOGIC (When panel closes)
-    setShowBurst(false);
+  useEffect(() => {
+    let timer: any;
     
-    if (wasClicked.current) {
+    if (isBurst) {
+      wasClicked.current = true;
+      setShowBurst(true);
       if (bubbleGroupRef.current) {
-        bubbleGroupRef.current.visible = true;
-        // Reset scale and animate it back up
-        gsap.set(bubbleGroupRef.current.scale, { x: 0, y: 0, z: 0 });
         gsap.to(bubbleGroupRef.current.scale, { 
-          x: 1, y: 1, z: 1, 
-          duration: 1.2, 
-          ease: "elastic.out(1, 0.75)" // Gives it a nice "bouncy" wrap feel
+          x: 0, y: 0, z: 0, 
+          duration: 0.3, 
+          onComplete: () => { bubbleGroupRef.current.visible = false; }
         });
       }
-      wasClicked.current = false;
+    } else {
+      setShowBurst(false);
+      if (wasClicked.current) {
+        if (bubbleGroupRef.current) {
+          bubbleGroupRef.current.visible = true;
+          gsap.set(bubbleGroupRef.current.scale, { x: 0, y: 0, z: 0 });
+          gsap.to(bubbleGroupRef.current.scale, { 
+            x: 1, y: 1, z: 1, 
+            duration: 1.2, 
+            ease: "elastic.out(1, 0.75)" 
+          });
+        }
+        wasClicked.current = false;
+      }
     }
-  }
-  return () => clearTimeout(timer);
-}, [isBurst, burstAll]);
+    return () => clearTimeout(timer);
+  }, [isBurst, burstAll]);
 
   useLayoutEffect(() => {
     const applyMaterialStyle = (mat: any) => {
@@ -135,10 +133,10 @@ useEffect(() => {
     applyMaterialStyle(nodes?.Cylinder021?.material);
   }, [materials, nodes]);
 
-  useFrame((state) => {
+  useFrame(() => {
     if (!started) return;
 
-    // Pause GSAP when active to allow manual rotation
+    // Pause GSAP when it is the main active burst feather
     if (isBurst) {
       if (rotTimelineRef.current && !rotTimelineRef.current.paused()) {
         rotTimelineRef.current.pause();
@@ -149,9 +147,17 @@ useEffect(() => {
       }
     }
     
-    if (isBurst && rotateRef.current) {
-      rotateRef.current.rotation.x = THREE.MathUtils.lerp(rotateRef.current.rotation.x, rotation[0], 0.1);
-      rotateRef.current.rotation.y = THREE.MathUtils.lerp(rotateRef.current.rotation.y, rotation[1], 0.1);
+    // 🚀 THE MAGIC: Lerp the inner rotation based on mouse drag
+    if (innerRotateRef.current) {
+      // If we aren't dragging, decay the target rotation back to 0 (This is the "snap back" effect)
+      if (!isDragging.current) {
+        targetDragRot.current.x = THREE.MathUtils.lerp(targetDragRot.current.x, 0, 0.05);
+        targetDragRot.current.y = THREE.MathUtils.lerp(targetDragRot.current.y, 0, 0.05);
+      }
+
+      // Smoothly apply the rotation to the mesh
+      innerRotateRef.current.rotation.x = THREE.MathUtils.lerp(innerRotateRef.current.rotation.x, targetDragRot.current.x, 0.15);
+      innerRotateRef.current.rotation.y = THREE.MathUtils.lerp(innerRotateRef.current.rotation.y, targetDragRot.current.y, 0.15);
     }
   });
 
@@ -161,15 +167,12 @@ useEffect(() => {
     const entranceTl = gsap.timeline({
         scrollTrigger: { 
           trigger: document.body, 
-          // Start exactly where the swan leaves, and animate for 1000px
           start: `${startOffset}px top`, 
           end: `${startOffset + 1000}px top`, 
           scrub: 1.5 
         }
     });
 
-    // Start them high up to give them a long fall
-   // Start them high up to give them a long fall
     const dropHeight = startPos[1] + 15;
     gsap.set(groupRef.current.position, { y: dropHeight });
 
@@ -177,50 +180,39 @@ useEffect(() => {
     const rotTl = gsap.timeline();
     rotTimelineRef.current = rotTl;
 
-    // This locks them to their wide X coordinates
     const laneX = targetPos[0];
 
+    // ... (Keep your existing long GSAP variants exactly as they were) ...
     if (variant === "high-drag-zig") {
-        // Total duration increased from 6.5s to ~11s
         posTl.to(groupRef.current.position, { x: laneX + 1.0, y: THREE.MathUtils.lerp(dropHeight, targetPos[1], 0.25), duration: 2.0, ease: "power2.out" })
              .to(groupRef.current.position, { x: laneX - 1.0, y: THREE.MathUtils.lerp(dropHeight, targetPos[1], 0.5), duration: 3.5, ease: "sine.inOut" })
              .to(groupRef.current.position, { x: laneX + 0.8, y: THREE.MathUtils.lerp(dropHeight, targetPos[1], 0.75), duration: 3.0, ease: "sine.inOut" })
              .to(groupRef.current.position, { x: laneX, y: targetPos[1], duration: 2.5, ease: "power2.inOut" });
         rotTl.to(rotateRef.current.rotation, { x: Math.PI * 0.2, y: Math.PI * 6, z: Math.PI / 1.6, duration: 15, ease: "power1.out" });
-        
     } else if (variant === "mid-drift") {
-      // Total duration increased from 7s to 12s
       posTl.to(groupRef.current.position, { x: laneX - 1.0, y: THREE.MathUtils.lerp(dropHeight, targetPos[1], 0.3), duration: 2.5, ease: "power2.out" })
            .to(groupRef.current.position, { x: laneX + 1.0, y: THREE.MathUtils.lerp(dropHeight, targetPos[1], 0.6), duration: 5.0, ease: "sine.inOut" })
            .to(groupRef.current.position, { y: targetPos[1], x: laneX, duration: 4.5, ease: "power1.inOut" });
       rotTl.to(rotateRef.current.rotation, { x: "+=" + Math.PI * 2, y: Math.PI * 4, duration: 6.0, ease: "power1.inOut" })
            .to(rotateRef.current.rotation, { x: Math.PI / -6, z: -Math.PI / 8, duration: 6.0, ease: "power2.out" }, ">");
-           
     } else if (variant === "side-roll-upper") {
-      // Total duration increased from 7.8s to 13s
       posTl.to(groupRef.current.position, { x: laneX + 0.8, y: THREE.MathUtils.lerp(dropHeight, targetPos[1], 0.3), z: startPos[2], duration: 2.5, ease: "power2.out" })
            .to(groupRef.current.position, { x: laneX - 0.8, y: THREE.MathUtils.lerp(dropHeight, targetPos[1], 0.65), duration: 5.5, ease: "sine.inOut" })
            .to(groupRef.current.position, { y: targetPos[1], x: laneX, duration: 5.0, ease: "power1.inOut" });
       rotTl.to(rotateRef.current.rotation, { x: Math.PI / 3, y: Math.PI * 0.5, z: Math.PI * 0.4, duration: 15, ease: "power2.out" });
-      
     } else if (variant === "upper-pendulum") {
-      // Total duration increased from 9s to 14.5s
       posTl.to(groupRef.current.position, { x: laneX - 1.0, y: THREE.MathUtils.lerp(dropHeight, targetPos[1], 0.3), z: startPos[2] - 1.5, duration: 2.5, ease: "power2.out" })
            .to(groupRef.current.position, { x: laneX + 1.0, y: THREE.MathUtils.lerp(dropHeight, targetPos[1], 0.6), duration: 4.0, ease: "sine.inOut" })
            .to(groupRef.current.position, { x: laneX - 0.5, y: THREE.MathUtils.lerp(dropHeight, targetPos[1], 0.8), duration: 4.0, ease: "sine.inOut" })
            .to(groupRef.current.position, { y: targetPos[1], x: laneX, duration: 4.0, ease: "slow(0.5, 0.8, false)" });
       rotTl.to(rotateRef.current.rotation, { x: Math.PI / 1.8, y: Math.PI * 2.2, z: Math.PI / 2.8, duration: 16, ease: "power2.out" });
-      
     } else if (variant === "small-drag") {
-      // Total duration increased from 12s to 18s
       posTl.to(groupRef.current.position, { x: laneX - 1.2, y: THREE.MathUtils.lerp(dropHeight, targetPos[1], 0.2), z: startPos[2] + 1, duration: 3.0, ease: "power1.out" })
            .to(groupRef.current.position, { x: laneX + 1.2, y: THREE.MathUtils.lerp(dropHeight, targetPos[1], 0.5), duration: 5.0, ease: "sine.inOut" })
            .to(groupRef.current.position, { x: laneX - 1.0, y: THREE.MathUtils.lerp(dropHeight, targetPos[1], 0.8), duration: 5.0, ease: "sine.inOut" })
            .to(groupRef.current.position, { x: laneX, y: targetPos[1], duration: 5.0, ease: "power1.inOut" });
       rotTl.to(rotateRef.current.rotation, { x: Math.PI * 0.15, z: Math.PI / 2, y: Math.PI * 4, duration: 18, ease: "sine.inOut" });
-      
     } else {
-        // Main variant: Total duration increased from ~10s to 17s
         posTl.to(groupRef.current.position, { x: laneX + 1.2, y: THREE.MathUtils.lerp(dropHeight, targetPos[1], 0.25), z: startPos[2] - 2, duration: 2.0, ease: "power2.out" })
              .to(groupRef.current.position, { x: laneX - 1.2, y: THREE.MathUtils.lerp(dropHeight, targetPos[1], 0.5), duration: 5.0, ease: "sine.inOut" })
              .to(groupRef.current.position, { x: laneX + 1.2, y: THREE.MathUtils.lerp(dropHeight, targetPos[1], 0.75), duration: 5.0, ease: "sine.inOut" })
@@ -235,7 +227,6 @@ useEffect(() => {
         const bubbleTl = gsap.timeline({
             scrollTrigger: { 
               trigger: document.body, 
-              // Shift the bubble reveal to happen during the fall
               start: `${startOffset + 900}px top`, 
               end: `${startOffset + 100}px top`, 
               scrub: 1.5 
@@ -299,32 +290,31 @@ useEffect(() => {
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerLeave={handlePointerUp}
+      onPointerOver={() => { if (!isDragging.current) document.body.style.cursor = "grab"; }}
       onClick={(e) => { 
-  e.stopPropagation(); 
-  const sY = window.scrollY;
+        e.stopPropagation(); 
+        const sY = window.scrollY;
+        const isVisibleOnScreen = sY > (startOffset + 500); 
 
-  // ✅ NEW CONDITION: Allow clicking 500px after they start appearing
-  // This ensures they are visible on screen before interaction is allowed.
-  const isVisibleOnScreen = sY > (startOffset + 500); 
-
-  if (isVisibleOnScreen && allBubblesReady && activeId !== id) {
-    const worldPos = new THREE.Vector3();
-    groupRef.current.getWorldPosition(worldPos);
-    
-    // This sends the data to handleBubbleClick in MainCanvas.tsx
-    onBubbleClick(id, worldPos); 
-  }
-}}
+        if (isVisibleOnScreen && allBubblesReady && activeId !== id) {
+          const worldPos = new THREE.Vector3();
+          groupRef.current.getWorldPosition(worldPos);
+          onBubbleClick(id, worldPos); 
+        }
+      }}
     >
+      {/* GSAP Controls this outer group */}
       <group ref={rotateRef}>
         <Center>
-            <group scale={getFeatherScale()}> 
+            {/* 🚀 Mouse drag controls this INNER group */}
+            <group ref={innerRotateRef} scale={getFeatherScale()}> 
               <mesh geometry={nodes.Cylinder021.geometry} material={materials["Material.006"]} rotation={[-0.566, 0.458, 0.274]} />
               <mesh geometry={nodes.Mesh002.geometry} material={nodes.Mesh002.material} rotation={[0, 0.529, 0]} />
               <mesh geometry={nodes.Mesh003.geometry} material={nodes.Mesh003.material} rotation={[0, 0.529, 0]} />
             </group>
         </Center>
       </group>
+      
       {showBurst && <BurstParticles active={showBurst} radius={getBubbleRadius()} />}
       <group ref={bubbleGroupRef} scale={0}>
         <Suspense fallback={null}><FloatBubble scale={1} radius={getBubbleRadius()} isBurst={false} /></Suspense>
