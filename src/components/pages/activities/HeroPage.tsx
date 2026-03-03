@@ -57,6 +57,26 @@ const ActivitiesHeroPage: React.FC = () => {
           ],
         },
         {
+          title: "Pickleball",
+          subtitle: "Fast-paced paddle sport action",
+          backgroundImage: "/assets/pages/activities/pickleball/pickleball.jpg",
+          images: [
+            "/assets/pages/activities/pickleball/pickleball.webp",
+            "/assets/pages/activities/pickleball/pickleball.webp",
+            "/assets/pages/activities/pickleball/pickleball.webp",
+            "/assets/pages/activities/pickleball/pickleball.webp",
+            "/assets/pages/activities/pickleball/pickleball.webp",
+            "/assets/pages/activities/pickleball/pickleball.webp",
+          ],
+          description:
+            "Enjoy exciting pickleball matches on a well-maintained court designed for quick reflexes, strategic shots, and engaging rallies. Perfect for beginners and seasoned players alike.",
+          whatIncludes: [
+            "Dedicated pickleball court access",
+            "Singles and doubles play options",
+            "Recreational and friendly match setup",
+          ],
+        },
+        {
           title: "Billiards",
           subtitle: "Classic precision gameplay",
           backgroundImage: "/assets/pages/activities/billiards/billiards.jpg",
