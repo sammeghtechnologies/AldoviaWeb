@@ -220,11 +220,13 @@ export const SwanModel = ({
   scrollProgress,
   opacity = 1,
   isReflection = false,
+  clipY,
   transformProgress,
 }: {
   scrollProgress: number;
   opacity?: number;
   isReflection?: boolean;
+  clipY?: number;
   transformProgress: number;
 }) => {
   const group = useRef<THREE.Group>(null);
@@ -238,38 +240,42 @@ export const SwanModel = ({
   const targetCamY = useRef(0); // Tracks desired camera height
   const [targetRotY, setTargetRotY] = useState(-Math.PI / 160);
 
+  const clipPlane = useMemo(() => {
+    if (clipY !== undefined) {
+      return new THREE.Plane(new THREE.Vector3(0, -1, 0), clipY);
+    }
+    return null;
+  }, [clipY]);
+
+  const materialsRef = useRef<THREE.Material[]>([]);
+
   useLayoutEffect(() => {
-  scene.traverse((child: any) => {
-    if (child.isMesh) {
-      child.castShadow = true;
-      child.receiveShadow = true;
+    materialsRef.current = []; // Clear array on mount
+    scene.traverse((child: any) => {
+      if (child.isMesh && child.material) {
+        child.castShadow = true;
+        child.receiveShadow = true;
 
-      if (child.material) {
-        // 1. Render both sides of the geometry
         child.material.side = THREE.DoubleSide; 
-
-        // 2. Fix Transparency Sorting Glitch
-        // AlphaTest prevents the "invisible" parts of the texture 
-        // from blocking the objects behind them.
-        child.material.alphaTest = 0.5; 
-
-        // 3. Ensure proper depth drawing
-        // This forces the mesh to write to the depth buffer,
-        // making the tail visible even through other transparent layers.
+        // Lower alpha test for the reflection so the fade is buttery smooth
+        child.material.alphaTest = isReflection ? 0.01 : 0.5; 
+        
         child.material.depthWrite = true;
         child.material.depthTest = true;
-        child.material.opacity = opacity;
-
-        // Existing styling
+        child.material.transparent = true; 
+        
         child.material.roughness = 0.4;
         child.material.metalness = 0.0;
         child.material.envMapIntensity = 1.5;
+        if (clipPlane) {
+          child.material.clippingPlanes = [clipPlane];
+        }
         
         child.material.needsUpdate = true;
+        materialsRef.current.push(child.material);
       }
-    }
-  });
-}, [scene]);
+    });
+  }, [scene, isReflection, clipPlane]);
 
   useEffect(() => {
     const action = actions["rigAction"] || actions[Object.keys(actions)[0]];
@@ -294,7 +300,11 @@ export const SwanModel = ({
       group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, targetRotY, 0.1);
     }
 
-    // 🚀 ONLY run this if it's the main intro swan
+    // 🚀 2. BULLETPROOF OPACITY UPDATE (Updates instantly with scroll)
+    materialsRef.current.forEach((mat) => {
+      mat.opacity = opacity;
+    });
+
     if (!isReflection) {
       camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetCamY.current, 0.05);
       camera.lookAt(0, -5, 0); 

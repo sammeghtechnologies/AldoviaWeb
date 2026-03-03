@@ -15,6 +15,8 @@ gsap.registerPlugin(ScrollTrigger);
 
 const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
+
+
 const CameraZoomController = ({ mountFeathers, startOffset }: { mountFeathers: boolean, startOffset: number }) => {
   const { camera } = useThree();
 
@@ -158,12 +160,15 @@ const MainCanvas = () => {
           setSwanProgress(sProg);
 
           // 🚀 NEW: The Swan Returns Logic
+         // 🚀 NEW: The Swan Returns Logic
           if (currentScroll >= 13900) {
             setMountEndSwan(true);
           } else {
             setMountEndSwan(false);
           }
-          const endSwanFade = THREE.MathUtils.smoothstep(sProg, 0.26, 0.60);
+          
+          // 🚀 CHANGE THIS: Match the exact 0.05 to 0.5 timing from the water shader
+          const endSwanFade = THREE.MathUtils.smoothstep(sProg, 0.05, 0.50);
           setEndSwanOpacity(endSwanFade);
 
           if (raw >= 0.75) {
@@ -211,7 +216,7 @@ const MainCanvas = () => {
       <canvas ref={frameCanvasRef} className="absolute inset-0 z-10 w-full h-full object-cover" />
 
       <div ref={canvasWrapperRef} className="absolute inset-0 z-20 overflow-hidden">
-        <Canvas gl={{ antialias: true, toneMapping: THREE.NoToneMapping, powerPreference: "high-performance" }}>
+        <Canvas gl={{ antialias: true, toneMapping: THREE.NoToneMapping, powerPreference: "high-performance" , localClippingEnabled: true}}>
           <color attach="background" args={["#000000"]} />
           <Suspense fallback={null}>
             <PerspectiveCamera makeDefault position={[0, 0, 70]} fov={isMobile ? 65 : 40} />
@@ -252,21 +257,29 @@ const MainCanvas = () => {
               </group>
             )}
 
-            {/* 🚀 NEW: The tiny reflection swan mounting at the end */}
+           {/* 🚀 THE GHOST SWAN (Upside down reflection) */}
+           {/* 🚀 THE GHOST SWAN (Upside down reflection) */}
             {mountEndSwan && (
               <group
-                position={[7.0, 0.85, -3.0]} 
-                rotation={[Math.PI, 0, 0]} 
-                scale={0.0015} 
+                // 🚀 FIXED: The feather lands at Y: 5.0, so the swan must be at Y: 4.8!
+                position={[5.0, -3.5, -3.0]} 
+                
+                rotation={[Math.PI,Math.PI/40, 0]}   
+                
+                // Set to a safe, visible scale so you can see it and adjust later
+                scale={0.22}               
               >
                 <SwanModel 
-                  scrollProgress={1.0}     
-                  transformProgress={1.0} 
-                  opacity={endSwanOpacity} 
-                  isReflection={true} 
+                  scrollProgress={0.0}     
+                  transformProgress={0.0} 
+                  opacity={endSwanOpacity}   
+                  isReflection={true}  
+                  clipY={-0.01}      
                 />
               </group>
             )}
+
+          
           </Suspense>
         </Canvas>
       </div>
