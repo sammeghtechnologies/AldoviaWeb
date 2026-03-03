@@ -19,10 +19,11 @@ const SplitActionButtons: React.FC<SplitActionButtonsProps> = ({
   visibilityClassName = "lg:!hidden",
 }) => {
   const hasSecondaryButton = Boolean(secondaryLabel);
+  const isPlanYourEventSecondary = secondaryLabel === "Plan Your Event";
   return (
     <div
     className={`!flex !flex-row !items-center !justify-between !gap-3 !w-full md:!w-[492px] ${visibilityClassName}
-    !bg-[rgba(73, 72, 72, 0.55)] 
+    !bg-[rgba(226, 29, 29, 0.55)] 
     backdrop-blur-[300px]
     !shadow-[0_-4px_20px_0_rgba(0,0,0,0.08)] 
     ${className}`}
@@ -46,7 +47,11 @@ const SplitActionButtons: React.FC<SplitActionButtonsProps> = ({
         <button
           type="button"
           onClick={onSecondaryClick}
-          className="!flex-1 !px-4 md:!px-7 !py-2.5 !rounded-full !bg-transparent !text-[#FFFFFF] !border !border-[#FFFFFF] !text-[13px] md:!text-[16px] !font-medium !leading-[20px] !text-center"
+          className={`!flex-1 !px-4 md:!px-7 !py-2.5 !rounded-full !text-[#FFFFFF] !border !border-[#FFFFFF] !text-[13px] md:!text-[16px] !font-medium !leading-[20px] !text-center ${
+            isPlanYourEventSecondary
+              ? "!bg-white/12 backdrop-blur-md"
+              : "!bg-transparent"
+          }`}
         >
           <span className="inline-flex items-center gap-2">
             {secondaryLabel === "Download Brochure" && <Download className="h-4 w-4" />}

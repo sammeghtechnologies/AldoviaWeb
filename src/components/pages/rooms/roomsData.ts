@@ -62,7 +62,7 @@ export const roomsData: RoomData[] = [
       '/assets/rooms/deluxe-room/s2.jpg',
       '/assets/rooms/deluxe-room/s3.jpg'
     ],
-    description: 'With its muted interiors, soft headboard and evocative ceiling accents, the Deluxe Room exudes an air of sophistication.',
+    description: 'Warm wood tones, muted interiors, and ceiling accents that catch the light just so. The Deluxe Room is Aldovia at its most considered: not the largest room, but the one where every detail has been thought through. A king bed, space for a small family, and the kind of quiet that makes forty minutes from Bangalore feel like a different latitude entirely.',
     occupancy: '2 adults + 2 children',
     bedType: 'King bed'
   },
@@ -89,8 +89,8 @@ export const roomsData: RoomData[] = [
       '/assets/rooms/luxury-room/s2.jpg',
       '/assets/rooms/luxury-room/s3.jpg'
     ],
-    description: 'A seamless blend of comfort and style, the Luxury Room offers expansive space and premium, carefully curated amenities.',
-    occupancy: '2 adults + 1 child',
+    description: 'A step wider, a touch more generous. The Luxury Room takes everything the Deluxe offers and gives it breathing space. Upgraded furnishings, a larger work area, and a bathroom that feels like it was designed for staying in, not just passing through. For guests who want comfort without ceremony.',
+    occupancy: '2 adults + 2 child',
     bedType: 'King bed'
   },
   {
@@ -116,7 +116,7 @@ export const roomsData: RoomData[] = [
       '/assets/rooms/1-bedroom-suite/s2.jpg',
       '/assets/rooms/1-bedroom-suite/s3.jpg'
     ],
-    description: 'Experience unparalleled comfort in our spacious 1 Bedroom Suite, featuring a beautifully separated living and relaxation area.',
+    description: 'A step wider, a touch more generous. The Luxury Room takes everything the Deluxe offers and gives it breathing space. Upgraded furnishings, a larger work area, and a bathroom that feels like it was designed for staying in, not just passing through. For guests who want comfort without ceremony.',
     occupancy: '2 adults + 2 children',
     bedType: 'King bed'
   },
@@ -144,9 +144,9 @@ export const roomsData: RoomData[] = [
       '/assets/rooms/2-bedroom-suite/s2.jpg',
       '/assets/rooms/2-bedroom-suite/s3.jpg'
     ],
-    description: 'Perfect for families or groups, this suite offers two distinct bedrooms, a grand living area, and uncompromising luxury.',
+    description: 'A separate living area changes everything. The 1 Bedroom Suite gives you a proper room to sit in after the conference, a space to host a quiet drink, a place to spread out without feeling like you are living on the bed. One bedroom, one living room, and the sense that someone thought about how you actually use a hotel room.',
     occupancy: '4 adults + 2 children',
-    bedType: '2 King beds'
+    bedType: 'King bed + Twin beds'
   },
   {
     id: 'deluxe-suite',
@@ -172,7 +172,7 @@ export const roomsData: RoomData[] = [
       '/assets/rooms/deluxe-suite/s2.jpg',
       '/assets/rooms/deluxe-suite/s3.jpg'
     ],
-    description: 'Step into elevated elegance. The Deluxe Suite features upgraded furnishings and a perfectly appointed relaxation area.',
+    description: 'Where the suite category begins to feel like a private residence. The Deluxe Suite pairs a generous bedroom with a living room that can double as a workspace, a meeting point, or simply a place to watch the grounds from the window. Premium furnishings, upgraded amenities, and the kind of space that makes extending your stay an easy decision.Where the suite category begins to feel like a private residence. The Deluxe Suite pairs a generous bedroom with a living room that can double as a workspace, a meeting point, or simply a place to watch the grounds from the window. Premium furnishings, upgraded amenities, and the kind of space that makes extending your stay an easy decision.',
     occupancy: '2 adults + 2 children',
     bedType: 'King bed'
   },
@@ -200,8 +200,8 @@ export const roomsData: RoomData[] = [
       '/assets/rooms/executive-suite/s2.jpg',
       '/assets/rooms/executive-suite/s3.jpg'
     ],
-    description: 'Designed for the modern traveler, the Executive Suite blends functional space with top-tier comfort and panoramic views.',
-    occupancy: '2 adults + 1 child',
+    description: 'The best room in the house, and it knows it. The Executive Suite is for the guest who treats a hotel stay as an extension of how they live. An expansive living area, a master bedroom with every upgrade the property offers, a bathroom that borders on indulgent, and views that remind you why this resort sits where it does. For leaders, for celebrations, for people who understand that the room you stay in sets the tone for everything else.',
+    occupancy: '2 adults + 2 children',
     bedType: 'King bed'
   }
 ];

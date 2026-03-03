@@ -33,7 +33,7 @@ export interface RoomLayer {
          '/assets/rooms/deluxe-room/s2.jpg',
          '/assets/rooms/deluxe-room/s3.jpg'
        ],
-       description: 'With its muted interiors, soft headboard and evocative ceiling accents, the Deluxe Room exudes an air of sophistication.',
+       description: 'Warm wood tones, muted interiors, and ceiling accents that catch the light just so. The Deluxe Room is Aldovia at its most considered: not the largest room, but the one where every detail has been thought through. A king bed, space for a small family, and the kind of quiet that makes forty minutes from Bangalore feel like a different latitude entirely.',
        occupancy: '2 adults + 2 children',
        bedType: 'King bed'
      },

@@ -4,9 +4,7 @@ const AboutUs: React.FC = () => {
   const [showFullText, setShowFullText] = useState(false);
   const mobileTextRef = useRef<HTMLParagraphElement | null>(null);
   const [mobileHeights, setMobileHeights] = useState({ collapsed: 0, expanded: 0 });
-  const aboutText =
-    "Led by the visionary entrepreneurs Mr. Ronald Colaco and Mr. Vivek Kumar, Clarks Exotica has emerged as a premier destination for corporate and leisure travellers alike. The Management team is characterized by their unwavering commitment to excellence, passion for hospitality, and relentless pursuit of innovation. Drawing on their extensive experience in the hospitality industry, the team is responsible for setting the resort's strategic direction, and ensuring that the resort remains a leading destination for travellers from around the world. Under their able guidance and leadership, Clarks has established itself as a beacon of excellence in the industry.";
-
+  const aboutText  = "Set across 45 acres of landscaped grounds, just forty minutes from the heart of Bangalore, Aldovia Convention Resort & Spa began its life as Clarks Exotica, a name that served the property well for years. But properties, like the people who build them, evolve. And in January 2026, this evolution found its name.\n\nAldovia is not a rebrand in the cosmetic sense. It is a recalibration. Every space, every service, every experience has been reconsidered through a single lens: excellence, not as an aspiration, but as a standard. The Galaxy Grand Ballroom still seats three thousand. The grounds still stretch to the horizon. The kitchens still serve meals three times a day. What has changed is the intention behind all of it.\n\nToday, Aldovia is where Bangalore comes to celebrate. Weddings that take over the entire property. Conferences that bring five hundred people together under one roof. Family weekends that start with the pool and end with a meal nobody wants to finish. Corporate retreats where the offsite actually feels different from the office.\n\nTwelve event venues ranging from intimate boardrooms to a courtyard under the open sky. Three restaurants, each with their own identity. A spa that draws on Ayurvedic tradition without ignoring modern practice. An infinity pool that makes forty minutes from the city feel like forty hours.\n\nAnd behind all of it, a team that has been here long enough to know what works, and bold enough to change what did not.\n\nAldovia. Crafted In Excellence.";
   useEffect(() => {
     const measureHeights = () => {
       const node = mobileTextRef.current;
@@ -42,7 +40,7 @@ const AboutUs: React.FC = () => {
         </p> */}
 
         <h2 className="!mb-7 !mt-5 mx-auto max-w-4xl text-center text-[2rem] font-semibold leading-tight tracking-[0.01em] md:text-[3rem] lg:text-[3.4rem]">
-          A Legacy of Visionary Leadership
+        The Aldovia Story
         </h2>
 
         <div
