@@ -2,7 +2,7 @@ import AssetLoader from "./AssetLoader";
 import FeatherLoader from "./components/FeatherLoader";
 import { useLoader } from "./context/LoaderProvider";
 //import LandingPage from "./LandingPage";
-import TestLandingPage from "./testlandingpage";
+import TestLandingPage from "./TestLandingPage";
 
 const App = () => {
   const { ready, assets } = useLoader();
