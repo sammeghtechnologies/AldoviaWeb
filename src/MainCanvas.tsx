@@ -160,7 +160,7 @@ const MainCanvas = () => {
 
     const totalScroll = 16000;
     const centerLogoWidth = isMobile ? "280px" : "420px";
-    const cornerLogoWidth = isMobile ? "72px" : "120px";
+    const cornerLogoWidth = isMobile ? "56px" : "120px";
 
     gsap.set(logoRef.current, {
       autoAlpha: 0, scale: 0.8, top: "50%", left: "50%",
@@ -263,12 +263,12 @@ const MainCanvas = () => {
   return (
     <div ref={containerRef} className="relative w-full h-screen bg-black overflow-hidden">
       {showCornerActions && (
-        <div className="fixed top-12 right-6 z-[2147483647] flex items-center gap-5 pointer-events-none">
+        <div className="fixed top-8 right-4 md:top-12 md:right-6 z-[2147483647] flex items-center gap-3 md:gap-5 pointer-events-none">
          
           <button
             type="button"
             onClick={() => navigate("/home")}
-            className="group pointer-events-auto relative inline-flex items-center justify-center min-w-[180px] md:min-w-[180px] h-10 md:h-10 px-8 md:px-8 rounded-full bg-[#07090d] text-white text-[1em] !md:text-[1em] font-lust tracking-[0.06em] uppercase border-[2px] border-[var(--color-secondary)] shadow-[0_0_0_2px_#07090d] transition-all duration-300 overflow-hidden"
+            className="group pointer-events-auto relative inline-flex items-center justify-center min-w-[140px] md:min-w-[180px] h-8 md:h-10 px-5 md:px-8 rounded-full bg-[#07090d] text-white text-[0.82em] md:text-[1em] font-lust tracking-[0.05em] md:tracking-[0.06em] uppercase border-[2px] border-[var(--color-secondary)] shadow-[0_0_0_2px_#07090d] transition-all duration-300 overflow-hidden"
           >
             <span className="absolute inset-y-0 left-0 w-0 bg-[var(--color-secondary)] transition-all duration-500 ease-out group-hover:w-full" />
             <span className="relative z-10 !text-white transition-colors duration-300 group-hover:!text-[var(--color-primary)]">Book Now</span>
