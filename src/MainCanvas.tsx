@@ -156,6 +156,7 @@ const MainCanvas = () => {
 
     const totalScroll = 16000;
     const centerLogoWidth = isMobile ? "280px" : "420px";
+    const cornerLogoWidth = isMobile ? "72px" : "120px";
 
     gsap.set(logoRef.current, {
       autoAlpha: 0, scale: 0.8, top: "50%", left: "50%",
@@ -233,7 +234,7 @@ const MainCanvas = () => {
     tl.to(canvasWrapperRef.current, { autoAlpha: 1, filter: "blur(40px)", duration: 0.5 }, ">");
     tl.to(logoRef.current, { autoAlpha: 1, scale: 1, filter: "blur(0px)", duration: 0.5 }, "<");
     tl.to(frameCanvasRef.current, { autoAlpha: 0, duration: 0.5 }, "<");
-    tl.to(logoRef.current, { top: "37px", left: "48px", xPercent: 0, yPercent: 0, width: "56px", duration: 1.5, ease: "power2.inOut" }, ">");
+    tl.to(logoRef.current, { top: "37px", left: "48px", xPercent: 0, yPercent: 0, width: cornerLogoWidth, duration: 1.5, ease: "power2.inOut" }, ">");
     tl.to(canvasWrapperRef.current, { filter: "blur(0px)", duration: 1.5, ease: "power2.inOut" }, "<");
     tl.to({}, { duration: 4.0 });
     tl.to({}, { duration: 3.366 });
@@ -298,7 +299,7 @@ const MainCanvas = () => {
       </div>
 
       <div ref={logoRef} className="absolute z-30 pointer-events-none" style={{ visibility: "hidden" }}>
-        <img src="assets/logo/aldovialogo.svg" alt="Logo" className="w-full h-auto brightness-0 invert" />
+        <img src="assets/logo/beige-logo.svg" alt="Logo" className="w-full h-auto brightness-0 invert" />
       </div>
 
       <RoomDetailsPanel

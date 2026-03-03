@@ -103,7 +103,6 @@ const MenuSection = ({
 // ✅ FIX 3: Destructured introFinished prop to pass down to Logo_top
 const MenuFrame = ({
   masterTl,
-  introFinished,
   showBookNow = true,
   showTopLogo = true,
   forceTopBarBackground = false,
