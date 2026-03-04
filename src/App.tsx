@@ -1,8 +1,9 @@
+import { Suspense, lazy } from "react";
 import AssetLoader from "./AssetLoader";
 import FeatherLoader from "./components/FeatherLoader";
 import { useLoader } from "./context/LoaderProvider";
-//import LandingPage from "./LandingPage";
-import TestLandingPage from "./TestLandingPage";
+
+const TestLandingPage = lazy(() => import("./TestLandingPage"));
 
 const App = () => {
   const { ready, assets } = useLoader();
@@ -16,7 +17,11 @@ const App = () => {
       {/* <FeatherCursor/> */}
       {!ready && <AssetLoader />}
       {!ready && <FeatherLoader/>}
-      {ready && <TestLandingPage />}
+      {ready && (
+        <Suspense fallback={null}>
+          <TestLandingPage />
+        </Suspense>
+      )}
     </>
   );
 };

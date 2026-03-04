@@ -11,6 +11,10 @@ interface Props {
 }
 
 const HeroSection = ({ activeRoom, setActiveRoom }: Props) => {
+  const DESKTOP_SCENE_STYLE = {
+    width: '1340px',
+    height: '760px',
+  } as const;
   const roomItems = roomsData.map((room) => room.navLabel || room.title);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -92,7 +96,7 @@ const HeroSection = ({ activeRoom, setActiveRoom }: Props) => {
           </div>
 
           {/* Desktop view with original animation */}
-          <div className="hidden md:block absolute inset-0 w-full h-full">
+          <div className="hidden md:block absolute inset-0 w-full h-full overflow-hidden">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeRoom.id}
@@ -100,13 +104,22 @@ const HeroSection = ({ activeRoom, setActiveRoom }: Props) => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0, transition: { duration: 0.3 } }}
                 transition={{ duration: 0.4, ease: "easeInOut" }}
-                className="absolute inset-0 w-full h-full overflow-hidden"
+                className="absolute left-1/2 top-1/2 overflow-hidden -translate-x-1/2 -translate-y-1/2"
+                style={DESKTOP_SCENE_STYLE}
               >
                 {activeRoom.isStatic ? (
-                  <img src={activeRoom.staticImage} alt={activeRoom.title} className="w-full h-full object-cover" />
+                  <img
+                    src={activeRoom.staticImage}
+                    alt={activeRoom.title}
+                    className="h-full w-full max-w-none object-cover"
+                  />
                 ) : (
                   <>
-                    <img src={activeRoom.bgImage} alt="Background" className="absolute inset-0 w-full h-full object-cover" />
+                    <img
+                      src={activeRoom.bgImage}
+                      alt="Background"
+                      className="absolute inset-0 h-full w-full max-w-none object-cover"
+                    />
                     {activeRoom.layers?.map((layer) => (
                       <motion.img
                         key={layer.id}

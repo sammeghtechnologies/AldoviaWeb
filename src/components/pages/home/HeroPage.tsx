@@ -6,18 +6,50 @@ import HeroStats from "./HeroStats";
 import ScrollIndicator from "./ScrollIndicator";
 import MenuFrame from "../../MenuFrame/v2/MenuFrame";
 import DeferredSection from "../../sections/DeferredSection";
-import ExperienceSection from "../../sections/ExperienceSection";
-import LocationSection from "../../sections/LocationSection";
-import Footer from "../../sections/Footer";
-import SplitActionButtons from "../../ui/SplitActionButtons";
 
 const CarouselSection = lazy(() => import("../../sections/CarouselSection"));
 const ImmersiveSection = lazy(() => import("../../sections/ImmersiveSection"));
 const RoomsSection = lazy(() => import("../../sections/RoomsSection"));
+const ExperienceSection = lazy(() => import("../../sections/ExperienceSection"));
+const LocationSection = lazy(() => import("../../sections/LocationSection"));
+const Footer = lazy(() => import("../../sections/Footer"));
+const SplitActionButtons = lazy(() => import("../../ui/SplitActionButtons"));
 
 const HeroPage: React.FC = () => {
   const navigate = useNavigate();
   const [showStickyActions, setShowStickyActions] = React.useState(false);
+
+  React.useEffect(() => {
+    // Warm lazy chunks after initial render so first paint stays fast
+    // while reducing delay when users scroll into deferred sections.
+    const prefetch = () => {
+      void import("../../sections/CarouselSection");
+      void import("../../sections/ImmersiveSection");
+      void import("../../sections/RoomsSection");
+      void import("../../sections/ExperienceSection");
+      void import("../../sections/LocationSection");
+      void import("../../sections/Footer");
+      void import("../../ui/SplitActionButtons");
+    };
+
+    const idleCallback = (window as Window & {
+      requestIdleCallback?: (callback: () => void) => number;
+      cancelIdleCallback?: (id: number) => void;
+    }).requestIdleCallback;
+    const cancelIdleCallback = (window as Window & {
+      cancelIdleCallback?: (id: number) => void;
+    }).cancelIdleCallback;
+
+    if (idleCallback) {
+      const id = idleCallback(prefetch);
+      return () => {
+        if (cancelIdleCallback) cancelIdleCallback(id);
+      };
+    }
+
+    const timer = window.setTimeout(prefetch, 1200);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   React.useEffect(() => {
     const onScroll = () => {
@@ -110,10 +142,12 @@ const HeroPage: React.FC = () => {
           showStickyActions ? "!translate-y-0 !opacity-100" : "!translate-y-6 !opacity-0 !pointer-events-none"
         }`}
       >
-        <SplitActionButtons
-          onSecondaryClick={() => navigate("/venues")}
-          className="!w-full md:!w-[492px]"
-        />
+        <Suspense fallback={<div className="h-12 w-full md:w-[492px]" />}>
+          <SplitActionButtons
+            onSecondaryClick={() => navigate("/venues")}
+            className="!w-full md:!w-[492px]"
+          />
+        </Suspense>
       </div>
     </>
   );

@@ -9,7 +9,7 @@ const Footer: React.FC = () => {
 
 <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 right-[-12%] z-0 translate-y-[28%] bg-no-repeat opacity-10 md:opacity-[0.15]"
+        className="pointer-events-none absolute bottom-0 right-[-12%] z-0 translate-y-[10%] md:translate-y-[28%] bg-no-repeat opacity-10 md:opacity-[0.15]"
         style={{
           backgroundImage: "url('/assets/logo/logo-wet-earth.png')",
           backgroundSize: "min(64vw, 100vh)",

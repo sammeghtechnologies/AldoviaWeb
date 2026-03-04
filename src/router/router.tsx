@@ -1,10 +1,10 @@
 import { Suspense, lazy, useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router";
-import RoomsPage from "../components/pages/rooms/RoomsPage";
 
 const ProjectRoot = lazy(() => import("../ProjectRoot"));
 const Error404 = lazy(() => import("../404"));
 const HeroPage = lazy(() => import("../components/pages/home/HeroPage"));
+const RoomsPage = lazy(() => import("../components/pages/rooms/RoomsPage"));
 const VenuesHeroPage = lazy(() => import("../components/pages/venues/HeroPage"));
 const ActivitiesHeroPage = lazy(() => import("../components/pages/activities/HeroPage"));
 const DiningHeroPage = lazy(() => import("../components/pages/dining/HeroPage"));
