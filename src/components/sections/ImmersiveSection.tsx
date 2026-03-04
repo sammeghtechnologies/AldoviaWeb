@@ -29,13 +29,13 @@ const ImmersiveSection: React.FC = () => {
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute right-[-14%] top-[-7%] z-0 -translate-y-[22%] bg-no-repeat opacity-20 md:right-[-12.5%] md:-translate-y-[44%] md:opacity-[0.15]"
+        className="pointer-events-none absolute z-0 bg-no-repeat opacity-20 md:opacity-[0.15] right-[-18%] top-[-10%] -translate-y-[18%] sm:right-[-16%] sm:top-[-9%] sm:-translate-y-[20%] md:right-[-14%] md:top-[0%] md:-translate-y-[22%] lg:right-[-12%] lg:top-[2%] lg:-translate-y-[24%] [--logo-size:80vw] sm:[--logo-size:72vw] md:[--logo-size:64vw] lg:[--logo-size:58vw] xl:[--logo-size:54vw]"
         style={{
           backgroundImage: "url('/assets/logo/logo-wet-earth.png')",
-          backgroundSize: "min(64vw, 920px)",
+          backgroundSize: "var(--logo-size)",
           backgroundPosition: "right top",
-          width: "min(64vw, 920px)",
-          height: "min(64vw, 920px)",
+          width: "var(--logo-size)",
+          height: "var(--logo-size)",
         }}
       />
 

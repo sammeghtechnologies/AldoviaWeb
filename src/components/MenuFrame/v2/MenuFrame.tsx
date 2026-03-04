@@ -547,7 +547,7 @@ const MenuFrame = ({
           <div className="border-t border-white/10 mb-10 !p-3" />
           <div className="!mb-3">
             <MenuSection
-              title="Convention"
+              title="Convention Center"
               isOpen={openSection === "convention"}
               icons={icons}
               showToggleIcon={false}
