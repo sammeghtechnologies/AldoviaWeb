@@ -33,6 +33,7 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const shaderRef = useRef<any>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
+
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const baseRadius = isMobile ? 4.5 : 6.4;
 
@@ -46,14 +47,17 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
       const t = Math.max(0, splashProgress - delay);
       const duration = 1.0 - delay;
 
-      if (t === 0 || t >= duration) {
+      // FINISH EARLY: Multiplying by 1.4 makes it complete the lifecycle faster
+      const activeT = (t / duration) * 1.4;
+
+      if (t === 0 || activeT >= 1.0) {
         dummy.scale.set(0, 0, 0);
         dummy.updateMatrix();
         meshRef.current.setMatrixAt(i, dummy.matrix);
         continue;
       }
 
-      const activeT = t / duration;
+      // Exact original height curve (naturally scales to 0 at the end of the sine wave)
       const heightCurve = Math.sin(activeT * Math.PI);
       let height = heightCurve * (6.5 + layerIndex * 2.5);
 
@@ -80,11 +84,12 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
     meshRef.current.instanceMatrix.needsUpdate = true;
 
     if (shaderRef.current) {
-      shaderRef.current.uniforms.uProgress.value = splashProgress;
+      shaderRef.current.uniforms.uProgress.value = Math.min(1.0, splashProgress * 1.4);
     }
   });
 
   const onBeforeCompile = (shader: any) => {
+    // EXACT ORIGINAL SHADER. NO CUSTOM FADE HACKS.
     shaderRef.current = shader;
     shader.uniforms.uProgress = { value: 0.0 };
 
@@ -117,9 +122,9 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
       .replace(
         `void main() {`,
         `varying vec2 vMyUv;
-       varying vec3 vPos;
-       uniform float uProgress; 
-       void main() {
+         varying vec3 vPos;
+         uniform float uProgress; 
+         void main() {
       `
       )
       .replace(
@@ -127,8 +132,6 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
         `vec4 diffuseColor = vec4( diffuse, opacity );
        float angle = atan(vPos.z, vPos.x);
        
-       // --- HOLE CATEGORIZATION ---
-       // Use a pseudo-random hash based on angle to bucket holes
        float holeBucket = fract(sin(floor(angle * 8.0) * 12.9898) * 43758.5453);
        
        float tearNoise = sin(angle * 15.0 + uProgress * 5.0) * cos(vMyUv.y * 15.0 - uProgress * 5.0);
@@ -136,21 +139,18 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
 
        float holes = 0.0;
        float holeRims = 0.0;
-       float rimWidth = 0.04; // Tightened border for 3D look
+       float rimWidth = 0.04; 
 
        if (holeBucket < 0.3) {
-         // 30% DYNAMIC HOLES: Threshold moves with scroll
          float dynThreshold = mix(0.95, 0.45, uProgress);
          holes = smoothstep(dynThreshold, dynThreshold + 0.1, tearNoise);
          holeRims = smoothstep(dynThreshold - rimWidth, dynThreshold, tearNoise) * smoothstep(dynThreshold + 0.1, dynThreshold + 0.1 - rimWidth, tearNoise);
        } 
        else if (holeBucket < 0.4) {
-         // 10% STATIC HOLES: Fixed size
          float staticThreshold = 0.72;
          holes = smoothstep(staticThreshold, staticThreshold + 0.1, tearNoise);
          holeRims = smoothstep(staticThreshold - rimWidth, staticThreshold, tearNoise) * smoothstep(staticThreshold + 0.1, staticThreshold + 0.1 - rimWidth, tearNoise);
        }
-       // 60% REMOVED: holes remains 0.0
 
        float wave1 = sin(angle * 3.0);
        float wave2 = sin(angle * 7.0);
@@ -176,8 +176,6 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
        float weightGradient = mix(1.0, 0.5, vMyUv.y);
        float finalAlpha = (max(0.0, bodyAlpha * 0.25) + (heavyRim * 2.0) + (crownDrops * 2.5) + wallDrops) * bottomAlpha * weightGradient;
        
-       // --- 3D SPECULAR LOOK ---
-       // Use high RGB values (> 1.0) on the rims to simulate depth and light refraction
        vec3 waterTint = vec3(0.9, 0.96, 1.0);
        vec3 rimHighlight = vec3(1.6, 1.8, 2.0) * (holeRims + heavyRim * 0.5 + crownDrops);
        diffuseColor.rgb = waterTint + rimHighlight;
@@ -192,7 +190,7 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
       <cylinderGeometry args={[baseRadius * 1.05, baseRadius, 1, 64, 12, true]} />
       <meshPhysicalMaterial
         color="#eaf6ff"
-        transmission={0.92}
+        transmission={0.96}     
         thickness={2.0}
         ior={1.33}
         roughness={0.03}
@@ -200,11 +198,11 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
         clearcoat={1}
         clearcoatRoughness={0}
         envMapIntensity={3}
-        attenuationColor="#bfe3ff"
+        attenuationColor="#d8dbdd"
         attenuationDistance={0.6}
         transparent={true}
-        opacity={opacity}
-        depthWrite={true}
+        opacity={opacity * 0.85} 
+        depthWrite={true}     
         depthTest={true}
         side={THREE.DoubleSide}
         onBeforeCompile={onBeforeCompile}
@@ -294,7 +292,8 @@ export const SwanModel = ({
         mat.needsUpdate = true;
 
         mat.side = THREE.DoubleSide;
-        mat.transparent = true;
+        //mat.transparent = true;
+        mat.transparent = opacity < 1;
 
         mat.roughness = 0.18;
         mat.metalness = 0.02;
@@ -316,6 +315,10 @@ export const SwanModel = ({
         child.material = mat; // Apply the new unique skin back to the mesh
         materialsRef.current.push(mat);
       }
+
+      materialsRef.current.forEach((mat) => {
+        mat.dispose(); // Wipes it from GPU memory!
+      });
     });
   }, [scene, isReflection, clipPlane]);
 
@@ -336,6 +339,8 @@ export const SwanModel = ({
 
   // --- SMOOTH ROTATION & CAMERA FRAME ---
   useFrame(({ camera }) => {
+
+    
     if (group.current) {
       group.current.rotation.x = 0.1;
       group.current.rotation.z = 0;
@@ -345,7 +350,15 @@ export const SwanModel = ({
     // 🚀 2. BULLETPROOF OPACITY UPDATE (Updates instantly with scroll)
     materialsRef.current.forEach((mat) => {
       mat.opacity = opacity;
+
+                const needsTransparent = opacity < 1;
+              if (mat.transparent !== needsTransparent) {
+                mat.transparent = needsTransparent;
+                mat.needsUpdate = true;
+              }
     });
+
+    
 
     if (!isReflection) {
       camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetCamY.current, 0.05);
@@ -426,7 +439,6 @@ export const SwanModel = ({
     </>
   );
 };
-
 /* =========================================================
    💦 SPLASH DROPLETS
 ========================================================= */

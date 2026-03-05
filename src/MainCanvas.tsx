@@ -1,6 +1,6 @@
 import { Canvas, useThree } from "@react-three/fiber";
 import { Suspense, useRef, useState, useEffect } from "react";
-import { PerspectiveCamera, Environment } from "@react-three/drei";
+import { PerspectiveCamera, Environment} from "@react-three/drei";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import ScrollTrigger from "gsap/ScrollTrigger";
@@ -17,14 +17,14 @@ import RoomDetailsPanel from "./components/pages/home/RoomDetailsPanel";
 
 gsap.registerPlugin(ScrollTrigger);
 const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-const bubbleRouteMap: Record<number, string> = {
-  1: "/rooms",
-  2: "/venues",
-  3: "/venues?mode=convention",
-  4: "/rooms",
-  5: "/venues",
-  6: "/venues?mode=convention",
-};
+// const bubbleRouteMap: Record<number, string> = {
+//   1: "/rooms",
+//   2: "/venues",
+//   3: "/venues?mode=convention",
+//   4: "/rooms",
+//   5: "/venues",
+//   6: "/venues?mode=convention",
+// };
 
 // --- ADVANCED CAMERA CONTROLLER ---
 const CameraZoomController = ({ mountFeathers, activeId, startOffset }: { mountFeathers: boolean, activeId: number | null, startOffset: number }) => {
@@ -106,6 +106,9 @@ const MainCanvas = () => {
   const [mountWater, setMountWater] = useState(false);
   const [mountEndSwan, setMountEndSwan] = useState(false);
 
+  const [mountBackWater, setMountBackWater] = useState(false);
+
+
   // Animation Progress States
   const [scrollProgress, setScrollProgress] = useState(0);
   const [transformProgress, setTransformProgress] = useState(0);
@@ -126,7 +129,6 @@ const MainCanvas = () => {
 
   const feather3Ref = useRef<any>(null);
   const cornerActionsVisibleRef = useRef(false);
-  const embeddedPath = activeId ? bubbleRouteMap[activeId] : null;
 
   // Image Sequence Loading
   const TOTAL_FRAMES = 499;
@@ -166,7 +168,7 @@ const MainCanvas = () => {
   useGSAP(() => {
     if (!isLoaded || images.length === 0) return;
 
-    const totalScroll = 16000;
+    const totalScroll = 15000;
     const centerLogoWidth = isMobile ? "280px" : "420px";
     const cornerLogoWidth = isMobile ? "88px" : "120px";
 
@@ -185,8 +187,12 @@ const MainCanvas = () => {
         scrub: 1.5,
         onUpdate: (self) => {
           const raw = self.progress;
-          const currentScroll = raw * 16000;
+          const currentScroll = raw * 15000;
           const shouldShowCornerActions = raw >= 0.4;
+
+          if (self.progress >= 1 && self.direction === 1) {
+            window.scrollTo(0, self.end);
+          }
 
           if (cornerActionsVisibleRef.current !== shouldShowCornerActions) {
             cornerActionsVisibleRef.current = shouldShowCornerActions;
@@ -229,17 +235,23 @@ const MainCanvas = () => {
           setFallProgress(THREE.MathUtils.clamp((currentScroll - riseStart) / (riseEnd - riseStart), 0, 1));
 
           const landStart = 13980;
-          const landEnd = 15800;
+          const landEnd = 15000;
           const sProg = THREE.MathUtils.clamp((currentScroll - landStart) / (landEnd - landStart), 0, 1);
           setSwanProgress(sProg);
 
           setMountEndSwan(currentScroll >= 13900);
           setEndSwanOpacity(THREE.MathUtils.smoothstep(sProg, 0.05, 0.50));
 
-          if (raw >= 0.75) {
+          if (raw >= 0.73) {
             setMount3D(false);
           } else if (raw > 0.4) {
             setMount3D(true);
+          }
+
+          if (raw >= 0.795) {
+            setMountBackWater(false);
+          } else if (raw > 0.4) {
+            setMountBackWater(true);
           }
         }
       }
@@ -301,7 +313,14 @@ const MainCanvas = () => {
               <group>
                 <SwanModel scrollProgress={scrollProgress} transformProgress={transformProgress} />
                 <WaterPlane splashProgress={splashProgress} opacity={swanOpacity} />
-                <SplashWalls splashProgress={splashProgress} opacity={swanOpacity} />
+                                  <SplashWalls splashProgress={splashProgress} opacity={swanOpacity} />
+
+               
+              </group>
+            )}
+
+          {mountBackWater && (
+              <group>
                 <SplashDroplets splashProgress={splashProgress} opacity={swanOpacity} />
               </group>
             )}
@@ -338,7 +357,7 @@ const MainCanvas = () => {
       <RoomDetailsPanel
         activeId={activeId}
         content={null}
-        embeddedPath={embeddedPath}
+       // embeddedPath={embeddedPath}
         onClose={() => {
           setActiveId(null);
           setFocusTarget(null);
