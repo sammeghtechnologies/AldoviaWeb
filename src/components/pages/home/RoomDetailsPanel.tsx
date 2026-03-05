@@ -4,10 +4,11 @@ import type { RoomContent } from "../../roomDetailsPanel/RoomData";
 interface PanelProps {
   activeId: number | null;
   content: null | RoomContent;
+  embeddedPath?: string | null;
   onClose: () => void;
 }
 
-const RoomDetailsPanel = ({ activeId, content, onClose }: PanelProps) => {
+const RoomDetailsPanel = ({ activeId, content, embeddedPath, onClose }: PanelProps) => {
   useEffect(() => {
     const body = document.body;
     const html = document.documentElement;
@@ -36,7 +37,26 @@ const RoomDetailsPanel = ({ activeId, content, onClose }: PanelProps) => {
         z-[99999] flex flex-col rounded-[10px] !p-4
         ${activeId ? "translate-x-0" : "translate-x-full"}`}
     >
-      {content && (
+      {embeddedPath ? (
+        <div className="h-full w-full relative overflow-hidden rounded-[10px] bg-[#0f0f0f]">
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClose();
+            }}
+            className="absolute top-4 left-4 text-xs text-white/80 hover:text-white transition-colors tracking-widest uppercase cursor-pointer z-[100001] p-2 bg-black/35 rounded"
+          >
+            [ CLOSE ]
+          </button>
+          <iframe
+            key={embeddedPath}
+            src={embeddedPath}
+            title="Detail Hero View"
+            className="h-full w-full border-0 bg-white"
+          />
+        </div>
+      ) : content ? (
         /* 🚀 INCREASED LEFT PADDING: Changed from px-8 to pl-16 (mobile) and pl-24 (desktop) */
         <div className="font-area-regular text-[#49261c] h-full relative flex flex-col justify-between pl-16 md:pl-24 pr-10 md:pr-14 pt-24 pb-10">
 
@@ -114,7 +134,7 @@ const RoomDetailsPanel = ({ activeId, content, onClose }: PanelProps) => {
         </div>
 
       </div>
-    )}
+    ) : null}
   </div>
   );
 };

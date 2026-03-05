@@ -14,10 +14,17 @@ import WaterSurface from "./components/WaterSurface/WaterSurface";
 
 // UI Components
 import RoomDetailsPanel from "./components/pages/home/RoomDetailsPanel";
-import { roomData } from "./components/roomDetailsPanel/RoomData";
 
 gsap.registerPlugin(ScrollTrigger);
 const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+const bubbleRouteMap: Record<number, string> = {
+  1: "/rooms",
+  2: "/venues",
+  3: "/venues?mode=convention",
+  4: "/rooms",
+  5: "/venues",
+  6: "/venues?mode=convention",
+};
 
 // --- ADVANCED CAMERA CONTROLLER ---
 const CameraZoomController = ({ mountFeathers, activeId, startOffset }: { mountFeathers: boolean, activeId: number | null, startOffset: number }) => {
@@ -119,6 +126,7 @@ const MainCanvas = () => {
 
   const feather3Ref = useRef<any>(null);
   const cornerActionsVisibleRef = useRef(false);
+  const embeddedPath = activeId ? bubbleRouteMap[activeId] : null;
 
   // Image Sequence Loading
   const TOTAL_FRAMES = 499;
@@ -262,19 +270,20 @@ const MainCanvas = () => {
 
   return (
     <div ref={containerRef} className="relative w-full h-screen bg-black overflow-hidden">
-      {showCornerActions && (
-        <div className="fixed !top-14 right-4 md:top-12 md:right-6 z-[2147483647] flex items-center gap-3 md:gap-5 pointer-events-none">
-         
-          <button
-            type="button"
-            onClick={() => navigate("/home")}
-            className="group pointer-events-auto relative inline-flex items-center justify-center min-w-[160px] md:min-w-[180px] h-9 md:h-10 px-6 md:px-8 rounded-full bg-[#07090d] text-white text-[0.9em] md:text-[1em] font-lust tracking-[0.05em] md:tracking-[0.06em] uppercase border-[2px] border-[var(--color-secondary)] shadow-[0_0_0_2px_#07090d] transition-all duration-300 overflow-hidden"
-          >
-            <span className="absolute inset-y-0 left-0 w-0 bg-[var(--color-secondary)] transition-all duration-500 ease-out group-hover:w-full" />
-            <span className="relative z-10 !text-white transition-colors duration-300 group-hover:!text-[var(--color-primary)]">Book Now</span>
-          </button>
-        </div>
-      )}
+      <div
+        className={`fixed !top-14 right-4 md:top-12 md:right-6 z-[2147483647] flex items-center gap-3 md:gap-5 transition-all duration-700 ease-out ${
+          showCornerActions ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
+        }`}
+      >
+        <button
+          type="button"
+          onClick={() => navigate("/home")}
+          className="group pointer-events-auto relative inline-flex items-center justify-center min-w-[160px] md:min-w-[180px] h-9 md:h-10 px-6 md:px-8 rounded-full bg-[#07090d] text-white text-[0.9em] md:text-[1em] font-lust tracking-[0.05em] md:tracking-[0.06em] uppercase border-[2px] border-[var(--color-secondary)] shadow-[0_0_0_2px_#07090d] transition-all duration-300 overflow-hidden"
+        >
+          <span className="absolute inset-y-0 left-0 w-0 bg-[var(--color-secondary)] transition-all duration-500 ease-out group-hover:w-full" />
+          <span className="relative z-10 !text-white transition-colors duration-300 group-hover:!text-[var(--color-primary)]">Book Now</span>
+        </button>
+      </div>
 
       <canvas ref={frameCanvasRef} className="absolute inset-0 z-10 w-full h-full object-cover" />
 
@@ -328,7 +337,8 @@ const MainCanvas = () => {
 
       <RoomDetailsPanel
         activeId={activeId}
-        content={activeId ? roomData[activeId] : null}
+        content={null}
+        embeddedPath={embeddedPath}
         onClose={() => {
           setActiveId(null);
           setFocusTarget(null);

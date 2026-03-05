@@ -106,9 +106,9 @@ export const roomsData: RoomData[] = [
     textClassName: 'absolute -translate-x-1/2 object-contain z-20 pointer-events-none w-[75%] bottom-[15%] left-[50%] md:w-[35%] md:bottom-[44%] md:left-[18%]',
     layers: [
       { id: 'bed', src: '/assets/rooms/1-bedroom-suite/bed.png', slideFrom: 'left', className: 'bottom-[-6%] right-[11%] w-[53%] object-contain -rotate-2' },
-      { id: 'chairL', src: '/assets/rooms/1-bedroom-suite/chair.png', slideFrom: 'top', className: 'bottom-[30%] left-[39%] w-[13.5%] object-contain' },
-      { id: 'table', src: '/assets/rooms/1-bedroom-suite/table.png', slideFrom: 'top', className: 'bottom-[3%] left-[86%] w-[15.2%] object-contain' },
-      { id: 'chairR', src: '/assets/rooms/1-bedroom-suite/roundtab.png', slideFrom: 'top', className: 'bottom-[27%] left-[35%] w-[7%] object-contain' },
+      { id: 'chairL', src: '/assets/rooms/1-bedroom-suite/chair.png', slideFrom: 'top', className: 'bottom-[29%] left-[39%] w-[13.5%] object-contain' },
+      { id: 'table', src: '/assets/rooms/1-bedroom-suite/table.png', slideFrom: 'top', className: 'bottom-[2%] left-[85%] w-[15.2%] object-contain' },
+      { id: 'chairR', src: '/assets/rooms/1-bedroom-suite/roundtab.png', slideFrom: 'top', className: 'bottom-[26%] left-[35%] w-[7%] object-contain' },
       { id: 'chairS', src: '/assets/rooms/1-bedroom-suite/schair.png', slideFrom: 'top', className: 'bottom-[4%] left-[-2%] w-[11.2%] object-contain' },
     ],
      gallery: [

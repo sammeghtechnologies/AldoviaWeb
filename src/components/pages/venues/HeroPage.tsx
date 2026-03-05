@@ -437,12 +437,15 @@ const venueCardsByTab: Record<VenueTab, VenueCard[]> = venueTabs.reduce(
 const HeroPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const modeFromQuery = new URLSearchParams(location.search).get("mode");
+  const modeFromState = location.state?.mode;
+  const resolvedMode = modeFromState ?? modeFromQuery;
   const pageMode =
-    location.state?.mode === "wedding"
+    resolvedMode === "wedding"
       ? "wedding"
-      : location.state?.mode === "corporate"
+      : resolvedMode === "corporate"
         ? "corporate"
-        : location.state?.mode === "convention"
+        : resolvedMode === "convention"
           ? "convention"
         : "venue";
   const heroImages =

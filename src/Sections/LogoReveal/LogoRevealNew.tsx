@@ -4,7 +4,7 @@ import {
   Environment,
   useGLTF,
   useAnimations,
-} from "@react-three/drei";
+  } from "@react-three/drei";
 import {
   Suspense,
   useRef,
@@ -21,6 +21,7 @@ import { Reflector } from "three/addons/objects/Reflector.js";
 
 gsap.registerPlugin(ScrollTrigger);
 const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
 
 /* =========================================================
    💦 WATER WALLS
@@ -54,12 +55,12 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
       const activeT = t / duration;
       const heightCurve = Math.sin(activeT * Math.PI);
       let height = heightCurve * (6.5 + layerIndex * 2.5);
-      
+
       let outwardExpansion = 1.0 + activeT * 0.35;
 
       if (activeT > 0.4) {
-        const flareProgress = (activeT - 0.4) / 0.6; 
-        outwardExpansion += Math.pow(flareProgress, 1.5) * 0.6; 
+        const flareProgress = (activeT - 0.4) / 0.6;
+        outwardExpansion += Math.pow(flareProgress, 1.5) * 0.6;
       }
 
       if (isInner) {
@@ -250,39 +251,57 @@ export const SwanModel = ({
   const materialsRef = useRef<THREE.Material[]>([]);
 
   useLayoutEffect(() => {
-    materialsRef.current = []; // Clear array on mount
-    scene.traverse((child: any) => {
-      if (child.isMesh && child.material) {
-        child.castShadow = true;
-        child.receiveShadow = true;
+    materialsRef.current = []; // Clear array on mount
+    scene.traverse((child: any) => {
+      if (child.isMesh && child.material) {
+        child.castShadow = true;
+        child.receiveShadow = true;
 
         // 🚀 THE FIX: Give this specific swan its own unique material clone!
         const mat = child.material.clone();
 
-        mat.side = THREE.DoubleSide; 
-        mat.alphaTest = isReflection ? 0.01 : 0.5; 
-        mat.depthWrite = true;
-        mat.depthTest = true;
-        mat.transparent = true; 
-        
-        mat.roughness = 0.4;
-        mat.metalness = 0.0;
-        mat.envMapIntensity = 1.5;
+        mat.side = THREE.DoubleSide;
+        mat.alphaTest = isReflection ? 0.01 : 0.5;
+        mat.depthWrite = true;
+        mat.depthTest = true;
+        mat.transparent = true;
+
+        mat.roughness = 0.18;        // smoother feathers
+        mat.metalness = 0.02;        // tiny reflective sheen
+        mat.envMapIntensity = 2.5;   // better light response
+        mat.normalScale?.set(1.2, 1.2);
+        mat.sheen = 0.6
+        mat.sheenColor = new THREE.Color("#ffffff")
+        mat.sheenRoughness = 0.4
+
+        mat.flatShading = false;
+        mat.needsUpdate = true;
+
+        mat.side = THREE.DoubleSide;
+        mat.transparent = true;
+
+        mat.roughness = 0.18;
+        mat.metalness = 0.02;
+        mat.envMapIntensity = 2.5;
+
+        mat.flatShading = false;
+        mat.depthWrite = true;
+        mat.depthTest = true;
 
         // 🚀 Now, if this is the reflection, it only cuts THIS clone's feet off
-        if (clipPlane) {
-          mat.clippingPlanes = [clipPlane];
-        } else {
+        if (clipPlane) {
+          mat.clippingPlanes = [clipPlane];
+        } else {
           // Explicitly clear it for the main swan just to be safe
-          mat.clippingPlanes = []; 
+          mat.clippingPlanes = [];
         }
-        
-        mat.needsUpdate = true;
+
+        mat.needsUpdate = true;
         child.material = mat; // Apply the new unique skin back to the mesh
-        materialsRef.current.push(mat);
-      }
-    });
-  }, [scene, isReflection, clipPlane]);
+        materialsRef.current.push(mat);
+      }
+    });
+  }, [scene, isReflection, clipPlane]);
 
   useEffect(() => {
     const action = actions["rigAction"] || actions[Object.keys(actions)[0]];
@@ -314,7 +333,7 @@ export const SwanModel = ({
 
     if (!isReflection) {
       camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetCamY.current, 0.05);
-      camera.lookAt(0, -5, 0); 
+      camera.lookAt(0, -5, 0);
     }
   });
 
@@ -383,7 +402,7 @@ export const SwanModel = ({
 /* =========================================================
    💦 SPLASH DROPLETS
 ========================================================= */
-export const SplashDroplets = ({ splashProgress, opacity = 1  }: { splashProgress: number, opacity?: number }) => {
+export const SplashDroplets = ({ splashProgress, opacity = 1 }: { splashProgress: number, opacity?: number }) => {
   const count = 3000;
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
@@ -504,7 +523,7 @@ export const SplashDroplets = ({ splashProgress, opacity = 1  }: { splashProgres
 
         attenuationColor="#bfe3ff"     // inner water tint
         attenuationDistance={0.35}     // core darkening
-    
+
         transparent={true}
         opacity={opacity}
 
@@ -517,7 +536,7 @@ export const SplashDroplets = ({ splashProgress, opacity = 1  }: { splashProgres
 /* =========================================================
    🌊 WATER PLANE
 ========================================================= */
-export const WaterPlane = ({ splashProgress, opacity = 1  }: { splashProgress: number, opacity?: number }) => {
+export const WaterPlane = ({ splashProgress, opacity = 1 }: { splashProgress: number, opacity?: number }) => {
   const reflectorRef = useRef<any>(null);
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const geometry = useMemo(() => new THREE.PlaneGeometry(5000, 5000), []);
@@ -606,8 +625,8 @@ export const WaterPlane = ({ splashProgress, opacity = 1  }: { splashProgress: n
   useFrame(() => {
     if (reflectorRef.current?.userData.shader) {
       // ✅ Multiply splashProgress so the waves scrub rapidly back and forth as you scroll
-      const scrollSpeedMultiplier = 30.0; 
-      
+      const scrollSpeedMultiplier = 30.0;
+
       reflectorRef.current.userData.shader.uniforms.uTime.value = splashProgress * scrollSpeedMultiplier;
       reflectorRef.current.userData.shader.uniforms.uTakeoff.value = splashProgress;
     }
@@ -689,7 +708,7 @@ const LogoRevealNew = ({
           } else if (!isCornerReached) {
             hasReachedCornerRef.current = false;
           }
-          
+
 
           // --- PHASE 1: Video executes first (0% to 40% of scroll) ---
           if (raw <= 0.4) {
@@ -812,11 +831,35 @@ const LogoRevealNew = ({
         style={{ opacity: 0, visibility: "hidden" }}
       >
         <Canvas
-          gl={{ antialias: true, toneMapping: THREE.NoToneMapping, powerPreference: "high-performance" }}
+          gl={{
+            antialias: true,
+            toneMapping: THREE.ACESFilmicToneMapping,
+            outputColorSpace: THREE.SRGBColorSpace,
+            powerPreference: "high-performance"
+          }}
           onCreated={() => setIsReady(true)}
         >
           <color attach="background" args={["#000000"]} />
-          <ambientLight intensity={0.2} />
+          <ambientLight intensity={0.35} />
+
+          <directionalLight
+            position={[5, 10, 5]}
+            intensity={2}
+            castShadow
+          />
+
+          <directionalLight
+            position={[0, 5, -10]}
+            intensity={1.5}
+            color="#ffffff"
+          />
+
+          <spotLight
+            position={[0, 15, 10]}
+            intensity={1.5}
+            angle={0.3}
+            penumbra={1}
+          />
           <pointLight position={[10, 10, 10]} intensity={1.5} />
           <spotLight position={[-10, 20, 10]} angle={0.2} penumbra={1} intensity={2} />
           {/* Base position is [0,0,70], interaction takes over Y via useFrame */}
@@ -827,7 +870,10 @@ const LogoRevealNew = ({
             <WaterPlane splashProgress={splashProgress} />
             <SplashDroplets splashProgress={splashProgress} />
             <SplashWalls splashProgress={splashProgress} />
-            <Environment preset="city" />
+            <Environment
+              preset="studio"
+              background={false}
+            />
           </Suspense>
         </Canvas>
       </div>
