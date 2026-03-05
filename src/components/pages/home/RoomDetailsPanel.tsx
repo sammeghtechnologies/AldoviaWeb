@@ -43,13 +43,13 @@ const RoomDetailsPanel = ({ activeId, content, onClose }: PanelProps) => {
               e.stopPropagation();
               onClose();
             }}
-            className="absolute top-6 left-10 md:left-14 text-xs text-gray-500 hover:text-black transition-colors tracking-widest uppercase cursor-pointer z-[100001] p-2"
+            className="absolute top-6 left-1 md:left-1 text-xs text-gray-500 hover:text-black transition-colors tracking-widest uppercase cursor-pointer z-[100001] p-2"
           >
             [ CLOSE ]
           </button>
 
         {/* Header - Kept right aligned but added slight right padding for balance */}
-        <div className="mb-14 text-right pt-12 pr-4">
+        <div className="!p-4 mb-14 text-right pt-12 pr-4">
           <h2 className="text-3xl md:text-4xl font-light uppercase tracking-[0.2em] text-[#49261c] mb-3 leading-tight">
             {panelData.title}
           </h2>
@@ -94,7 +94,7 @@ const RoomDetailsPanel = ({ activeId, content, onClose }: PanelProps) => {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end border-t border-[#49261c]/10 pt-8 mt-10">
+        <div className="!p-3 flex justify-end border-t border-[#49261c]/10 pt-8 mt-10">
           <div className="flex flex-row items-end gap-3 text-right">
             <p className="!p-3 text-sm !text-[var(--color-primary)]">
               Start your journey with Aldovia by exploring more
