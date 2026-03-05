@@ -316,9 +316,9 @@ const ExperienceSection: React.FC = () => {
         }}
         className="pointer-events-none absolute inset-x-0 top-0 h-[94%] bg-[#21140F]"
       />
-     <div
+      <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 right-[-14%] z-0 -translate-y-[57%] bg-no-repeat opacity-10 md:opacity-[0.75]"
+        className="pointer-events-none absolute top-[-10%] right-[-15%] z-0 -translate-y-[44%] bg-no-repeat opacity-10 md:opacity-[0.15]"
         style={{
           backgroundImage: "url('/assets/logo/logo-wet-earth.png')",
           backgroundSize: "min(64vw, 920px)",

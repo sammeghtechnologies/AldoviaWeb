@@ -4,7 +4,7 @@ import {
   Environment,
   useGLTF,
   useAnimations,
-  } from "@react-three/drei";
+} from "@react-three/drei";
 import {
   Suspense,
   useRef,
@@ -21,6 +21,7 @@ import { Reflector } from "three/addons/objects/Reflector.js";
 
 gsap.registerPlugin(ScrollTrigger);
 const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
 
 
 /* =========================================================
@@ -253,6 +254,21 @@ export const SwanModel = ({
   useLayoutEffect(() => {
     materialsRef.current = []; // Clear array on mount
     scene.traverse((child: any) => {
+
+      if (child.isMesh) {
+
+        child.geometry.computeVertexNormals(); // fix shading
+
+        child.material.flatShading = false;
+        child.material.needsUpdate = true;
+
+        child.material.side = THREE.DoubleSide;
+        child.material.depthWrite = true;
+        child.material.depthTest = true;
+        child.material.alphaTest = 0.5;
+
+      }
+
       if (child.isMesh && child.material) {
         child.castShadow = true;
         child.receiveShadow = true;
@@ -377,25 +393,37 @@ export const SwanModel = ({
   const currentScale = baseScale + transformProgress * (isMobile ? 250 : 400);
 
   return (
-    <primitive
-      ref={group}
-      object={scene}
-      scale={currentScale}
-      position={[0, -14, 0]}
-      onPointerDown={(e: any) => {
-        e.stopPropagation();
-        isDragging.current = true;
-        previousX.current = e.clientX;
-        previousY.current = e.clientY; // Start tracking Y position
-        document.body.style.cursor = "grabbing";
-      }}
-      onPointerOver={() => {
-        if (!isDragging.current) document.body.style.cursor = "grab";
-      }}
-      onPointerOut={() => {
-        if (!isDragging.current) document.body.style.cursor = "auto";
-      }}
-    />
+    <>
+      <primitive
+        ref={group}
+        object={scene}
+        scale={currentScale}
+        position={[0, -14, 0]}
+        onPointerDown={(e: any) => {
+          e.stopPropagation();
+          isDragging.current = true;
+          previousX.current = e.clientX;
+          previousY.current = e.clientY; // Start tracking Y position
+          document.body.style.cursor = "grabbing";
+        }}
+        onPointerOver={() => {
+          if (!isDragging.current) document.body.style.cursor = "grab";
+        }}
+        onPointerOut={() => {
+          if (!isDragging.current) document.body.style.cursor = "auto";
+        }}
+      />
+
+      {!isReflection && (
+        <pointLight
+          color="#fff2dc"
+          intensity={1.1}
+          distance={65}
+          decay={2}
+          position={[6, 8, 10]}
+        />
+      )}
+    </>
   );
 };
 
