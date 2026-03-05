@@ -8,19 +8,11 @@ import ScrollTrigger from "gsap/ScrollTrigger";
 
 import CameraFocusController from "../../../components/CameraFocusController/CameraFocusController"; 
 import RoomDetailsPanel from "../../../components/pages/home/RoomDetailsPanel";
+import { roomData } from "../../../components/roomDetailsPanel/RoomData";
 import NaturalFeather from "../../../components/NaturalFeather/NaturalFeather";
 import WaterSurface from "../../../components/WaterSurface/WaterSurface";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
-
-const bubbleRouteMap: Record<number, string> = {
-  1: "/rooms",
-  2: "/venues",
-  3: "/venues?mode=convention",
-  4: "/rooms",
-  5: "/venues",
-  6: "/venues?mode=convention",
-};
 
 // ✅ FIXED: Added 'isClicked' to prevent fighting with CameraFocusController
 const ScrollZoomLogic = ({ isActive, isClicked }: { isActive: boolean, isClicked: boolean }) => {
@@ -121,8 +113,6 @@ const BubbleFeather_Interaction = ({ }: any) => {
     setFocusTarget(new THREE.Vector3(target.x + 1.5, target.y, target.z));
   };
 
-  const embeddedPath = activeId ? bubbleRouteMap[activeId] : null;
-
   return (
     <>
       <div ref={canvasContainerRef} className="fixed inset-0 z-30 bg-[#00000000] opacity-0">
@@ -154,7 +144,7 @@ const BubbleFeather_Interaction = ({ }: any) => {
           </group>
         </Canvas>
       </div>
-      <RoomDetailsPanel activeId={activeId} content={null} embeddedPath={embeddedPath} onClose={() => { setActiveId(null); setFocusTarget(null); }} />
+      <RoomDetailsPanel activeId={activeId} content={activeId ? roomData[activeId] : null} onClose={() => { setActiveId(null); setFocusTarget(null); }} />
     </>
   );
 };

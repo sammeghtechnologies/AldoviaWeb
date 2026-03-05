@@ -336,8 +336,6 @@ const ExperienceSection: React.FC = () => {
 
         {/* Heading */}
         <div className="!mb-10">
-       
-       
 
           <div className="!mb-6 md:!mb-3 text-left lg:text-center lg:!w-full lg:!max-w-[980px] lg:!mx-auto">
           <div className="lg:hidden">

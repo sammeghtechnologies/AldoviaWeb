@@ -1,64 +1,40 @@
-import { useEffect } from "react";
-import type { RoomContent } from "../../roomDetailsPanel/RoomData";
+import { roomData, type RoomContent } from "../../roomDetailsPanel/RoomData";
+import { useNavigate } from "react-router";
 
 interface PanelProps {
   activeId: number | null;
   content: null | RoomContent;
-  embeddedPath?: string | null;
   onClose: () => void;
 }
 
-const RoomDetailsPanel = ({ activeId, content, embeddedPath, onClose }: PanelProps) => {
-  useEffect(() => {
-    const body = document.body;
-    const html = document.documentElement;
-    const prevBodyOverflow = body.style.overflow;
-    const prevHtmlOverflow = html.style.overflow;
+const RoomDetailsPanel = ({ activeId, content, onClose }: PanelProps) => {
+  const navigate = useNavigate();
+  const panelData = content ?? (activeId ? roomData[activeId] ?? null : null);
+  const resolveImageSrc = (src: string) => (src.startsWith("http") || src.startsWith("/") ? src : `/${src}`);
+  const handleStartJourney = () => {
+    if (!activeId) return;
 
-    if (activeId) {
-      body.style.overflow = "hidden";
-      html.style.overflow = "hidden";
-    } else {
-      body.style.overflow = prevBodyOverflow;
-      html.style.overflow = prevHtmlOverflow;
-    }
+    if (activeId === 1) navigate("/rooms");
+    else if (activeId === 2) navigate("/venues", { state: { mode: "wedding" } });
+    else if (activeId === 3) navigate("/experience");
+    else if (activeId === 4) navigate("/activities");
+    else if (activeId === 5) navigate("/venues", { state: { mode: "convention" } });
+    else if (activeId === 6) navigate("/dining");
 
-    return () => {
-      body.style.overflow = prevBodyOverflow;
-      html.style.overflow = prevHtmlOverflow;
-    };
-  }, [activeId]);
+    onClose();
+  };
 
   return (
     <div
-      style={{ pointerEvents: activeId ? 'auto' : 'none' }}
-      className={`fixed top-[90px] pt-5 !pl-5 right-0 h-[calc(100vh-90px)] w-full md:w-[50%] bg-[#f5f5dc] border-l border-white/5
+      style={{ pointerEvents: activeId ? "auto" : "none", zIndex: 2147483648 }}
+      className={`fixed top-0 pt-5 !pl-5 right-0 h-screen w-full md:w-[50%] bg-[#f5f5dc] border-l border-white/5
         transform transition-transform duration-700 ease-[0.22,1,0.36,1]
-        z-[99999] flex flex-col rounded-[10px] !p-4
+        flex flex-col
         ${activeId ? "translate-x-0" : "translate-x-full"}`}
     >
-      {embeddedPath ? (
-        <div className="h-full w-full relative overflow-hidden rounded-[10px] bg-[#0f0f0f]">
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onClose();
-            }}
-            className="absolute top-4 left-4 text-xs text-white/80 hover:text-white transition-colors tracking-widest uppercase cursor-pointer z-[100001] p-2 bg-black/35 rounded"
-          >
-            [ CLOSE ]
-          </button>
-          <iframe
-            key={embeddedPath}
-            src={embeddedPath}
-            title="Detail Hero View"
-            className="h-full w-full border-0 bg-white"
-          />
-        </div>
-      ) : content ? (
+      {panelData && (
         /* 🚀 INCREASED LEFT PADDING: Changed from px-8 to pl-16 (mobile) and pl-24 (desktop) */
-        <div className="font-area-regular text-[#49261c] h-full relative flex flex-col justify-between pl-16 md:pl-24 pr-10 md:pr-14 pt-24 pb-10">
+        <div className="font-sans text-[#49261c] h-full relative flex flex-col justify-between pl-16 md:pl-24 pr-10 md:pr-14 pt-24 pb-10">
 
           {/* Fixed Close Button - Shifted right to left-10/14 to stay aligned with new padding */}
           <button
@@ -74,11 +50,11 @@ const RoomDetailsPanel = ({ activeId, content, embeddedPath, onClose }: PanelPro
 
         {/* Header - Kept right aligned but added slight right padding for balance */}
         <div className="mb-14 text-right pt-12 pr-4">
-          <h2 className="font-lust text-3xl md:text-4xl font-light uppercase tracking-[0.2em] text-[#49261c] mb-3 leading-tight">
-            {content.title}
+          <h2 className="text-3xl md:text-4xl font-light uppercase tracking-[0.2em] text-[#49261c] mb-3 leading-tight">
+            {panelData.title}
           </h2>
           <p className="text-[10px] tracking-[0.3em] text-[#49261c]/60 uppercase border-b border-[#49261c]/10 pb-4 inline-block">
-            {content.subtitle}
+            {panelData.subtitle}
           </p>
         </div>
 
@@ -89,26 +65,26 @@ const RoomDetailsPanel = ({ activeId, content, embeddedPath, onClose }: PanelPro
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
             <div className="w-full h-[220px] md:h-[280px] overflow-hidden rounded-xl shadow-xl border border-black/5">
               <img
-                src={content.img1}
+                src={resolveImageSrc(panelData.img1)}
                 alt="Room View 1"
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
               />
             </div>
 
             <div className="text-[#49261c]/80 text-sm md:text-base leading-relaxed font-light">
-              {content.desc}
+              {panelData.desc}
             </div>
           </div>
 
           {/* Row 2: Left Text | Right Image */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
             <div className="text-[#49261c]/80 text-sm md:text-base leading-relaxed font-light order-2 md:order-1">
-              {content.desc}
+              {panelData.desc}
             </div>
 
             <div className="w-full h-[220px] md:h-[280px] overflow-hidden rounded-xl shadow-xl border border-black/5 order-1 md:order-2">
               <img
-                src={content.img2}
+                src={resolveImageSrc(panelData.img2)}
                 alt="Room View 2"
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
               />
@@ -118,23 +94,22 @@ const RoomDetailsPanel = ({ activeId, content, embeddedPath, onClose }: PanelPro
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-[#49261c]/10 pt-8 mt-10">
-          <div>
-            <span className="block text-[10px] text-[#49261c]/50 uppercase tracking-wider mb-1">
-              Nightly Rate
-            </span>
-            <span className="text-3xl font-light text-[#49261c]">
-              {content.price}
-            </span>
+        <div className="flex justify-end border-t border-[#49261c]/10 pt-8 mt-10">
+          <div className="flex flex-row items-end gap-3 text-right">
+            <p className="!p-3 text-sm !text-[var(--color-primary)]">
+              Start your journey with Aldovia by exploring more
+            </p>
+            <button
+              onClick={handleStartJourney}
+              className="!p-3 border border-[#49261c]/30 rounded-full px-10 md:px-14 py-4 md:py-5 text-xs font-medium tracking-[0.2em] uppercase hover:bg-[#49261c] hover:text-[#f5f5dc] transition-all duration-300"
+            >
+              Start Journey
+            </button>
           </div>
-          
-          <button className="!p-3 border border-[#49261c]/30 rounded-full px-10 md:px-14 py-4 md:py-5 text-xs font-medium tracking-[0.2em] uppercase hover:bg-[#49261c] hover:text-[#f5f5dc] transition-all duration-300">
-            Book Now
-          </button>
         </div>
 
       </div>
-    ) : null}
+    )}
   </div>
   );
 };
