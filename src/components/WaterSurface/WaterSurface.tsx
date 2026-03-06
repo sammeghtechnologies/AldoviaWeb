@@ -6,7 +6,7 @@ import { Reflector } from "three/addons/objects/Reflector.js";
 const WATER_LEVEL = 0; 
 const START_OFFSET = 5.0;
 
-const WaterSurface = ({ fallProgress, swanProgress, id3Ref }: any) => {
+const WaterSurface = ({ fallProgress, swanProgress, id3Ref,opacity = 1 }: any) => {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const ripplePlaneRef = useRef<THREE.Mesh>(null!);
   
@@ -157,8 +157,8 @@ const WaterSurface = ({ fallProgress, swanProgress, id3Ref }: any) => {
     const fadeOutMultiplier = 1.0 - THREE.MathUtils.smoothstep(swanProgress, 0.05, 0.5);
     
     // 2. APPLY IT ONLY TO THE WATER SO THE SWAN CAN APPEAR
-    if (material.uniforms.globalOpacity) {
-        material.uniforms.globalOpacity.value = baseOpacity * fadeOutMultiplier;
+  if (material.uniforms.globalOpacity) {
+        material.uniforms.globalOpacity.value = baseOpacity * fadeOutMultiplier * opacity;
     }
 
     if (material.uniforms.uTime) {
@@ -204,8 +204,8 @@ const WaterSurface = ({ fallProgress, swanProgress, id3Ref }: any) => {
           rippleMaterial.uniforms.uTime.value = time;
           
           // 3. KEEP RIPPLES ALIVE (Notice fadeOutMultiplier is NOT here)
-          rippleMaterial.uniforms.uOpacity.value = rippleFadeIn * 1.5;
-        } else {
+rippleMaterial.uniforms.uOpacity.value = rippleFadeIn * 1.5 * opacity;      
+  } else {
           ripplePlaneRef.current.visible = false;
           rippleMaterial.uniforms.uOpacity.value = 0;
         }
