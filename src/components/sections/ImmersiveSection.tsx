@@ -75,7 +75,7 @@ const ImmersiveSection: React.FC = () => {
               Immersive Experience
             </p>
 
-            <h3 className="!pt-2 !pb-2 text-4xl font-serif leading-tight !mb-6 max-w-[16ch] md:text-4xl !text-[var(--color-primary)]">
+            <h3 className="!pt-2 !pb-2 text-4xl font-serif leading-tight !mb-6 max-w-[16ch] md:text-4xl !text-[var(--color-secondary)]">
               Before You Arrive
             </h3>
 

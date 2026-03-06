@@ -189,16 +189,16 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]} frustumCulled={false}>
       <cylinderGeometry args={[baseRadius * 1.05, baseRadius, 1, 64, 12, true]} />
       <meshPhysicalMaterial
-        color="#eaf6ff"
+        color="#ffffff"
         transmission={0.96}     
         thickness={2.0}
         ior={1.33}
-        roughness={0.03}
-        metalness={0}
+        roughness={0.5}
+        metalness={0.1}
         clearcoat={1}
         clearcoatRoughness={0}
-        envMapIntensity={3}
-        attenuationColor="#d8dbdd"
+        envMapIntensity={1.5}
+        attenuationColor="#ffffff"
         attenuationDistance={0.6}
         transparent={true}
         opacity={opacity * 0.85} 
@@ -256,7 +256,7 @@ export const SwanModel = ({
       if (child.isMesh) {
 
         child.geometry.computeVertexNormals(); // fix shading
-
+        child.geometry.normalizeNormals();
         child.material.flatShading = false;
         child.material.needsUpdate = true;
 
@@ -286,16 +286,39 @@ export const SwanModel = ({
         const isFeatherMaterial = luminance > 0.6;
 
         if (isFeatherMaterial) {
-          mat.color = new THREE.Color(isReflection ? "#d9dde2" : "#f7f7f4");
-          mat.roughness = isReflection ? 0.48 : 0.34;        // soften reflected highlights
-          mat.metalness = 0.0;         // real feathers should stay soft, not glossy
-          mat.envMapIntensity = isReflection ? 0.55 : 1.45;  // dim the mirror swan
-          mat.normalScale?.set(1.55, 1.55);
-          mat.aoMapIntensity = 1.3;
-          mat.sheen = isReflection ? 0.45 : 0.95;
-          mat.sheenColor = new THREE.Color(isReflection ? "#d7dde4" : "#ffffff");
-          mat.sheenRoughness = isReflection ? 0.88 : 0.72;
-        } else {
+
+          // keep existing texture maps
+          mat.map = child.material.map;
+          mat.normalMap = child.material.normalMap;
+          mat.roughnessMap = child.material.roughnessMap;
+          mat.aoMap = child.material.aoMap;
+        
+          // make feathers whiter like tail
+          mat.color = new THREE.Color(isReflection ? "#e3e7eb" : "#ffffff");
+        
+          // lighting response
+          mat.roughness = isReflection ? 0.5 : 0.32;
+          mat.metalness = 0.0;
+        
+          // stronger environment lighting for white feathers
+          mat.envMapIntensity = isReflection ? 0.55 : 1.8;
+        
+          // improve feather shading
+          if (mat.normalScale) {
+            mat.normalScale.set(
+              isReflection ? 1.4 : 1.3,
+              isReflection ? 1.4 : 1.3
+            );
+          }
+        
+          mat.aoMapIntensity = isReflection ? 1.2 : 1.1;
+        
+          // soft feather sheen
+          mat.sheen = isReflection ? 0.35 : 0.9;
+          mat.sheenColor = new THREE.Color("#ffffff");
+          mat.sheenRoughness = 0.6;
+        
+        }else {
           mat.color.copy(originalColor);
           mat.metalness = child.material.metalness ?? 0;
           mat.roughness = isReflection ? Math.max(child.material.roughness ?? 0.5, 0.6) : child.material.roughness ?? 0.5;
@@ -440,8 +463,8 @@ export const SwanModel = ({
 
       {!isReflection && (
         <pointLight
-          color="#fffaf2"
-          intensity={1.8}
+          color="#ffffff"
+          intensity={2.1}
           distance={58}
           decay={2}
           position={[5.5, 9, 12]}
@@ -895,12 +918,12 @@ const LogoRevealNew = ({
           onCreated={() => setIsReady(true)}
         >
           <color attach="background" args={["#000000"]} />
-          <ambientLight intensity={0.22} />
+          <ambientLight intensity={0.26} />
 
           <directionalLight
             position={[7, 12, 8]}
-            intensity={2.9}
-            color="#fffdf8"
+            intensity={3.2}
+            color="#ffffff"
             castShadow
             shadow-mapSize-width={2048}
             shadow-mapSize-height={2048}
@@ -909,8 +932,8 @@ const LogoRevealNew = ({
 
           <directionalLight
             position={[-8, 6, -12]}
-            intensity={1.35}
-            color="#dcecff"
+            intensity={1.55}
+            color="#e8f1ff"
           />
 
           <directionalLight
@@ -921,10 +944,10 @@ const LogoRevealNew = ({
 
           <spotLight
             position={[0, 16, 11]}
-            intensity={2.1}
+            intensity={2.35}
             angle={0.34}
             penumbra={0.9}
-            color="#fffdfa"
+            color="#ffffff"
           />
           <pointLight position={[10, 10, 10]} intensity={0.95} color="#f4f7ff" />
           <spotLight position={[-10, 20, 10]} angle={0.24} penumbra={1} intensity={1.7} color="#d9ecff" />
