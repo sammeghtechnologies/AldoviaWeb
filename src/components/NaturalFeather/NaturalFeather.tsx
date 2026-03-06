@@ -14,6 +14,8 @@ const NaturalFeather = forwardRef(({
   id, startPos, targetPos, started, variant, activeId, onBubbleClick,
   allBubblesReady, burstAll, startOffset
 }: any, ref: any) => {
+
+  
   
   const { nodes, materials } = useGLTF("/models/feather_2.glb") as any;
 

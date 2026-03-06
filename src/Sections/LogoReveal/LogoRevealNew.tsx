@@ -230,7 +230,7 @@ export const SwanModel = ({
   transformProgress: number;
 }) => {
   const group = useRef<THREE.Group>(null);
-  const { scene, animations } = useGLTF("/models/Swan_anim_v14.glb");
+  const { scene, animations } = useGLTF("/models/Swan_anim_v15.glb");
   const { actions } = useAnimations(animations, group);
 
   // --- DRAG INTERACTION STATE ---
@@ -286,6 +286,7 @@ export const SwanModel = ({
         mat.normalScale?.set(1.2, 1.2);
         mat.sheen = 0.6
         mat.sheenColor = new THREE.Color("#ffffff")
+        mat.emissive = new THREE.Color("#ffffff"); // 2. Add an inner glow
         mat.sheenRoughness = 0.4
 
         mat.flatShading = false;
@@ -429,8 +430,8 @@ export const SwanModel = ({
 
       {!isReflection && (
         <pointLight
-          color="#fff2dc"
-          intensity={1.1}
+          color="#fcfbfa"
+          intensity={20.1}
           distance={65}
           decay={2}
           position={[6, 8, 10]}
@@ -931,6 +932,6 @@ const LogoRevealNew = ({
   );
 };
 
-useGLTF.preload("/models/Swan_anim_v14.glb");
+useGLTF.preload("/models/Swan_anim_v15.glb");
 
 export default LogoRevealNew;

@@ -7,7 +7,7 @@ import ScrollTrigger from "gsap/ScrollTrigger";
 import { useNavigate } from "react-router";
 import * as THREE from "three";
 
-import { SwanModel, WaterPlane, SplashWalls, SplashDroplets } from "./Sections/LogoReveal/LogoRevealNew";
+import { SwanModel, WaterPlane, SplashDroplets } from "./Sections/LogoReveal/LogoRevealNew";
 import NaturalFeather from "./components/NaturalFeather/NaturalFeather";
 import CameraFocusController from "./components/CameraFocusController/CameraFocusController";
 import WaterSurface from "./components/WaterSurface/WaterSurface";
@@ -135,6 +135,25 @@ const MainCanvas = () => {
   const BLUR_START_FRAME = TOTAL_FRAMES - 25;
   const FRAME_PATH = (i: number) => `/assets/swarn_60/frame_${String(i).padStart(4, "0")}.jpg`;
 
+  // --- SCROLL LOCK LOGIC ---
+  useEffect(() => {
+    if (activeId !== null) {
+      // Disable scrolling when a bubble is clicked
+      document.body.style.overflow = "hidden";
+      document.body.style.touchAction = "none"; // Extra safety for mobile touch scrolling
+    } else {
+      // Re-enable scrolling when panel is closed
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    }
+
+    // Cleanup function: ensures scrolling is restored if the component unmounts
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    };
+  }, [activeId]);
+
   useEffect(() => {
     const loadedArray: HTMLImageElement[] = new Array(TOTAL_FRAMES);
     let loadedCount = 0;
@@ -162,7 +181,7 @@ const MainCanvas = () => {
     }
 
     setActiveId(id);
-    setFocusTarget(new THREE.Vector3(target.x + 3.5, target.y, target.z + 8.0));
+    setFocusTarget(new THREE.Vector3(target.x + 5.7, target.y+0.5, target.z + 15.0));
   };
 
   useGSAP(() => {
@@ -313,7 +332,7 @@ const MainCanvas = () => {
               <group>
                 <SwanModel scrollProgress={scrollProgress} transformProgress={transformProgress} />
                 <WaterPlane splashProgress={splashProgress} opacity={swanOpacity} />
-                                  <SplashWalls splashProgress={splashProgress} opacity={swanOpacity} />
+                                 {/* <SplashWalls splashProgress={splashProgress} opacity={swanOpacity} /> */}
 
                
               </group>
