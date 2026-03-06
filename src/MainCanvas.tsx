@@ -7,7 +7,7 @@ import ScrollTrigger from "gsap/ScrollTrigger";
 import { useNavigate } from "react-router";
 import * as THREE from "three";
 
-import { SwanModel, WaterPlane, SplashDroplets } from "./Sections/LogoReveal/LogoRevealNew";
+import { SwanModel, WaterPlane, SplashDroplets,SplashWalls } from "./Sections/LogoReveal/LogoRevealNew";
 import NaturalFeather from "./components/NaturalFeather/NaturalFeather";
 import CameraFocusController from "./components/CameraFocusController/CameraFocusController";
 import WaterSurface from "./components/WaterSurface/WaterSurface";
@@ -224,12 +224,28 @@ const MainCanvas = () => {
           setSwanOpacity(raw < fadeStart ? 1 : Math.max(0, 1 - (raw - fadeStart) / (fadeEnd - fadeStart)));
 
           // Base Swan Animations
+          // const swanRaw = Math.min(raw / 0.75, 1.0);
+          // if (swanRaw > 0.4) {
+          //   setScrollProgress(swanRaw < 0.60 ? 0 : (swanRaw - 0.60) / 0.40);
+          //   setTransformProgress(swanRaw < 0.60 ? 0 : swanRaw > 0.85 ? 1 : (swanRaw - 0.60) / 0.25);
+          //   setSplashProgress(swanRaw < 0.90 ? 0 : (swanRaw - 0.90) / 0.10);
+          // }
+
+          // Base Swan Animations (Stretched out to be slower)
+         // Base Swan Animations
+         // Base Swan Animations
+         // Base Swan Animations
           const swanRaw = Math.min(raw / 0.75, 1.0);
+          
           if (swanRaw > 0.4) {
-            setScrollProgress(swanRaw < 0.60 ? 0 : (swanRaw - 0.60) / 0.40);
-            setTransformProgress(swanRaw < 0.60 ? 0 : swanRaw > 0.85 ? 1 : (swanRaw - 0.60) / 0.25);
             setSplashProgress(swanRaw < 0.90 ? 0 : (swanRaw - 0.90) / 0.10);
           }
+
+          // 🚀 BOTH the animation AND the scaling now stretch to 95% of the page
+        // 🚀 STRETCHED TO THE ABSOLUTE MAXIMUM (Ends at 99% of scroll)
+         // 🚀 Just a little more! Starts at 42%, ends at 100%
+         setScrollProgress(raw < 0.45 ? 0 : raw >= 1.0 ? 1 : (raw - 0.45) / 0.55);
+          setTransformProgress(raw < 0.45 ? 0 : raw >= 1.0 ? 1 : (raw - 0.45) / 0.55);
 
           // Feathers Mount
           if (raw >= 0.73 && raw < 0.99) {
@@ -332,7 +348,7 @@ const MainCanvas = () => {
               <group>
                 <SwanModel scrollProgress={scrollProgress} transformProgress={transformProgress} />
                 <WaterPlane splashProgress={splashProgress} opacity={swanOpacity} />
-                                 {/* <SplashWalls splashProgress={splashProgress} opacity={swanOpacity} /> */}
+                                 <SplashWalls splashProgress={splashProgress} opacity={swanOpacity} />
 
                
               </group>

@@ -317,9 +317,10 @@ export const SwanModel = ({
         materialsRef.current.push(mat);
       }
 
+     return () => {
       materialsRef.current.forEach((mat) => {
-        mat.dispose(); // Wipes it from GPU memory!
-      });
+        mat.dispose(); 
+      })}
     });
   }, [scene, isReflection, clipPlane]);
 
