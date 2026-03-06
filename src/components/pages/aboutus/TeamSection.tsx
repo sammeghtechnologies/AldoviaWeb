@@ -120,19 +120,6 @@ const TeamSection: React.FC = () => {
         ref={sectionRef}
         className="relative h-[400vh] w-full text-[var(--color-primary)] bg-[var(--color-secondary)]"
       >
-         {/* Background */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute bottom-0 right-[-14%] z-0 -translate-y-[69%] bg-no-repeat opacity-10 md:opacity-[0.15]"
-          style={{
-            backgroundImage: "url('/assets/logo/logo-wet-earth.png')",
-            backgroundSize: "min(64vw, 920px)",
-            backgroundPosition: "right top",
-            width: "min(64vw, 920px)",
-            height: "min(64vw, 920px)",
-          }}
-        />
-     
         <div className="!pt-8 !pb-0 text-center">
           <h2 className="font-lust-medium text-[2em] md:text-[3em] leading-tight text-[var(--color-primary)]">
             The Management
@@ -149,6 +136,18 @@ const TeamSection: React.FC = () => {
               willChange: "transform, opacity",
             }}
           >
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute bottom-0 right-[-46%] z-0 translate-y-[44%] bg-no-repeat opacity-10 md:opacity-[0.15]"
+              style={{
+                backgroundImage: "url('/assets/logo/logo-wet-earth.png')",
+                backgroundSize: "min(64vw, 920px)",
+                backgroundPosition: "right bottom",
+                width: "min(64vw, 920px)",
+                height: "min(64vw, 920px)",
+              }}
+            />
+
             <div className="relative h-full w-full rounded-[18px] border border-[var(--color-secondary)] bg-[#f4efe3] !p-5 shadow-[0_16px_40px_rgba(44,20,12,0.12)] md:!p-8 lg:!p-10">
               <div className="relative h-full min-h-[700px] overflow-visible md:min-h-[460px]">
                 <MemberCardContent member={members[displayedIndex]} />

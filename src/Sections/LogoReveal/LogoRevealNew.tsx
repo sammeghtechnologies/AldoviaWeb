@@ -190,7 +190,7 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
       <cylinderGeometry args={[baseRadius * 1.05, baseRadius, 1, 64, 12, true]} />
       <meshPhysicalMaterial
         color="#ffffff"
-        transmission={0.96}     
+        transmission={0.96}
         thickness={2.0}
         ior={1.33}
         roughness={0.5}
@@ -201,8 +201,8 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
         attenuationColor="#ffffff"
         attenuationDistance={0.6}
         transparent={true}
-        opacity={opacity * 0.85} 
-        depthWrite={true}     
+        opacity={opacity * 0.85}
+        depthWrite={true}
         depthTest={true}
         side={THREE.DoubleSide}
         onBeforeCompile={onBeforeCompile}
@@ -287,38 +287,39 @@ export const SwanModel = ({
 
         if (isFeatherMaterial) {
 
-          // keep existing texture maps
+          // keep original texture maps
           mat.map = child.material.map;
           mat.normalMap = child.material.normalMap;
           mat.roughnessMap = child.material.roughnessMap;
           mat.aoMap = child.material.aoMap;
-        
-          // make feathers whiter like tail
-          mat.color = new THREE.Color(isReflection ? "#e3e7eb" : "#ffffff");
-        
-          // lighting response
+
+          // brighter white like reference swan
+          mat.color = new THREE.Color(isReflection ? "#e4e7eb" : "#ffffff");
+
+          // feather softness
           mat.roughness = isReflection ? 0.5 : 0.32;
           mat.metalness = 0.0;
-        
-          // stronger environment lighting for white feathers
-          mat.envMapIntensity = isReflection ? 0.55 : 1.8;
-        
-          // improve feather shading
+
+          // environment lighting response
+          mat.envMapIntensity = isReflection ? 0.55 : 1.6;
+
+          // smoother feather shading
           if (mat.normalScale) {
             mat.normalScale.set(
-              isReflection ? 1.4 : 1.3,
-              isReflection ? 1.4 : 1.3
+              isReflection ? 1.4 : 1.25,
+              isReflection ? 1.4 : 1.25
             );
           }
-        
+
+          // ambient occlusion for feather depth
           mat.aoMapIntensity = isReflection ? 1.2 : 1.1;
-        
-          // soft feather sheen
+
+          // subtle feather sheen like real feathers
           mat.sheen = isReflection ? 0.35 : 0.9;
           mat.sheenColor = new THREE.Color("#ffffff");
           mat.sheenRoughness = 0.6;
-        
-        }else {
+
+        } else {
           mat.color.copy(originalColor);
           mat.metalness = child.material.metalness ?? 0;
           mat.roughness = isReflection ? Math.max(child.material.roughness ?? 0.5, 0.6) : child.material.roughness ?? 0.5;
@@ -349,10 +350,11 @@ export const SwanModel = ({
         materialsRef.current.push(mat);
       }
 
-     return () => {
-      materialsRef.current.forEach((mat) => {
-        mat.dispose(); 
-      })}
+      return () => {
+        materialsRef.current.forEach((mat) => {
+          mat.dispose();
+        })
+      }
     });
   }, [scene, isReflection, clipPlane]);
 
@@ -374,7 +376,7 @@ export const SwanModel = ({
   // --- SMOOTH ROTATION & CAMERA FRAME ---
   useFrame(({ camera }) => {
 
-    
+
     if (group.current) {
       group.current.rotation.x = 0.1;
       group.current.rotation.z = 0;
@@ -385,14 +387,14 @@ export const SwanModel = ({
     materialsRef.current.forEach((mat) => {
       mat.opacity = isReflection ? opacity * 0.42 : opacity;
 
-                const needsTransparent = (isReflection ? opacity * 0.42 : opacity) < 1;
-              if (mat.transparent !== needsTransparent) {
-                mat.transparent = needsTransparent;
-                mat.needsUpdate = true;
-              }
+      const needsTransparent = (isReflection ? opacity * 0.42 : opacity) < 1;
+      if (mat.transparent !== needsTransparent) {
+        mat.transparent = needsTransparent;
+        mat.needsUpdate = true;
+      }
     });
 
-    
+
 
     if (!isReflection) {
       camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetCamY.current, 0.05);
@@ -918,7 +920,12 @@ const LogoRevealNew = ({
           onCreated={() => setIsReady(true)}
         >
           <color attach="background" args={["#000000"]} />
-          <ambientLight intensity={0.26} />
+          <ambientLight intensity={0.65} />
+
+          <directionalLight
+            position={[10, 20, 10]}
+            intensity={2.2}
+          />
 
           <directionalLight
             position={[7, 12, 8]}
