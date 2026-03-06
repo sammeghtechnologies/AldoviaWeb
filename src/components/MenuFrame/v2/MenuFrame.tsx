@@ -106,6 +106,7 @@ const MenuFrame = ({
   showBookNow = true,
   showTopLogo = true,
   forceTopBarBackground = false,
+  forcePrimaryTopBarIcons = false,
   disableTopBarBackground = false,
   disableBackdropBlur = false,
 }: {
@@ -114,6 +115,7 @@ const MenuFrame = ({
   showBookNow?: boolean;
   showTopLogo?: boolean;
   forceTopBarBackground?: boolean;
+  forcePrimaryTopBarIcons?: boolean;
   disableTopBarBackground?: boolean;
   disableBackdropBlur?: boolean;
 }) => {
@@ -141,7 +143,7 @@ const MenuFrame = ({
   const isHeroSection = !isBeyondHero;
   const isHomeBeyondHero = location.pathname === "/home" && isBeyondHero;
   const isAboutUsPage = location.pathname === "/aboutus";
-  const hamburgerIconSrc = isOpen
+  const defaultHamburgerIconSrc = isOpen
     ? "assets/icons/feet-beige.png"
     : isHomeExperienceInView
     ? "assets/icons/feet-beige.png"
@@ -156,6 +158,9 @@ const MenuFrame = ({
     : shouldShowTopBarBackground
       ? "assets/icons/feet-beige.png"
       : "assets/icons/feet-brown.png";
+  const hamburgerIconSrc = forcePrimaryTopBarIcons
+    ? "assets/icons/feet-brown.png"
+    : defaultHamburgerIconSrc;
   const topLogoSrc = hamburgerIconSrc.includes("feet-beige")
     ? "assets/logo/beige-logo.svg"
     : "assets/logo/brown-logo.svg";

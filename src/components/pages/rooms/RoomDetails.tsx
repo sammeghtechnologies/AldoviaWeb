@@ -15,6 +15,7 @@ const RoomDetails = ({ room, setActiveRoom }: Props) => {
   const [expandedMobileImage, setExpandedMobileImage] = useState<number | null>(null);
   const roomItems = roomsData.map((r) => r.navLabel || r.title);
   const images = displayRoom.gallery || [displayRoom.staticImage, displayRoom.staticImage, displayRoom.staticImage];
+  const isDeluxeSuite = displayRoom.id === 'deluxe-suite';
   const titleParts = displayRoom.title.split(' ');
   const secondPart = titleParts.length > 1 ? titleParts.pop() : '';
   const firstPart = titleParts.join(' ') || displayRoom.title;
@@ -53,7 +54,11 @@ const RoomDetails = ({ room, setActiveRoom }: Props) => {
       <div className="top-[10vh] w-full md:w-[90%] max-w-[1280px] mx-auto min-h-full md:min-h-screen flex flex-col md:flex-row items-center justify-center md:gap-8 relative md:left-1/2 md:-translate-x-1/2 z-10">
         
         {/* Gallery: Desktop expands | Mobile stays as equal strips */}
-        <div className="group flex h-[30vh] md:h-[62vh] w-full md:w-[90%] gap-2 md:gap-4 z-10 mb-8 md:mb-0 px-4 md:px-0 !mt-[50px] md:mt-0">
+        <div
+          className={`group flex h-[30vh] md:h-[62vh] w-full gap-2 md:gap-4 z-10 mb-8 md:mb-0 px-4 md:px-0 !mt-[50px] md:mt-0 ${
+            isDeluxeSuite ? 'md:w-[72%] lg:w-[68%]' : 'md:w-[90%]'
+          }`}
+        >
           {images.slice(0, 3).map((img, i) => (
             <motion.div 
               key={`${displayRoom.id}-${i}`} 
@@ -71,7 +76,11 @@ const RoomDetails = ({ room, setActiveRoom }: Props) => {
         </div>
 
         {/* Text Details & Split-Title */}
-        <div className="!mt-5 !pl-2 flex flex-col relative w-full md:w-[48%] z-10 px-6 md:px-4 md:pl-0 pb-20 md:pb-0 !text-[var(--color-primary)] justify-center">
+        <div
+          className={`!mt-5 !pl-2 flex flex-col relative w-full z-10 px-6 md:px-4 md:pl-0 pb-20 md:pb-0 !text-[var(--color-primary)] justify-center ${
+            isDeluxeSuite ? 'md:w-[58%] lg:w-[62%]' : 'md:w-[48%]'
+          }`}
+        >
           <h2 className="font-lust text-[2.5rem] leading-[0.9] tracking-tight !text-[var(--color-primary)] md:hidden">
             {displayRoom.title}
           </h2>
@@ -89,7 +98,11 @@ const RoomDetails = ({ room, setActiveRoom }: Props) => {
             {secondPart}
           </h2>          
           
-          <p className="font-area text-[15px] md:text-[17px] !text-[var(--color-primary)] max-w-sm leading-relaxed !mt-4 md:!mt-8">
+          <p
+            className={`font-area text-[15px] md:text-[17px] !text-[var(--color-primary)] leading-relaxed !mt-4 md:!mt-8 ${
+              isDeluxeSuite ? 'max-w-xl' : 'max-w-sm'
+            }`}
+          >
             {displayRoom.description}
           </p>
 
