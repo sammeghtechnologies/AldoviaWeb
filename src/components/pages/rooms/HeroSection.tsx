@@ -33,6 +33,33 @@ const HeroSection = ({ activeRoom, setActiveRoom }: Props) => {
     }
   };
 
+  const renderHeroTitle = () => (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={`hero-title-${activeRoom.id}`}
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -18 }}
+        transition={{ duration: 0.45, ease: 'easeOut', delay: 0.2 }}
+        className="pointer-events-none absolute left-[7%] top-[20%] z-20 text-[var(--color-secondary)]/85 select-none md:left-[3.5%] md:top-[16%]"
+      >
+        <div className="relative leading-none">
+          <span className="block font-lust text-[3.6rem] tracking-[-0.08em] md:text-[8rem]">
+            Rooms
+          </span>
+          <div className="-mt-4 flex items-end gap-1 md:-mt-10 md:gap-2">
+            <span className="font-lust text-[5.6rem] leading-[0.8] md:text-[9rem]">
+              &
+            </span>
+            <span className="font-lust text-[3.25rem] italic tracking-[-0.05em] md:pb-4 md:text-[6rem]">
+              Suites
+            </span>
+          </div>
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+
   useEffect(() => {
     const updateMobile = () => setIsMobile(window.innerWidth < 768);
     updateMobile();
@@ -80,19 +107,7 @@ const HeroSection = ({ activeRoom, setActiveRoom }: Props) => {
               </motion.div>
             </AnimatePresence>
 
-            <AnimatePresence mode="wait">
-              {activeRoom.textLayer && (
-                <motion.img
-                  key={`text-${activeRoom.id}`}
-                  src={activeRoom.textLayer}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.4, delay: 0.2 }}
-                  className={`${activeRoom.textClassName || "absolute bottom-[20%] left-[50%] -translate-x-1/2 w-[70%] object-contain z-20 pointer-events-none"} !top-[24%] !bottom-auto`}
-                />
-              )}
-            </AnimatePresence>
+            {renderHeroTitle()}
           </div>
 
           {/* Desktop view with original animation */}
@@ -131,19 +146,11 @@ const HeroSection = ({ activeRoom, setActiveRoom }: Props) => {
                         className={`absolute ${layer.className || 'inset-0 w-full h-full object-contain'}`}
                       />
                     ))}
-                    {activeRoom.textLayer && (
-                      <motion.img
-                        src={activeRoom.textLayer}
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: 0.5, duration: 0.4, ease: "easeOut" }}
-                        className={`${activeRoom.textClassName || "absolute bottom-[15%] left-[50%] -translate-x-1/2 w-[40%] object-contain z-20 pointer-events-none"}`}
-                      />
-                    )}
                   </>
                 )}
               </motion.div>
             </AnimatePresence>
+            {renderHeroTitle()}
           </div>
 
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(13,8,6,0.32)_0%,rgba(20,12,8,0.28)_36%,rgba(19,11,8,0.55)_100%)] pointer-events-none" />
