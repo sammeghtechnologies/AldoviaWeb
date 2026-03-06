@@ -280,14 +280,27 @@ export const SwanModel = ({
         mat.depthTest = true;
         mat.transparent = true;
 
-        mat.roughness = 0.18;        // smoother feathers
-        mat.metalness = 0.02;        // tiny reflective sheen
-        mat.envMapIntensity = 2.5;   // better light response
-        mat.normalScale?.set(1.2, 1.2);
-        mat.sheen = 0.6
-        mat.sheenColor = new THREE.Color("#ffffff")
-        
-        mat.sheenRoughness = 0.4
+        const originalColor = child.material.color?.clone?.() ?? new THREE.Color("#ffffff");
+        const luminance =
+          originalColor.r * 0.2126 + originalColor.g * 0.7152 + originalColor.b * 0.0722;
+        const isFeatherMaterial = luminance > 0.6;
+
+        if (isFeatherMaterial) {
+          mat.color = new THREE.Color(isReflection ? "#d9dde2" : "#f7f7f4");
+          mat.roughness = isReflection ? 0.48 : 0.34;        // soften reflected highlights
+          mat.metalness = 0.0;         // real feathers should stay soft, not glossy
+          mat.envMapIntensity = isReflection ? 0.55 : 1.45;  // dim the mirror swan
+          mat.normalScale?.set(1.55, 1.55);
+          mat.aoMapIntensity = 1.3;
+          mat.sheen = isReflection ? 0.45 : 0.95;
+          mat.sheenColor = new THREE.Color(isReflection ? "#d7dde4" : "#ffffff");
+          mat.sheenRoughness = isReflection ? 0.88 : 0.72;
+        } else {
+          mat.color.copy(originalColor);
+          mat.metalness = child.material.metalness ?? 0;
+          mat.roughness = isReflection ? Math.max(child.material.roughness ?? 0.5, 0.6) : child.material.roughness ?? 0.5;
+          mat.envMapIntensity = isReflection ? 0.45 : child.material.envMapIntensity ?? 1;
+        }
 
         mat.flatShading = false;
         mat.needsUpdate = true;
@@ -295,10 +308,6 @@ export const SwanModel = ({
         mat.side = THREE.DoubleSide;
         //mat.transparent = true;
         mat.transparent = opacity < 1;
-
-        mat.roughness = 0.18;
-        mat.metalness = 0.02;
-        mat.envMapIntensity = 2.5;
 
         mat.flatShading = false;
         mat.depthWrite = true;
@@ -351,9 +360,9 @@ export const SwanModel = ({
 
     // 🚀 2. BULLETPROOF OPACITY UPDATE (Updates instantly with scroll)
     materialsRef.current.forEach((mat) => {
-      mat.opacity = opacity;
+      mat.opacity = isReflection ? opacity * 0.42 : opacity;
 
-                const needsTransparent = opacity < 1;
+                const needsTransparent = (isReflection ? opacity * 0.42 : opacity) < 1;
               if (mat.transparent !== needsTransparent) {
                 mat.transparent = needsTransparent;
                 mat.needsUpdate = true;
@@ -431,11 +440,11 @@ export const SwanModel = ({
 
       {!isReflection && (
         <pointLight
-          color="#fcfbfa"
-          intensity={1.1}
-          distance={65}
+          color="#fffaf2"
+          intensity={1.8}
+          distance={58}
           decay={2}
-          position={[6, 8, 10]}
+          position={[5.5, 9, 12]}
         />
       )}
     </>
@@ -875,8 +884,10 @@ const LogoRevealNew = ({
         style={{ opacity: 0, visibility: "hidden" }}
       >
         <Canvas
+          shadows
           gl={{
             antialias: true,
+            toneMappingExposure: 1.15,
             toneMapping: THREE.ACESFilmicToneMapping,
             outputColorSpace: THREE.SRGBColorSpace,
             powerPreference: "high-performance"
@@ -884,28 +895,39 @@ const LogoRevealNew = ({
           onCreated={() => setIsReady(true)}
         >
           <color attach="background" args={["#000000"]} />
-          <ambientLight intensity={0.35} />
+          <ambientLight intensity={0.22} />
 
           <directionalLight
-            position={[5, 10, 5]}
-            intensity={2}
+            position={[7, 12, 8]}
+            intensity={2.9}
+            color="#fffdf8"
             castShadow
+            shadow-mapSize-width={2048}
+            shadow-mapSize-height={2048}
+            shadow-bias={-0.00015}
           />
 
           <directionalLight
-            position={[0, 5, -10]}
-            intensity={1.5}
-            color="#ffffff"
+            position={[-8, 6, -12]}
+            intensity={1.35}
+            color="#dcecff"
+          />
+
+          <directionalLight
+            position={[0, -3, 10]}
+            intensity={0.7}
+            color="#b9d4f5"
           />
 
           <spotLight
-            position={[0, 15, 10]}
-            intensity={1.5}
-            angle={0.3}
-            penumbra={1}
+            position={[0, 16, 11]}
+            intensity={2.1}
+            angle={0.34}
+            penumbra={0.9}
+            color="#fffdfa"
           />
-          <pointLight position={[10, 10, 10]} intensity={1.5} />
-          <spotLight position={[-10, 20, 10]} angle={0.2} penumbra={1} intensity={2} />
+          <pointLight position={[10, 10, 10]} intensity={0.95} color="#f4f7ff" />
+          <spotLight position={[-10, 20, 10]} angle={0.24} penumbra={1} intensity={1.7} color="#d9ecff" />
           {/* Base position is [0,0,70], interaction takes over Y via useFrame */}
           <PerspectiveCamera makeDefault position={[0, 0, 70]} fov={isMobile ? 65 : 40} />
 
