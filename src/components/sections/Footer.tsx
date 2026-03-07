@@ -9,16 +9,16 @@ const Footer: React.FC = () => {
 
 <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-[-32%] right-[-35%] z-0 translate-y-[10%] md:translate-y-[28%] bg-no-repeat opacity-10 md:opacity-[0.15]"
+        className="pointer-events-none absolute bottom-[-8%] right-[-58%] z-0 translate-y-0 bg-no-repeat opacity-[0.14] [--logo-size:clamp(20rem,300vw,36rem)] md:bottom-[-32%] md:right-[-35%] md:translate-y-[28%] md:opacity-[0.15] md:[--logo-size:100vw]"
         style={{
           backgroundImage: "url('/assets/logo/brownsmall-bg.svg')",
-          backgroundSize: "min(100vw)",
+          backgroundSize: "var(--logo-size)",
           backgroundPosition: "right bottom",
-          width: "min(100vw)",
-          height: "min(100vw)",
+          width: "var(--logo-size)",
+          height: "var(--logo-size)",
         }}
       />
-      <div className="max-w-6xl mx-auto">
+      <div className="relative z-10 max-w-6xl mx-auto">
 
         {/* Brand */}
         <div className="flex w-max-12 !mb-14 justify-center">
