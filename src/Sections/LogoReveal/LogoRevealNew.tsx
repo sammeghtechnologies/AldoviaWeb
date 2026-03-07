@@ -951,7 +951,6 @@ const LogoRevealNew = ({
   const [scrollProgress, setScrollProgress] = useState(0);
   const [transformProgress, setTransformProgress] = useState(0);
   const [splashProgress, setSplashProgress] = useState(0);
-  const [useCornerLogo, setUseCornerLogo] = useState(false);
   const [images, setImages] = useState<HTMLImageElement[]>([]);
   const hasReachedCornerRef = useRef(false);
   const isBookNowVisibleRef = useRef(false);
@@ -993,7 +992,6 @@ const LogoRevealNew = ({
           const raw = self.progress;
           const isCornerReached = raw >= 0.6;
 
-          setUseCornerLogo(isCornerReached);
 
           if (isBookNowVisibleRef.current !== isCornerReached) {
             isBookNowVisibleRef.current = isCornerReached;
