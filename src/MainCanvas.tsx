@@ -327,7 +327,7 @@ const MainCanvas = () => {
 
     const totalScroll = 15000;
     const centerLogoWidth = isMobile ? "360px" : "660px";
-    const cornerLogoWidth = isMobile ? "112px" : "160px";
+    const cornerLogoWidth = isMobile ? "112px" : "140px";
 
     gsap.set(logoRef.current, {
       autoAlpha: 0, scale: 0.8, top: "50%", left: "50%",
@@ -468,14 +468,14 @@ const MainCanvas = () => {
   return (
     <div ref={containerRef} className="relative w-full h-screen bg-black overflow-hidden">
       <div
-        className={`fixed !top-14 right-4 md:top-12 md:right-6 z-[2147483647] flex items-center gap-3 md:gap-5 transition-all duration-700 ease-out ${
+        className={`fixed !top-10 right-4 md:top-12 md:right-6 z-[2147483647] flex items-center gap-3 md:gap-5 transition-all duration-700 ease-out ${
           showCornerActions ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
         }`}
       >
         <button
           type="button"
           onClick={() => navigate("/home")}
-          className="group pointer-events-auto relative inline-flex items-center justify-center min-w-[160px] md:min-w-[180px] h-9 md:h-10 px-6 md:px-8 rounded-full bg-[#07090d] text-white text-[0.9em] md:text-[1em] font-lust tracking-[0.05em] md:tracking-[0.06em] uppercase border-[2px] border-[var(--color-secondary)] shadow-[0_0_0_2px_#07090d] transition-all duration-300 overflow-hidden"
+          className="group pointer-events-auto relative inline-flex items-center justify-center min-w-[140px] md:min-w-[180px] h-9 md:h-10 px- md:px-8 rounded-full bg-[#07090d] text-white text-[0.9em] md:text-[1em] font-lust tracking-[0.05em] md:tracking-[0.06em] uppercase border-[2px] border-[var(--color-secondary)] shadow-[0_0_0_2px_#07090d] transition-all duration-300 overflow-hidden"
         >
           <span className="absolute inset-y-0 left-0 w-0 bg-[var(--color-secondary)] transition-all duration-500 ease-out group-hover:w-full" />
           <span className="relative z-10 !text-white transition-colors duration-300 group-hover:!text-[var(--color-primary)]">Book Now</span>

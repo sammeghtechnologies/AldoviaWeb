@@ -21,12 +21,12 @@ const Logo_top = ({
       type="button"
       onClick={onClick}
       aria-label="Go to landing page"
-      className={`logo-top absolute left-[-5%] lg:left-[0%] top-[30%] -translate-y-1/2 z-[5000] transition-opacity duration-500 cursor-pointer ${hideOnMobile ? "hidden md:block" : "block"} ${isVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+      className={`logo-top absolute left-[2%] lg:left-[2%] top-[55%] -translate-y-1/2 z-[5000] transition-opacity duration-500 cursor-pointer ${hideOnMobile ? "hidden md:block" : "block"} ${isVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}
     >
       <img
         src={logoSrc}
         alt="Aldovia"
-        className="logo-image w-[11em] lg:w-[12rem] h-auto object-contain block"
+        className="logo-image w-[6em] lg:w-[7rem] h-auto object-contain block"
       />
     </button>
   );
