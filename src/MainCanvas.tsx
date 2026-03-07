@@ -259,6 +259,7 @@ const MainCanvas = () => {
   const [allBubblesReady, setAllBubblesReady] = useState(false);
   const [burstAll, setBurstAll] = useState(false);
   const [showCornerActions, setShowCornerActions] = useState(false);
+  const [useCornerLogo, setUseCornerLogo] = useState(false);
 
   const feather3Ref = useRef<any>(null);
   const cornerActionsVisibleRef = useRef(false);
@@ -325,8 +326,8 @@ const MainCanvas = () => {
     if (!isLoaded || images.length === 0) return;
 
     const totalScroll = 15000;
-    const centerLogoWidth = isMobile ? "280px" : "420px";
-    const cornerLogoWidth = isMobile ? "88px" : "120px";
+    const centerLogoWidth = isMobile ? "360px" : "660px";
+    const cornerLogoWidth = isMobile ? "112px" : "160px";
 
     gsap.set(logoRef.current, {
       autoAlpha: 0, scale: 0.8, top: "50%", left: "50%",
@@ -368,6 +369,7 @@ const MainCanvas = () => {
           if (cornerActionsVisibleRef.current !== shouldShowCornerActions) {
             cornerActionsVisibleRef.current = shouldShowCornerActions;
             setShowCornerActions(shouldShowCornerActions);
+            setUseCornerLogo(shouldShowCornerActions);
           }
 
           const fadeStart = 0.70; const fadeEnd = 0.75;
@@ -447,7 +449,7 @@ const MainCanvas = () => {
     tl.to(canvasWrapperRef.current, { autoAlpha: 1, filter: "blur(40px)", duration: 0.5 }, ">");
     tl.to(logoRef.current, { autoAlpha: 1, scale: 1, filter: "blur(0px)", duration: 0.5 }, "<");
     tl.to(frameCanvasRef.current, { autoAlpha: 0, duration: 0.5 }, "<");
-    tl.to(logoRef.current, { top: "32px", left: "40px", xPercent: 0, yPercent: 0, width: cornerLogoWidth, duration: 1.5, ease: "power2.inOut" }, ">");
+    tl.to(logoRef.current, { top: "16px", left: "20px", xPercent: 0, yPercent: 0, width: cornerLogoWidth, duration: 1.5, ease: "power2.inOut" }, ">");
     tl.to(canvasWrapperRef.current, { filter: "blur(0px)", duration: 1.5, ease: "power2.inOut" }, "<");
     tl.to({}, { duration: 4.0 });
     tl.to({}, { duration: 3.366 });
@@ -530,8 +532,13 @@ const MainCanvas = () => {
         </Canvas>
       </div>
 
-      <div ref={logoRef} className="absolute z-30 pointer-events-none" style={{ visibility: "hidden" }}>
-        <img src="assets/logo/beige-logo.svg" alt="Logo" className="w-full h-auto brightness-0 invert" />
+      <div ref={logoRef} className="absolute z-30 overflow-hidden pointer-events-none" style={{ visibility: "hidden" }}>
+        <img
+          src={useCornerLogo ? "assets/logo/beigelogo-mini.svg" : "assets/logo/beigelogo-small.svg"}
+          alt="Logo"
+          className="block w-full h-auto brightness-0 invert"
+          style={{ transform: "scale(1)" }}
+        />
       </div>
 
       <RoomDetailsPanel

@@ -65,13 +65,14 @@ const LuxuryCard: React.FC<LuxuryCardProps> = ({
 
                {/* Content */}
                <div className="absolute bottom-0 w-full !px-8 !pb-12 !pt-20 sm:!px-10 sm:!pb-14 translate-y-6 [transform:translateZ(42px)]">
+                   
+                    <h2 className="!mb-3 text-4xl font-serif leading-[1.1]">
+                         {title}
+                    </h2>
+
                     <p className="!mb-3 text-[12px] tracking-[0.25em] uppercase text-yellow-400">
                          {category}
                     </p>
-
-                    <h2 className="!mb-4 text-4xl font-serif leading-[1.1]">
-                         {title}
-                    </h2>
 
                     <p className="!mb-6 text-base opacity-80 !leading-[1.35] max-w-[85%]">
                          {description}

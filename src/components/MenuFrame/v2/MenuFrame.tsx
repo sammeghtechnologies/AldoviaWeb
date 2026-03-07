@@ -7,7 +7,7 @@ import { useLocation, useNavigate } from "react-router";
 // ✅ FIX 1: Added introFinished prop to resolve 'isVisible' name error
 const Logo_top = ({
   isVisible = true,
-  logoSrc = "assets/logo/brown-logo.svg",
+  logoSrc = "assets/logo/brownlogo-mini.svg",
   onClick,
 }: {
   isVisible?: boolean;
@@ -19,12 +19,12 @@ const Logo_top = ({
       type="button"
       onClick={onClick}
       aria-label="Go to landing page"
-      className={`logo-top absolute left-3 top-1/2 -translate-y-1/2 z-[5000] transition-opacity duration-500 cursor-pointer ${isVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+      className={`logo-top absolute left-3 top-15 -translate-y-1/2 z-[5000] transition-opacity duration-500 cursor-pointer ${isVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}
     >
       <img
         src={logoSrc}
         alt="Aldovia"
-        className="logo-image w-[6em] lg:w-[8rem] h-auto object-contain block"
+        className="logo-image w-[6em] lg:w-[5rem] h-auto object-contain block"
       />
     </button>
   );
@@ -162,8 +162,8 @@ const MenuFrame = ({
     ? "assets/icons/feet-brown.png"
     : defaultHamburgerIconSrc;
   const topLogoSrc = hamburgerIconSrc.includes("feet-beige")
-    ? "assets/logo/beige-logo.svg"
-    : "assets/logo/brown-logo.svg";
+    ? "assets/logo/beigelogo-mini.svg"
+    : "assets/logo/brownlogo-mini.svg";
 
   // Logo animation
   useLayoutEffect(() => {

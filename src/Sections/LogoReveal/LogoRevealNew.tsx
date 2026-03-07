@@ -924,6 +924,7 @@ const LogoRevealNew = ({
   const [scrollProgress, setScrollProgress] = useState(0);
   const [transformProgress, setTransformProgress] = useState(0);
   const [splashProgress, setSplashProgress] = useState(0);
+  const [useCornerLogo, setUseCornerLogo] = useState(false);
   const [images, setImages] = useState<HTMLImageElement[]>([]);
   const hasReachedCornerRef = useRef(false);
   const isBookNowVisibleRef = useRef(false);
@@ -964,6 +965,8 @@ const LogoRevealNew = ({
         onUpdate: (self) => {
           const raw = self.progress;
           const isCornerReached = raw >= 0.6;
+
+          setUseCornerLogo(isCornerReached);
 
           if (isBookNowVisibleRef.current !== isCornerReached) {
             isBookNowVisibleRef.current = isCornerReached;
@@ -1016,10 +1019,20 @@ const LogoRevealNew = ({
       },
     });
 
-    const centerLogoWidth = isMobile ? "280px" : "420px";
+    const centerLogoWidth = isMobile ? "78vw" : "100vw";
 
     // Set Initial CSS States
-    gsap.set(logoRef.current, { autoAlpha: 0, scale: 0.8, top: "50%", left: "50%", xPercent: -50, yPercent: -50, filter: "blur(60px)", width: centerLogoWidth });
+    gsap.set(logoRef.current, {
+      autoAlpha: 1,
+      scale: 1,
+      top: "50%",
+      left: "50%",
+      xPercent: -50,
+      yPercent: -50,
+      filter: "blur(0px)",
+      width: centerLogoWidth,
+      maxWidth: "100vw",
+    });
     gsap.set(canvasWrapperRef.current, { autoAlpha: 0, filter: "blur(120px)" });
 
     // 1. Play Video Sequence (Takes exactly 4.0 units = 40% of total timeline)
@@ -1032,9 +1045,8 @@ const LogoRevealNew = ({
       onUpdate: () => renderHero(frameObj.frame)
     });
 
-    // 2. Video ends -> Fade in 3D Scene (blurred) and Logo (sharp) (Takes 0.5 units = 5%)
+    // 2. Video ends -> Fade in 3D Scene (blurred) while logo stays visible (Takes 0.5 units = 5%)
     tl.to(canvasWrapperRef.current, { autoAlpha: 1, filter: "blur(40px)", duration: 0.5 }, ">");
-    tl.to(logoRef.current, { autoAlpha: 1, scale: 1, filter: "blur(0px)", duration: 0.5 }, "<");
 
     // 3. Move Logo to corner AND unblur the Swan simultaneously (Takes 1.5 units = 15%)
     tl.to(logoRef.current, {
@@ -1042,7 +1054,7 @@ const LogoRevealNew = ({
       left: "48px",
       xPercent: 0,
       yPercent: 0,
-      width: "56px",
+      width: "144px",
       duration: 1.5,
       ease: "power2.inOut",
     }, ">");
@@ -1163,9 +1175,12 @@ const LogoRevealNew = ({
       <div
         ref={logoRef}
         className="absolute z-30 pointer-events-none"
-        style={{ opacity: 0, visibility: "hidden" }}
+        style={{ opacity: 1, visibility: "visible" }}
       >
-        <img src="assets/logo/aldovialogo.svg" alt="Logo" className="w-full h-auto brightness-0 invert" />
+        <img
+          src={"assets/logo/beigelogo-small.svg"}
+          alt="Logo"
+        />
       </div>
 
     </section>

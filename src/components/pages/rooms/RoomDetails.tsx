@@ -28,16 +28,19 @@ const RoomDetails = ({ room, setActiveRoom }: Props) => {
   return (
     <section 
       id="details-scroll-container" 
-      className="relative w-full  h-screen bg-[var(--color-secondary)] overflow-y-auto overflow-x-hidden touch-pan-y overscroll-none"
-      // --- FIXED: Added the transparent sticker background on top of the beige color ---
-      style={{
-        backgroundImage: "url('/assets/rooms/section2.png')",
-        backgroundSize: "cover", // Adjust to "contain" if the stickers get cut off
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        // Add `backgroundAttachment: "fixed"` here later if you want the stickers to stay completely still while scrolling
-      }}
+      className="relative w-full h-screen bg-[var(--color-secondary)] overflow-y-auto overflow-x-hidden touch-pan-y overscroll-none"
     >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-0 right-[-38%] z-0 translate-y-[64%] bg-no-repeat opacity-10 md:opacity-[0.15]"
+        style={{
+          backgroundImage: "url('/assets/logo/brownmini-bg.svg')",
+          backgroundSize: "min(100vw, 2000px)",
+          backgroundPosition: "right bottom",
+          width: "min(94vw, 2000px)",
+          height: "min(64vw, 2000px)",
+        }}
+      />
       
       {/* Tabs in details section */}
       <div className="absolute top-[20vh] left-0 right-0 z-50 pointer-events-auto">

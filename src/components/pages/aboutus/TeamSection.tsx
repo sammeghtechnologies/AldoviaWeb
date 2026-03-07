@@ -28,7 +28,7 @@ const members: TeamMember[] = [
     image: "/assets/pages/aboutus/nigel.webp",
   },
   {
-    role: "",
+    role: "Executive director",
     name: "Mr. Randal Colaco",
     description: "Mr. Randal Colaco, represents the new wave and brings fresh vision with creative direction to the family’s hospitality ventures. With a passion for premium experiences, Mr. Randal plays a key role in shaping Aldovia’s identity and growth. His approach blends design sensibility, operational excellence, and customer-first thinking. Mr. Randal represents the new wave of leadership with a strong focus on innovation and lifestyle-driven brands.",
     image: "/assets/pages/aboutus/randel.webp",
@@ -68,68 +68,124 @@ const MemberCardContent: React.FC<{ member: TeamMember }> = ({ member }) => {
 
 const TeamSection: React.FC = () => {
     const sectionRef = useRef<HTMLElement | null>(null);
+    const wheelLockRef = useRef(false);
+    const touchStartYRef = useRef<number | null>(null);
     const [displayedIndex, setDisplayedIndex] = useState(0);
     const [introProgress, setIntroProgress] = useState(0);
 
     const scrollToMember = (targetIndex: number) => {
-      const node = sectionRef.current;
-      if (!node) return;
-
       const normalizedIndex = Math.max(0, Math.min(members.length - 1, targetIndex));
-      const sectionTop = window.scrollY + node.getBoundingClientRect().top;
-      const maxScrollableInSection = Math.max(node.offsetHeight - window.innerHeight, 1);
-      const segment = members.length > 1 ? maxScrollableInSection / (members.length - 1) : 0;
-      const targetY = sectionTop + normalizedIndex * segment;
-
-      window.scrollTo({ top: targetY, behavior: "smooth" });
+      setDisplayedIndex(normalizedIndex);
     };
 
     useEffect(() => {
-      const updateActiveMember = () => {
+      const updateIntroProgress = () => {
         const node = sectionRef.current;
         if (!node) return;
 
         const rect = node.getBoundingClientRect();
-        const sectionTop = window.scrollY + rect.top;
-        const maxScrollableInSection = Math.max(node.offsetHeight - window.innerHeight, 1);
-        const rawProgress = (window.scrollY - sectionTop) / maxScrollableInSection;
-        const clampedProgress = Math.min(Math.max(rawProgress, 0), 0.9999);
         const introRaw = (window.innerHeight - rect.top) / (window.innerHeight * 0.7);
         const introClamped = Math.min(Math.max(introRaw, 0), 1);
-        const nextIndex = Math.min(
-          members.length - 1,
-          Math.floor(clampedProgress * members.length)
-        );
-
-        setDisplayedIndex(nextIndex);
         setIntroProgress(introClamped);
       };
 
-      updateActiveMember();
-      window.addEventListener("scroll", updateActiveMember, { passive: true });
-      window.addEventListener("resize", updateActiveMember);
+      updateIntroProgress();
+      window.addEventListener("scroll", updateIntroProgress, { passive: true });
+      window.addEventListener("resize", updateIntroProgress);
 
       return () => {
-        window.removeEventListener("scroll", updateActiveMember);
-        window.removeEventListener("resize", updateActiveMember);
+        window.removeEventListener("scroll", updateIntroProgress);
+        window.removeEventListener("resize", updateIntroProgress);
       };
     }, []);
+
+    useEffect(() => {
+      const node = sectionRef.current;
+      if (!node) return;
+
+      const releaseWheelLock = () => {
+        window.setTimeout(() => {
+          wheelLockRef.current = false;
+        }, 420);
+      };
+
+      const isSectionActive = () => {
+        const rect = node.getBoundingClientRect();
+        return rect.top <= window.innerHeight * 0.2 && rect.bottom >= window.innerHeight * 0.8;
+      };
+
+      const stepMember = (direction: 1 | -1) => {
+        if (wheelLockRef.current) return false;
+
+        const nextIndex = displayedIndex + direction;
+        if (nextIndex < 0 || nextIndex > members.length - 1) return false;
+
+        wheelLockRef.current = true;
+        setDisplayedIndex(nextIndex);
+        releaseWheelLock();
+        return true;
+      };
+
+      const handleWheel = (event: WheelEvent) => {
+        if (!isSectionActive()) return;
+        if (Math.abs(event.deltaY) < 18) return;
+
+        const didStep = event.deltaY > 0 ? stepMember(1) : stepMember(-1);
+        if (didStep) event.preventDefault();
+      };
+
+      const handleTouchStart = (event: TouchEvent) => {
+        touchStartYRef.current = event.touches[0]?.clientY ?? null;
+      };
+
+      const handleTouchMove = (event: TouchEvent) => {
+        if (!isSectionActive() || touchStartYRef.current === null) return;
+
+        const currentY = event.touches[0]?.clientY;
+        if (typeof currentY !== "number") return;
+
+        const deltaY = touchStartYRef.current - currentY;
+        if (Math.abs(deltaY) < 30) return;
+
+        const didStep = deltaY > 0 ? stepMember(1) : stepMember(-1);
+        if (didStep) {
+          event.preventDefault();
+          touchStartYRef.current = currentY;
+        }
+      };
+
+      const handleTouchEnd = () => {
+        touchStartYRef.current = null;
+      };
+
+      node.addEventListener("wheel", handleWheel, { passive: false });
+      node.addEventListener("touchstart", handleTouchStart, { passive: true });
+      node.addEventListener("touchmove", handleTouchMove, { passive: false });
+      node.addEventListener("touchend", handleTouchEnd);
+
+      return () => {
+        node.removeEventListener("wheel", handleWheel);
+        node.removeEventListener("touchstart", handleTouchStart);
+        node.removeEventListener("touchmove", handleTouchMove);
+        node.removeEventListener("touchend", handleTouchEnd);
+      };
+    }, [displayedIndex]);
 
     return (
       <section
         ref={sectionRef}
-        className="relative h-[400vh] w-full text-[var(--color-primary)] bg-[var(--color-secondary)]"
+        className="relative min-h-screen w-full text-[var(--color-primary)] bg-[var(--color-secondary)]"
       >
          {/* Background */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute bottom-0 right-[-14%] z-0 -translate-y-[69%] bg-no-repeat opacity-10 md:opacity-[0.15]"
+          className="pointer-events-none fixed top-[1%] right-[-40%] z-0 -translate-y-[9%] bg-no-repeat opacity-10 md:opacity-[0.15]"
           style={{
-            backgroundImage: "url('/assets/logo/logo-wet-earth.png')",
-            backgroundSize: "min(64vw, 920px)",
+            backgroundImage: "url('/assets/logo/brownsmall-bg.svg')",
+            backgroundSize: "min(100vw)",
             backgroundPosition: "right top",
-            width: "min(64vw, 920px)",
-            height: "min(64vw, 920px)",
+            width: "min(100vw)",
+            height: "min(100vw)",
           }}
         />
      
@@ -139,7 +195,7 @@ const TeamSection: React.FC = () => {
           </h2>
          
         </div>
-        <div className="sticky top-0 flex h-screen w-full items-center justify-center !px-4 md:!px-1 lg:!px-12">
+        <div className="flex min-h-[calc(100vh-72px)] w-full items-center justify-center !px-4 md:!px-1 lg:!px-12">
           <div
             className="relative w-full max-w-6xl min-h-[760px] md:min-h-[520px]"
             style={{
@@ -149,7 +205,7 @@ const TeamSection: React.FC = () => {
               willChange: "transform, opacity",
             }}
           >
-            <div className="relative h-full w-full rounded-[18px] border border-[var(--color-secondary)] bg-[#f4efe3] !p-5 shadow-[0_16px_40px_rgba(44,20,12,0.12)] md:!p-8 lg:!p-10">
+            <div className="relative h-full w-full rounded-[18px] border border-[var(--color-secondary)] bg-transparent !p-5 shadow-[0_16px_40px_rgba(44,20,12,0.12)] md:!p-8 lg:!p-10">
               <div className="relative h-full min-h-[700px] overflow-visible md:min-h-[460px]">
                 <MemberCardContent member={members[displayedIndex]} />
               </div>
