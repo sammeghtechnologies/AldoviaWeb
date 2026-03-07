@@ -10,6 +10,7 @@ interface Props {
   progressTrackColor?: string;
   progressFillColor?: string;
   buttonColor?: string;
+  buttonBorderColor?: string;
   iconColor?: string;
   className?: string;
   progressBarClassName?: string;
@@ -25,6 +26,7 @@ const CarouselControls: React.FC<Props> = ({
   progressTrackColor = "rgba(255, 255, 255, 0.20)",
   progressFillColor = "var(--color-primary)",
   buttonColor = "var(--color-primary)",
+  buttonBorderColor = "rgba(255,255,255,0.30)",
   iconColor = "var(--color-primary)",
   className = "",
   progressBarClassName = "w-[100px] max-w-[100px] shrink-0",
@@ -58,8 +60,8 @@ const CarouselControls: React.FC<Props> = ({
       <div className={`flex items-center gap-4 ${buttonsClassName}`}>
         <motion.button
           onClick={onPrev}
-          className="!rounded-[999px] h-10 !border !border-[rgba(255,255,255,0.30)] !bg-[rgba(255,255,255,0.10)] !px-5 !py-2 text-sm font-normal !text-[var(--color-secondary)] backdrop-blur-md transition duration-300 hover:!bg-[rgba(255,255,255,0.18)] md:text-base"
-          style={{ backgroundColor: buttonColor }}
+          className="!rounded-[999px] h-10 !border border-[rgba(241, 234, 234, 0.3)] !bg-[rgba(255,255,255,0.10)] !px-5 !py-2 text-sm font-normal !text-[var(--color-secondary)] backdrop-blur-md transition duration-300 hover:!bg-[rgba(255,255,255,0.18)] md:text-base"
+          style={{ backgroundColor: buttonColor, borderColor: buttonBorderColor }}
           whileHover={{ x: -2, scale: 1.03 }}
           whileTap={{ scale: 0.95 }}
           transition={{ type: "spring", stiffness: 320, damping: 22 }}
@@ -75,7 +77,8 @@ const CarouselControls: React.FC<Props> = ({
 
         <motion.button
           onClick={onNext}
-          className="!rounded-[999px] h-10 !border !border-[rgba(255,255,255,0.30)] !bg-[rgba(255,255,255,0.10)] !px-5 !py-2 text-sm font-normal !text-[var(--color-secondary)] backdrop-blur-md transition duration-300 hover:!bg-[rgba(255,255,255,0.18)] md:text-base"
+          className="!rounded-[999px] h-10 !border border-[rgba(167, 96, 96, 0.3)] !bg-[rgba(255,255,255,0.10)] !px-5 !py-2 text-sm font-normal !text-[var(--color-secondary)] backdrop-blur-md transition duration-300 hover:!bg-[rgba(255,255,255,0.18)] md:text-base"
+          style={{ backgroundColor: buttonColor, borderColor: buttonBorderColor }}
           whileHover={{ x: 2, scale: 1.03 }}
           whileTap={{ scale: 0.95 }}
           transition={{ type: "spring", stiffness: 320, damping: 22 }}
