@@ -47,15 +47,15 @@ const SplitActionButtons: React.FC<SplitActionButtonsProps> = ({
         <button
           type="button"
           onClick={onSecondaryClick}
-          className={`!flex-1 !px-4 md:!px-7 !py-2.5 !rounded-full !text-[#FFFFFF] !border !border-[#FFFFFF] !text-[13px] md:!text-[16px] !font-medium !leading-[20px] !text-center ${
+          className={`!flex-1 !px-4 md:!px-7 !py-2.5 !rounded-full !text-[var(--color-primary)] !border !border-[var(--color-primary)] !text-[13px] md:!text-[16px] !font-medium !leading-[20px] !text-center ${
             isPlanYourEventSecondary
-              ? "!bg-white/12 backdrop-blur-md"
+              ? "!bg-[var(--color-secondary)]/52 backdrop-blur-md"
               : "!bg-transparent"
           }`}
         >
           <span className="inline-flex items-center gap-2">
             {secondaryLabel === "Download Brochure" && <Download className="h-4 w-4" />}
-            <span>{secondaryLabel}</span>
+            <span className="!text-[var(--color-primary)]">{secondaryLabel}</span>
           </span>
         </button>
       )}

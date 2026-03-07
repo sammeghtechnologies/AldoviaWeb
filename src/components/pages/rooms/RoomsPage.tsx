@@ -120,7 +120,7 @@ const RoomsPage = () => {
       <MenuFrame
         showBookNow={false}
         forceTopBarBackground={view !== 'hero'}
-        forcePrimaryTopBarIcons={view === 'details'}
+        forcePrimaryTopBarIcons={view === 'details' || view === 'footer'}
       />
       <AnimatePresence initial={false} custom={direction}>
         <motion.div
@@ -144,7 +144,7 @@ const RoomsPage = () => {
           )}
 
           {view === 'footer' && (
-            <div className="h-full w-full overflow-y-auto bg-[var(--color-secondary)]">
+            <div className="h-full w-full overflow-y-auto bg-[var(--color-secondary)] !pt-12 md:pt-20">
               <Footer />
             </div>
           )}

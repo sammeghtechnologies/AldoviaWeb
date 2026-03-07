@@ -24,7 +24,7 @@ const HeroContent: React.FC = () => {
           text-[var(--color-secondary)]
           drop-shadow-[0_8px_24px_rgba(0,0,0,0.60)]
         ">
-          Where Every Moment Is Crafted In Excellence
+          Where every moment is crafted in excellence
         </h1>
 
         <p className="

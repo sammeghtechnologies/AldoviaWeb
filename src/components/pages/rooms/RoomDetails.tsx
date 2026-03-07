@@ -32,18 +32,18 @@ const RoomDetails = ({ room, setActiveRoom }: Props) => {
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 right-[-38%] z-0 translate-y-[64%] bg-no-repeat opacity-10 md:opacity-[0.15]"
+        className="pointer-events-none absolute bottom-0 right-[-79%] z-0 translate-y-[42%] bg-no-repeat opacity-10 sm:right-[-18%] sm:translate-y-[36%] md:right-[-16%] md:translate-y-[40%] lg:right-[-30%] lg:translate-y-[46%] xl:right-[-36%] xl:translate-y-[44%] md:opacity-[0.15] [--logo-size:188vw] sm:[--logo-size:96vw] md:[--logo-size:84vw] lg:[--logo-size:100vw] xl:[--logo-size:100vw]"
         style={{
-          backgroundImage: "url('/assets/logo/brownmini-bg.svg')",
-          backgroundSize: "min(100vw, 2000px)",
+          backgroundImage: "url('/assets/logo/brownsmall-bg.svg')",
+          backgroundSize: "var(--logo-size)",
           backgroundPosition: "right bottom",
-          width: "min(94vw, 2000px)",
-          height: "min(64vw, 2000px)",
+          width: "var(--logo-size)",
+          height: "var(--logo-size)",
         }}
       />
       
       {/* Tabs in details section */}
-      <div className="absolute top-[20vh] left-0 right-0 z-50 pointer-events-auto">
+      <div className="absolute top-[16vh] left-0 right-0 z-50 pointer-events-auto">
         <ScrollSelectTabs
           items={roomItems}
           active={displayRoom.navLabel || displayRoom.title}
@@ -125,7 +125,7 @@ const RoomDetails = ({ room, setActiveRoom }: Props) => {
             </div>
           </div>
 
-          <button className="font-area-semibold bg-[#00000000] border-2 !text-[var(--color-primary)] rounded-full uppercase w-fit !px-12 !py-5 mx-0 md:mx-0 text-[12px] tracking-[0.1em] mt-10 shadow-lg transition-transform hover:scale-105 active:scale-95">
+          <button className="font-area-semibold bg-[#00000000] border-2 !text-[var(--color-primary)] rounded-full uppercase w-fit !px-8 !py-3 sm:ml-3 md:!px-12 md:!py-5 mx-0 md:mx-0 text-[12px] tracking-[0.1em] mt-10 shadow-lg transition-transform hover:scale-105 active:scale-95">
             Book Now
           </button>
         </div>

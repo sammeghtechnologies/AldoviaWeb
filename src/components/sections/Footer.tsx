@@ -21,10 +21,12 @@ const Footer: React.FC = () => {
       <div className="max-w-6xl mx-auto">
 
         {/* Brand */}
-        <div className="text-center !mb-14">
-          <h2 className="font-lust text-[3em] text-[var(--color-primary)]">
-            Aldovia
-          </h2>
+        <div className="flex w-max-12 !mb-14 justify-center">
+         <img
+           src="/assets/logo/aldoviatext.png"
+           alt="Aldovia"
+           className="mx-auto w-full max-w-[280px] h-auto"
+         />
         </div>
 
         {/* Links Grid */}
@@ -84,10 +86,13 @@ const Footer: React.FC = () => {
 
             <ul className="space-y-3 text-sm">
               <li className="flex items-center gap-2">
-                <Phone size={16} /> +91 8071777000
+                <Phone size={16} /> 080 35077000 (Sales)
               </li>
               <li className="!pt-3 flex items-center gap-2">
-                <Mail size={16} /> info.blr@aldovia.in
+                <Phone size={16} /> 080 31013031 (Hotel)
+              </li>
+              <li className="!pt-3 flex items-center gap-2">
+                <Mail size={16} /> info@aldovia.in
               </li>
               <li className="!pt-3 flex items-start gap-2">
                 <MapPin size={16} /> Bangalore, Karnataka

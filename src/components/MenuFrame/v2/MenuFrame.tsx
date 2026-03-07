@@ -7,10 +7,12 @@ import { useLocation, useNavigate } from "react-router";
 // ✅ FIX 1: Added introFinished prop to resolve 'isVisible' name error
 const Logo_top = ({
   isVisible = true,
+  hideOnMobile = false,
   logoSrc = "assets/logo/brownlogo-mini.svg",
   onClick,
 }: {
   isVisible?: boolean;
+  hideOnMobile?: boolean;
   logoSrc?: string;
   onClick?: () => void;
 }) => {
@@ -19,12 +21,12 @@ const Logo_top = ({
       type="button"
       onClick={onClick}
       aria-label="Go to landing page"
-      className={`logo-top absolute left-3 top-15 -translate-y-1/2 z-[5000] transition-opacity duration-500 cursor-pointer ${isVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+      className={`logo-top absolute left-3 top-[60%] -translate-y-1/2 z-[5000] transition-opacity duration-500 cursor-pointer ${hideOnMobile ? "hidden md:block" : "block"} ${isVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}
     >
       <img
         src={logoSrc}
         alt="Aldovia"
-        className="logo-image w-[6em] lg:w-[5rem] h-auto object-contain block"
+        className="logo-image w-[5em] lg:w-[5rem] h-auto object-contain block"
       />
     </button>
   );
@@ -379,9 +381,10 @@ const MenuFrame = ({
         className={`h-[12vh] !p-1 absolute left-0 right-0 top-0 z-[2147483647]  transition-all duration-300 ${shouldShowTopBarBackground ? " backdrop-blur-xl  shadow-[0_10px_30px_rgba(0,0,0,0.45)]" : "bg-transparent"} ${isTopBarVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "-translate-y-12 opacity-0 pointer-events-none"
           }`}
       >
-        <div className="relative flex h-full items-center justify-end px-3 py-2 -translate-y-1">
+        <div className="relative flex h-full items-center justify-end px-3 py-2">
         <Logo_top
           isVisible={showTopLogo}
+          hideOnMobile={isOpen}
           logoSrc={topLogoSrc}
           onClick={() => navigate("/")}
         />
@@ -426,182 +429,182 @@ const MenuFrame = ({
         ref={sidebarRef}
         className="fixed !top-0 !right-0 !h-full w-[380px] md:w-[420px] lg:w-[460px] max-w-[95%] translate-x-full pointer-events-auto !p-0 md:!p-0 lg:!p-0"
       >
-        <div className={`!h-full bg-gradient-to-b from-[#4b2f23]/75 via-[#4b2f23]/75 to-[#4b2f23]/75 ${disableBackdropBlur ? "" : "backdrop-blur-xl"} !px-8 !py-10 md:!px-10 md:!py-12 lg:!px-5 lg:!py-1 relative overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.6)]`}>
+        <div className={`!h-full bg-gradient-to-b from-[#4b2f23]/75 via-[#4b2f23]/75 to-[#4b2f23]/75 ${disableBackdropBlur ? "" : "backdrop-blur-xl"} !px-8 !py-10 md:!px-10 md:!py-12 lg:!px-5 lg:!py-1 relative shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex flex-col`}>
+          <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden !pb-8 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            {/* Spacer so Home starts below hamburger icon area */}
+            <div className="h-10 md:h-14 lg:h-12" />
 
-          {/* Spacer so Home starts below hamburger icon area */}
-          <div className="h-16 md:h-20 lg:h-16" />
-
-          {/* HOME */}
-          <div className="!p-1  !mt-5 flex items-center gap-5 mb-12 shadow-xl"
-          onClick={() => {
-            setIsOpen(false);
-            navigate("/home");
-          }} 
-          >
-            <img
-              src={icons.home || "/assets/icons/home.svg"}
-              alt=""
-              className="w-6 h6- object-contain opacity-90"
-              style={{ filter: "brightness(0) invert(1)" }}
-            />
-
-            <span className="text-[17px] md:text-[19px] lg:text-[19px] tracking-wide text-white/90">
-              Home
-            </span>
-          </div>
-
-
-          <div className="border-t border-white/10 mb-10 !p-3" />
-
-          {/* STAY */}
-          <div className="mb-10 ">
-            <MenuSection
-              title="Stay"
-              isOpen={openSection === "stay"}
-              icons={icons}
-              onClick={() =>
-                setOpenSection(openSection === "stay" ? "" : "stay")
-              }
-            />
-
-            <ul
-              ref={stayRef}
-              className="!mt-5 lg:!mt-3 space-y-8 lg:space-y-4 !pl-2 overflow-hidden"
-              style={{ height: openSection === "stay" ? "auto" : 0 }}
+            {/* HOME */}
+            <div className="!p-1 flex items-center gap-5 mb-12 shadow-xl"
+            onClick={() => {
+              setIsOpen(false);
+              navigate("/home");
+            }} 
             >
-              {/* ✅ Fallbacks to direct public paths */}
-              <MenuIcon
-                icon={icons.bed || "/assets/icons/bed.svg"}
-                title="Rooms"
-                onClick={() => {
-                  setIsOpen(false);
-                  navigate("/rooms");
-                }} />
-              <MenuIcon
-                icon={icons.star || "/assets/icons/star.svg"}
-                title="Experiences & Packages"
-                onClick={() => {
-                  setIsOpen(false);
-                  navigate("/experience");
-                }}
+              <img
+                src={icons.home || "/assets/icons/home.svg"}
+                alt=""
+                className="w-6 h6- object-contain opacity-90"
+                style={{ filter: "brightness(0) invert(1)" }}
               />
-              <MenuIcon
-                icon={icons.forkknife || "/assets/icons/forkknife.svg"}
-                title="Dining"
-                onClick={() => {
-                  setIsOpen(false);
-                  navigate("/dining");
-                }}
-              />
-              <MenuIcon
-                icon={icons.activity || "/assets/icons/activity.svg"}
-                title="Activities"
-                onClick={() => {
-                  setIsOpen(false);
-                  navigate("/activities");
-                }}
-              />
-            </ul>
-          </div>
 
-          <div className="border-t border-white/10 mb-10 !p-3" />
-
-          {/* CELEBRATE & GATHER */}
-          <div className="mb-10">
-            <MenuSection
-              title="Events"
-              isOpen={openSection === "celebrate"}
-              icons={icons}
-              onClick={() =>
-                setOpenSection(openSection === "celebrate" ? "" : "celebrate")
-              }
-            />
-
-            <ul
-              ref={celebrateRef}
-              className="!mt-5 lg:!mt-3 space-y-8 lg:space-y-4 !pl-2 overflow-hidden"
-              style={{ height: openSection === "celebrate" ? "auto" : 0 }}
-            >
-              <MenuIcon
-                icon={icons.wedding || "/assets/icons/wedding.svg"}
-                title="Weddings"
-                onClick={() => {
-                  setIsOpen(false);
-                  navigate("/venues", { state: { mode: "wedding" } });
-                }}
-              />
-              <MenuIcon
-                icon={icons.corporate || "/assets/icons/corporate.svg"}
-                title="Corporate Events"
-                onClick={() => {
-                  setIsOpen(false);
-                  navigate("/venues", { state: { mode: "corporate" } });
-                }}
-              />
-              <MenuIcon
-                icon={icons.venue || "/assets/icons/venue.svg"}
-                title="Venues"
-                onClick={() => {
-                  setIsOpen(false);
-                  navigate("/venues", { state: { mode: "venue" } });
-                }}
-              />
-            </ul>
-          </div>
-
-          <div className="border-t border-white/10 mb-10 !p-3" />
-          <div className="!mb-3">
-            <MenuSection
-              title="Convention Center"
-              isOpen={openSection === "convention"}
-              icons={icons}
-              showToggleIcon={false}
-              onClick={() => {
-                setIsOpen(false);
-                navigate("/venues", { state: { mode: "convention" } });
-              }}
-            />
+              <span className="text-[17px] md:text-[1em] lg:text-[1em] tracking-wide text-white/90">
+                Home
+              </span>
             </div>
 
-          <div className="border-t border-white/10 mb-10 !p-3" />
 
-          {/* ✅ DISCOVER SECTION */}
-          <div className="mb-10">
-            <MenuSection
-              title="Discover"
-              isOpen={openSection === "discover"}
-              icons={icons}
-              onClick={() =>
-                setOpenSection(openSection === "discover" ? "" : "discover")
-              }
-            />
+            <div className="border-t border-white/10 mb-10 !p-3" />
 
-            <ul
-              ref={discoverRef}
-              className="!mt-5 lg:!mt-3 space-y-8 lg:space-y-4 !pl-2 overflow-hidden"
-              style={{ height: openSection === "discover" ? "auto" : 0 }}
-            >
-              <MenuIcon
-                icon={icons.about || "/assets/icons/about.svg"}
-                title="About Us"
+            {/* STAY */}
+            <div className="mb-10 ">
+              <MenuSection
+                title="Stay"
+                isOpen={openSection === "stay"}
+                icons={icons}
+                onClick={() =>
+                  setOpenSection(openSection === "stay" ? "" : "stay")
+                }
+              />
+
+              <ul
+                ref={stayRef}
+                className="!mt-5 lg:!mt-3 space-y-8 lg:space-y-4 !pl-2 overflow-hidden"
+                style={{ height: openSection === "stay" ? "auto" : 0 }}
+              >
+                <MenuIcon
+                  icon={icons.bed || "/assets/icons/bed.svg"}
+                  title="Rooms"
+                  onClick={() => {
+                    setIsOpen(false);
+                    navigate("/rooms");
+                  }} />
+                <MenuIcon
+                  icon={icons.star || "/assets/icons/star.svg"}
+                  title="Experiences & Packages"
+                  onClick={() => {
+                    setIsOpen(false);
+                    navigate("/experience");
+                  }}
+                />
+                <MenuIcon
+                  icon={icons.forkknife || "/assets/icons/forkknife.svg"}
+                  title="Dining"
+                  onClick={() => {
+                    setIsOpen(false);
+                    navigate("/dining");
+                  }}
+                />
+                <MenuIcon
+                  icon={icons.activity || "/assets/icons/activity.svg"}
+                  title="Activities"
+                  onClick={() => {
+                    setIsOpen(false);
+                    navigate("/activities");
+                  }}
+                />
+              </ul>
+            </div>
+
+            <div className="border-t border-white/10 mb-10 !p-3" />
+
+            {/* CELEBRATE & GATHER */}
+            <div className="mb-10">
+              <MenuSection
+                title="Events"
+                isOpen={openSection === "celebrate"}
+                icons={icons}
+                onClick={() =>
+                  setOpenSection(openSection === "celebrate" ? "" : "celebrate")
+                }
+              />
+
+              <ul
+                ref={celebrateRef}
+                className="!mt-5 lg:!mt-3 space-y-8 lg:space-y-4 !pl-2 overflow-hidden"
+                style={{ height: openSection === "celebrate" ? "auto" : 0 }}
+              >
+                <MenuIcon
+                  icon={icons.wedding || "/assets/icons/wedding.svg"}
+                  title="Weddings"
+                  onClick={() => {
+                    setIsOpen(false);
+                    navigate("/venues", { state: { mode: "wedding" } });
+                  }}
+                />
+                <MenuIcon
+                  icon={icons.corporate || "/assets/icons/corporate.svg"}
+                  title="Corporate Events"
+                  onClick={() => {
+                    setIsOpen(false);
+                    navigate("/venues", { state: { mode: "corporate" } });
+                  }}
+                />
+                <MenuIcon
+                  icon={icons.venue || "/assets/icons/venue.svg"}
+                  title="Venues"
+                  onClick={() => {
+                    setIsOpen(false);
+                    navigate("/venues", { state: { mode: "venue" } });
+                  }}
+                />
+              </ul>
+            </div>
+
+            <div className="border-t border-white/10 mb-10 !p-3" />
+            <div className="!mb-3">
+              <MenuSection
+                title="Convention Center"
+                isOpen={openSection === "convention"}
+                icons={icons}
+                showToggleIcon={false}
                 onClick={() => {
                   setIsOpen(false);
-                  navigate("/aboutus");
+                  navigate("/venues", { state: { mode: "convention" } });
                 }}
               />
-              <MenuIcon icon={icons.contact || "/assets/icons/contact.svg"} title="Get in Touch" />
-            </ul>
+              </div>
+
+            <div className="border-t border-white/10 mb-10 !p-3" />
+
+            {/* ✅ DISCOVER SECTION */}
+            <div className="mb-10">
+              <MenuSection
+                title="Discover"
+                isOpen={openSection === "discover"}
+                icons={icons}
+                onClick={() =>
+                  setOpenSection(openSection === "discover" ? "" : "discover")
+                }
+              />
+
+              <ul
+                ref={discoverRef}
+                className="!mt-5 lg:!mt-3 space-y-8 lg:space-y-4 !pl-2 overflow-hidden"
+                style={{ height: openSection === "discover" ? "auto" : 0 }}
+              >
+                <MenuIcon
+                  icon={icons.about || "/assets/icons/about.svg"}
+                  title="About Us"
+                  onClick={() => {
+                    setIsOpen(false);
+                    navigate("/aboutus");
+                  }}
+                />
+                <MenuIcon icon={icons.contact || "/assets/icons/contact.svg"} title="Get in Touch" />
+              </ul>
+            </div>
           </div>
 
           {/* CONTACT */}
-          <div className="absolute bottom-14 left-8 right-8">
-            <p className="text-[11px] md:text-[12px] lg:text-[12px] tracking-[0.35em] uppercase text-white/50 !mb-6">
+          <div className="relative z-20 mt-auto shrink-0 border-t border-white/10 pt-6">
+            <p className="!pt-2 text-[11px] md:text-[12px] lg:text-[12px] tracking-[0.35em] uppercase text-white/50 !mb-6">
               Get in touch
             </p>
 
             <div className="flex flex-col gap-6 text-[15px] md:text-[17px] lg:text-[16px] text-white/80">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full border border-yellow-500/40 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full border border-yellow-500/40 flex items-center justify-center">
                   <img
                     src={icons.phone || "/assets/icons/phone.svg"}
                     alt=""
@@ -609,11 +612,14 @@ const MenuFrame = ({
                     style={{ filter: "brightness(0) invert(1)" }}
                   />
                 </div>
-                <span>+91 8071777000</span>
+                <div className="flex flex-col gap-2 leading-tight">
+                  <span>080 35077000 (Sales)</span>
+                  <span>080 31013031 (Hotel)</span>
+                </div>
               </div>
 
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full border border-yellow-500/40 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full border border-yellow-500/40 flex items-center justify-center">
                   <img
                     src={icons.mail || "/assets/icons/mail.svg"}
                     alt=""
@@ -621,13 +627,13 @@ const MenuFrame = ({
                     style={{ filter: "brightness(0) invert(1)" }}
                   />
                 </div>
-                <span>info.blr@aldovia.in </span>
+                <span>info@aldovia.in </span>
               </div>
             </div>
           </div>
 
           {/* FOOTER */}
-          <div className="absolute bottom-4 left-8 right-8 text-[10px] md:text-[11px] tracking-[0.5em] uppercase text-white/40">
+          <div className="relative z-20 shrink-0 !mt-8 text-[10px] md:text-[11px] tracking-[0.5em] uppercase text-white/40">
             Aldovia Heritage © 2026
           </div>
         </div>
