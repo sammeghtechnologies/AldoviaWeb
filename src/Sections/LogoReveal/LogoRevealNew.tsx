@@ -216,6 +216,244 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
 /* =========================================================
    🦢 SWAN (INTERACTIVE + CAMERA TRACKING)
 ========================================================= */
+// export const SwanModel = ({
+//   scrollProgress,
+//   opacity = 1,
+//   isReflection = false,
+//   clipY,
+//   transformProgress,
+// }: {
+//   scrollProgress: number;
+//   opacity?: number;
+//   isReflection?: boolean;
+//   clipY?: number;
+//   transformProgress: number;
+// }) => {
+//   const group = useRef<THREE.Group>(null);
+//   const { scene, animations } = useGLTF("/models/Swan_anim_v16.glb");
+//   const { actions } = useAnimations(animations, group);
+
+//   // --- DRAG INTERACTION STATE ---
+//   const isDragging = useRef(false);
+//   const previousX = useRef(0);
+//   const previousY = useRef(0); // Tracks vertical mouse position
+//   const targetCamY = useRef(0); // Tracks desired camera height
+//   const [targetRotY, setTargetRotY] = useState(-Math.PI / 160);
+
+//   const clipPlane = useMemo(() => {
+//     if (clipY !== undefined) {
+//       return new THREE.Plane(new THREE.Vector3(0, -1, 0), clipY);
+//     }
+//     return null;
+//   }, [clipY]);
+
+//   const materialsRef = useRef<THREE.Material[]>([]);
+
+//   useLayoutEffect(() => {
+//     materialsRef.current = []; // Clear array on mount
+//     scene.traverse((child: any) => {
+
+//       if (child.isMesh) {
+
+//         child.geometry.computeVertexNormals(); // fix shading
+
+//         child.material.flatShading = false;
+//         child.material.needsUpdate = true;
+
+//         child.material.side = THREE.DoubleSide;
+//         child.material.depthWrite = true;
+//         child.material.depthTest = true;
+//         child.material.alphaTest = 0.5;
+
+//       }
+
+//       if (child.isMesh && child.material) {
+//         child.castShadow = true;
+//         child.receiveShadow = true;
+
+//         // 🚀 THE FIX: Give this specific swan its own unique material clone!
+//         const mat = child.material.clone();
+
+//         mat.side = THREE.DoubleSide;
+//         mat.alphaTest = isReflection ? 0.01 : 0.5;
+//         mat.depthWrite = true;
+//         mat.depthTest = true;
+//         mat.transparent = true;
+
+//         const originalColor = child.material.color?.clone?.() ?? new THREE.Color("#ffffff");
+//         const luminance =
+//           originalColor.r * 0.2126 + originalColor.g * 0.7152 + originalColor.b * 0.0722;
+//         const isFeatherMaterial = luminance > 0.6;
+
+//         if (isFeatherMaterial) {
+//           mat.color = new THREE.Color(isReflection ? "#d9dde2" : "#f7f7f4");
+//           mat.roughness = isReflection ? 0.48 : 0.34;        // soften reflected highlights
+//           mat.metalness = 0.0;         // real feathers should stay soft, not glossy
+//           mat.envMapIntensity = isReflection ? 0.55 : 1.45;  // dim the mirror swan
+//           mat.normalScale?.set(1.55, 1.55);
+//           mat.aoMapIntensity = 1.3;
+//           mat.sheen = isReflection ? 0.45 : 0.95;
+//           mat.sheenColor = new THREE.Color(isReflection ? "#d7dde4" : "#ffffff");
+//           mat.sheenRoughness = isReflection ? 0.88 : 0.72;
+//         } else {
+//           mat.color.copy(originalColor);
+//           mat.metalness = child.material.metalness ?? 0;
+//           mat.roughness = isReflection ? Math.max(child.material.roughness ?? 0.5, 0.6) : child.material.roughness ?? 0.5;
+//           mat.envMapIntensity = isReflection ? 0.45 : child.material.envMapIntensity ?? 1;
+//         }
+
+//         mat.flatShading = false;
+//         mat.needsUpdate = true;
+
+//         mat.side = THREE.DoubleSide;
+//         //mat.transparent = true;
+//         mat.transparent = opacity < 1;
+
+//         mat.flatShading = false;
+//         mat.depthWrite = true;
+//         mat.depthTest = true;
+
+//         // 🚀 Now, if this is the reflection, it only cuts THIS clone's feet off
+//         if (clipPlane) {
+//           mat.clippingPlanes = [clipPlane];
+//         } else {
+//           // Explicitly clear it for the main swan just to be safe
+//           mat.clippingPlanes = [];
+//         }
+
+//         mat.needsUpdate = true;
+//         child.material = mat; // Apply the new unique skin back to the mesh
+//         materialsRef.current.push(mat);
+//       }
+
+//      return () => {
+//       materialsRef.current.forEach((mat) => {
+//         mat.dispose(); 
+//       })}
+//     });
+//   }, [scene, isReflection, clipPlane]);
+
+//   useEffect(() => {
+//     const action = actions["rigAction"] || actions[Object.keys(actions)[0]];
+//     if (action) action.play().paused = true;
+//     return () => {
+//       if (action) action.stop();
+//     };
+//   }, [actions]);
+
+//   useEffect(() => {
+//     const action = actions["rigAction"] || actions[Object.keys(actions)[0]];
+//     if (action && action.getClip()) {
+//       action.time = action.getClip().duration * scrollProgress;
+//     }
+//   }, [scrollProgress, actions]);
+
+//   // --- SMOOTH ROTATION & CAMERA FRAME ---
+//   useFrame(({ camera }) => {
+
+    
+//     if (group.current) {
+//       group.current.rotation.x = 0.1;
+//       group.current.rotation.z = 0;
+//       group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, targetRotY, 0.1);
+//     }
+
+//     // 🚀 2. BULLETPROOF OPACITY UPDATE (Updates instantly with scroll)
+//     materialsRef.current.forEach((mat) => {
+//       mat.opacity = isReflection ? opacity * 0.42 : opacity;
+
+//                 const needsTransparent = (isReflection ? opacity * 0.42 : opacity) < 1;
+//               if (mat.transparent !== needsTransparent) {
+//                 mat.transparent = needsTransparent;
+//                 mat.needsUpdate = true;
+//               }
+//     });
+
+    
+
+//     if (!isReflection) {
+//       camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetCamY.current, 0.05);
+//       camera.lookAt(0, -5, 0);
+//     }
+//   });
+
+//   // --- DRAG HANDLERS ---
+//   useEffect(() => {
+//     const handleGlobalPointerUp = () => {
+//       isDragging.current = false;
+//       document.body.style.cursor = "auto";
+//     };
+
+//     const handleGlobalPointerMove = (e: PointerEvent) => {
+//       if (!isDragging.current) return;
+
+//       const deltaX = e.clientX - previousX.current;
+//       const deltaY = e.clientY - previousY.current;
+
+//       // Horizontal Drag -> Rotates Swan
+//       setTargetRotY((prev) => prev + deltaX * 0.015);
+
+//       // Vertical Drag -> Moves Camera
+//       // Moving mouse down pulls the camera up (over the swan)
+//       targetCamY.current += deltaY * 0.15;
+
+//       // Prevent camera from going underwater or flying out of orbit
+//       targetCamY.current = THREE.MathUtils.clamp(targetCamY.current, -10, 40);
+
+//       previousX.current = e.clientX;
+//       previousY.current = e.clientY;
+//     };
+
+//     window.addEventListener("pointerup", handleGlobalPointerUp);
+//     window.addEventListener("pointermove", handleGlobalPointerMove);
+
+//     return () => {
+//       window.removeEventListener("pointerup", handleGlobalPointerUp);
+//       window.removeEventListener("pointermove", handleGlobalPointerMove);
+//     };
+//   }, []);
+
+//   const baseScale = isMobile ? 380 : 600;
+//   const currentScale = baseScale + transformProgress * (isMobile ? 250 : 400);
+
+//   return (
+//     <>
+//       <primitive
+//         ref={group}
+//         object={scene}
+//         scale={currentScale}
+//         position={[0, -14, 0]}
+//         onPointerDown={(e: any) => {
+//           e.stopPropagation();
+//           isDragging.current = true;
+//           previousX.current = e.clientX;
+//           previousY.current = e.clientY; // Start tracking Y position
+//           document.body.style.cursor = "grabbing";
+//         }}
+//         onPointerOver={() => {
+//           if (!isDragging.current) document.body.style.cursor = "grab";
+//         }}
+//         onPointerOut={() => {
+//           if (!isDragging.current) document.body.style.cursor = "auto";
+//         }}
+//       />
+
+//       {!isReflection && (
+//         <pointLight
+//           color="#fffaf2"
+//           intensity={1.8}
+//           distance={58}
+//           decay={2}
+//           position={[5.5, 9, 12]}
+//         />
+//       )}
+//     </>
+//   );
+// };
+
+/* =========================================================
+   🦢 SWAN (INTERACTIVE + CAMERA TRACKING)
+========================================================= */
 export const SwanModel = ({
   scrollProgress,
   opacity = 1,
@@ -233,45 +471,46 @@ export const SwanModel = ({
   const { scene, animations } = useGLTF("/models/Swan_anim_v16.glb");
   const { actions } = useAnimations(animations, group);
 
-  // --- DRAG INTERACTION STATE ---
   const isDragging = useRef(false);
   const previousX = useRef(0);
-  const previousY = useRef(0); // Tracks vertical mouse position
-  const targetCamY = useRef(0); // Tracks desired camera height
+  const previousY = useRef(0); 
+  const targetCamY = useRef(0); 
   const [targetRotY, setTargetRotY] = useState(-Math.PI / 160);
 
-  const clipPlane = useMemo(() => {
-    if (clipY !== undefined) {
-      return new THREE.Plane(new THREE.Vector3(0, -1, 0), clipY);
-    }
-    return null;
-  }, [clipY]);
+  // 🚀 1. SAFELY CREATE CLIP PLANE REF (Does not trigger re-renders)
+  const clipPlaneRef = useRef<THREE.Plane | null>(null);
+  if (clipY !== undefined && !clipPlaneRef.current) {
+    clipPlaneRef.current = new THREE.Plane(new THREE.Vector3(0, -1, 0), clipY);
+  }
 
   const materialsRef = useRef<THREE.Material[]>([]);
 
   useLayoutEffect(() => {
-    materialsRef.current = []; // Clear array on mount
-    scene.traverse((child: any) => {
+    materialsRef.current = []; 
+    const originalMaterials = new Map(); // 🚀 2. PROTECT THE GLOBAL CACHE
 
+    scene.traverse((child: any) => {
       if (child.isMesh) {
 
         child.geometry.computeVertexNormals(); // fix shading
         child.geometry.normalizeNormals();
         child.material.flatShading = false;
         child.material.needsUpdate = true;
-
         child.material.side = THREE.DoubleSide;
         child.material.depthWrite = true;
         child.material.depthTest = true;
         child.material.alphaTest = 0.5;
-
       }
 
       if (child.isMesh && child.material) {
         child.castShadow = true;
         child.receiveShadow = true;
 
-        // 🚀 THE FIX: Give this specific swan its own unique material clone!
+        // Save pristine material
+        if (!originalMaterials.has(child.uuid)) {
+          originalMaterials.set(child.uuid, child.material);
+        }
+
         const mat = child.material.clone();
 
         mat.side = THREE.DoubleSide;
@@ -327,36 +566,33 @@ export const SwanModel = ({
         }
 
         mat.flatShading = false;
-        mat.needsUpdate = true;
-
-        mat.side = THREE.DoubleSide;
-        //mat.transparent = true;
         mat.transparent = opacity < 1;
-
-        mat.flatShading = false;
         mat.depthWrite = true;
         mat.depthTest = true;
 
-        // 🚀 Now, if this is the reflection, it only cuts THIS clone's feet off
-        if (clipPlane) {
-          mat.clippingPlanes = [clipPlane];
+        // 🚀 3. APPLY BLADE SAFELY
+        if (clipPlaneRef.current) {
+          mat.clippingPlanes = [clipPlaneRef.current];
         } else {
-          // Explicitly clear it for the main swan just to be safe
-          mat.clippingPlanes = [];
+          mat.clippingPlanes = null; // Destroys inherited blades from cache
         }
 
         mat.needsUpdate = true;
-        child.material = mat; // Apply the new unique skin back to the mesh
+        child.material = mat; 
         materialsRef.current.push(mat);
       }
-
-      return () => {
-        materialsRef.current.forEach((mat) => {
-          mat.dispose();
-        })
-      }
     });
-  }, [scene, isReflection, clipPlane]);
+
+    return () => {
+      // 🚀 4. RESTORE CACHE ON UNMOUNT
+      scene.traverse((child: any) => {
+        if (child.isMesh && originalMaterials.has(child.uuid)) {
+          child.material = originalMaterials.get(child.uuid);
+        }
+      });
+      materialsRef.current.forEach((mat) => mat.dispose());
+    };
+  }, [scene, isReflection]); // 🚀 5. REMOVED clipPlane dependency!
 
   useEffect(() => {
     const action = actions["rigAction"] || actions[Object.keys(actions)[0]];
@@ -373,9 +609,11 @@ export const SwanModel = ({
     }
   }, [scrollProgress, actions]);
 
-  // --- SMOOTH ROTATION & CAMERA FRAME ---
   useFrame(({ camera }) => {
-
+    // 🚀 6. DYNAMICALLY LIFT BLADE IN RENDER LOOP (Zero lag)
+    if (clipPlaneRef.current && clipY !== undefined) {
+      clipPlaneRef.current.constant = clipY;
+    }
 
     if (group.current) {
       group.current.rotation.x = 0.1;
@@ -383,10 +621,8 @@ export const SwanModel = ({
       group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, targetRotY, 0.1);
     }
 
-    // 🚀 2. BULLETPROOF OPACITY UPDATE (Updates instantly with scroll)
     materialsRef.current.forEach((mat) => {
-      mat.opacity = isReflection ? opacity * 0.42 : opacity;
-
+mat.opacity = isReflection ? opacity * 0.85 : opacity;
       const needsTransparent = (isReflection ? opacity * 0.42 : opacity) < 1;
       if (mat.transparent !== needsTransparent) {
         mat.transparent = needsTransparent;
@@ -394,15 +630,12 @@ export const SwanModel = ({
       }
     });
 
-
-
     if (!isReflection) {
       camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetCamY.current, 0.05);
       camera.lookAt(0, -5, 0);
     }
   });
 
-  // --- DRAG HANDLERS ---
   useEffect(() => {
     const handleGlobalPointerUp = () => {
       isDragging.current = false;
@@ -411,20 +644,11 @@ export const SwanModel = ({
 
     const handleGlobalPointerMove = (e: PointerEvent) => {
       if (!isDragging.current) return;
-
       const deltaX = e.clientX - previousX.current;
       const deltaY = e.clientY - previousY.current;
-
-      // Horizontal Drag -> Rotates Swan
       setTargetRotY((prev) => prev + deltaX * 0.015);
-
-      // Vertical Drag -> Moves Camera
-      // Moving mouse down pulls the camera up (over the swan)
       targetCamY.current += deltaY * 0.15;
-
-      // Prevent camera from going underwater or flying out of orbit
       targetCamY.current = THREE.MathUtils.clamp(targetCamY.current, -10, 40);
-
       previousX.current = e.clientX;
       previousY.current = e.clientY;
     };
@@ -452,7 +676,7 @@ export const SwanModel = ({
           e.stopPropagation();
           isDragging.current = true;
           previousX.current = e.clientX;
-          previousY.current = e.clientY; // Start tracking Y position
+          previousY.current = e.clientY; 
           document.body.style.cursor = "grabbing";
         }}
         onPointerOver={() => {
@@ -462,15 +686,8 @@ export const SwanModel = ({
           if (!isDragging.current) document.body.style.cursor = "auto";
         }}
       />
-
       {!isReflection && (
-        <pointLight
-          color="#ffffff"
-          intensity={2.1}
-          distance={58}
-          decay={2}
-          position={[5.5, 9, 12]}
-        />
+        <pointLight color="#fffaf2" intensity={1.8} distance={58} decay={2} position={[5.5, 9, 12]} />
       )}
     </>
   );
@@ -734,6 +951,7 @@ const LogoRevealNew = ({
   const [scrollProgress, setScrollProgress] = useState(0);
   const [transformProgress, setTransformProgress] = useState(0);
   const [splashProgress, setSplashProgress] = useState(0);
+  const [useCornerLogo, setUseCornerLogo] = useState(false);
   const [images, setImages] = useState<HTMLImageElement[]>([]);
   const hasReachedCornerRef = useRef(false);
   const isBookNowVisibleRef = useRef(false);
@@ -774,6 +992,8 @@ const LogoRevealNew = ({
         onUpdate: (self) => {
           const raw = self.progress;
           const isCornerReached = raw >= 0.6;
+
+          setUseCornerLogo(isCornerReached);
 
           if (isBookNowVisibleRef.current !== isCornerReached) {
             isBookNowVisibleRef.current = isCornerReached;
@@ -826,10 +1046,20 @@ const LogoRevealNew = ({
       },
     });
 
-    const centerLogoWidth = isMobile ? "280px" : "420px";
+    const centerLogoWidth = isMobile ? "78vw" : "100vw";
 
     // Set Initial CSS States
-    gsap.set(logoRef.current, { autoAlpha: 0, scale: 0.8, top: "50%", left: "50%", xPercent: -50, yPercent: -50, filter: "blur(60px)", width: centerLogoWidth });
+    gsap.set(logoRef.current, {
+      autoAlpha: 1,
+      scale: 1,
+      top: "50%",
+      left: "50%",
+      xPercent: -50,
+      yPercent: -50,
+      filter: "blur(0px)",
+      width: centerLogoWidth,
+      maxWidth: "100vw",
+    });
     gsap.set(canvasWrapperRef.current, { autoAlpha: 0, filter: "blur(120px)" });
 
     // 1. Play Video Sequence (Takes exactly 4.0 units = 40% of total timeline)
@@ -842,9 +1072,8 @@ const LogoRevealNew = ({
       onUpdate: () => renderHero(frameObj.frame)
     });
 
-    // 2. Video ends -> Fade in 3D Scene (blurred) and Logo (sharp) (Takes 0.5 units = 5%)
+    // 2. Video ends -> Fade in 3D Scene (blurred) while logo stays visible (Takes 0.5 units = 5%)
     tl.to(canvasWrapperRef.current, { autoAlpha: 1, filter: "blur(40px)", duration: 0.5 }, ">");
-    tl.to(logoRef.current, { autoAlpha: 1, scale: 1, filter: "blur(0px)", duration: 0.5 }, "<");
 
     // 3. Move Logo to corner AND unblur the Swan simultaneously (Takes 1.5 units = 15%)
     tl.to(logoRef.current, {
@@ -852,7 +1081,7 @@ const LogoRevealNew = ({
       left: "48px",
       xPercent: 0,
       yPercent: 0,
-      width: "56px",
+      width: "144px",
       duration: 1.5,
       ease: "power2.inOut",
     }, ">");
@@ -939,8 +1168,8 @@ const LogoRevealNew = ({
 
           <directionalLight
             position={[-8, 6, -12]}
-            intensity={1.55}
-            color="#e8f1ff"
+            intensity={1.35}
+            color="#dcecff"
           />
 
           <directionalLight
@@ -978,15 +1207,18 @@ const LogoRevealNew = ({
       <div
         ref={logoRef}
         className="absolute z-30 pointer-events-none"
-        style={{ opacity: 0, visibility: "hidden" }}
+        style={{ opacity: 1, visibility: "visible" }}
       >
-        <img src="assets/logo/aldovialogo.svg" alt="Logo" className="w-full h-auto brightness-0 invert" />
+        <img
+          src={"assets/logo/beigelogo-small.svg"}
+          alt="Logo"
+        />
       </div>
 
     </section>
   );
 };
 
-useGLTF.preload("/models/Swan_anim_v16.glb");
+useGLTF.preload("/models/Swan_anim_v17.glb");
 
 export default LogoRevealNew;

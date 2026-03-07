@@ -1,4 +1,4 @@
-import { Canvas, useThree } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Suspense, useRef, useState, useEffect } from "react";
 import { PerspectiveCamera, Environment} from "@react-three/drei";
 import gsap from "gsap";
@@ -6,7 +6,7 @@ import { useGSAP } from "@gsap/react";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import { useNavigate } from "react-router";
 import * as THREE from "three";
-
+import { useMemo } from "react";
 import { SwanModel, WaterPlane, SplashDroplets,SplashWalls } from "./Sections/LogoReveal/LogoRevealNew";
 import NaturalFeather from "./components/NaturalFeather/NaturalFeather";
 import CameraFocusController from "./components/CameraFocusController/CameraFocusController";
@@ -90,6 +90,133 @@ const CameraZoomController = ({ mountFeathers, activeId, startOffset }: { mountF
   return null;
 };
 
+
+// --- THE INFINITE LOOP CAMERA CONTROLLER ---
+
+// --- THE INFINITE LOOP CONTROLLER (1-FRAME GLITCH FIXED) ---
+const CameraDiveController = ({ diveProgress, activeId }: { diveProgress: number, activeId: number | null }) => {
+  const { camera } = useThree();
+  
+  const hasDived = useRef(false);
+  const preDiveRotation = useRef(new THREE.Euler());
+  const preDiveUp = useRef(new THREE.Vector3());
+
+  useFrame(() => {
+    if (activeId !== null) return;
+
+    if (diveProgress === 0) {
+      if (hasDived.current) {
+        if (window.scrollY < 10000) {
+            camera.position.set(0, 0, 70);
+            camera.up.set(0, 1, 0);
+            camera.lookAt(0, -5, 0);
+        } else {
+            camera.rotation.copy(preDiveRotation.current);
+            camera.up.copy(preDiveUp.current);
+        }
+        hasDived.current = false;
+      }
+      return; 
+    }
+
+    if (!hasDived.current) {
+      preDiveRotation.current.copy(camera.rotation);
+      preDiveUp.current.copy(camera.up);
+      hasDived.current = true;
+    }
+
+    const freezePoint = 0.60; 
+
+    // 🚀 PHASE 1: YOUR EXACT SOMERSAULT DIVE
+    // THE FIX: Changed to Strictly Less Than (<). 
+    // This forces the camera to instantly teleport to the sky the exact millisecond it hits 0.60
+    if (diveProgress < freezePoint) {
+      const swanX = 6.0;    const swanY = -5.5;   const swanZ = -3.0;
+      const featherX = 7.0; const featherY = 5.0; const featherZ = -3.0;
+      const startX = 7.0;   const startY = 5.0;   const startZ = 24.0;
+
+      const startRadius = Math.hypot(startY - swanY, startZ - swanZ);
+      const startAngle = Math.atan2(startY - swanY, startZ - swanZ);
+
+      const endX = swanX;
+      const endAngle = startAngle - (Math.PI * 1.2); 
+      const endRadius = startRadius * 0.85;  
+
+      const p = diveProgress; 
+      const currentRadius = THREE.MathUtils.lerp(startRadius, endRadius, p);
+      const currentAngle = THREE.MathUtils.lerp(startAngle, endAngle, p);
+      
+      const targetX = THREE.MathUtils.lerp(startX, endX, p);
+      const targetY = swanY + currentRadius * Math.sin(currentAngle);
+      const targetZ = swanZ + currentRadius * Math.cos(currentAngle);
+
+      camera.position.set(targetX, targetY, targetZ);
+
+      const focusX = THREE.MathUtils.lerp(featherX, swanX, p);
+      const focusY = THREE.MathUtils.lerp(featherY, swanY, p);
+      const focusZ = THREE.MathUtils.lerp(featherZ, swanZ, p);
+
+      camera.up.set(0, Math.cos(currentAngle), -Math.sin(currentAngle));
+      camera.lookAt(focusX, focusY, focusZ);
+    } 
+    // 🚀 PHASE 2: TELEPORT TO TOP OF START SWAN & SWEEP DOWN
+    else {
+      const p2 = (diveProgress - freezePoint) / (1.0 - freezePoint);
+
+      const swanY = -5.0; 
+
+      const startRadius = 40.0;
+      const endRadius = Math.hypot(0 - swanY, 70.0 - 0); 
+      
+      const startAngle = Math.PI / 2;
+      const endAngle = Math.atan2(0 - swanY, 70.0 - 0); 
+      
+      const currentRadius = THREE.MathUtils.lerp(startRadius, endRadius, p2);
+      const currentAngle = THREE.MathUtils.lerp(startAngle, endAngle, p2);
+
+      const lockOffset = THREE.MathUtils.lerp(0.01, 0, p2);
+
+      camera.position.set(
+        0,
+        swanY + currentRadius * Math.sin(currentAngle),
+        lockOffset + currentRadius * Math.cos(currentAngle)
+      );
+
+      camera.up.set(0, 1, 0); 
+      camera.lookAt(0, swanY, 0); 
+    }
+  });
+
+  return null;
+};
+
+
+// --- THE SWAN REFLECTION FX WRAPPER ---
+// --- THE SWAN REFLECTION FX WRAPPER ---
+const EndSwanWrapper = ({ opacity, scale, whiteness, clipY }: { opacity: number, scale: number, whiteness: number, clipY: number }) => {
+  const groupRef = useRef<THREE.Group>(null);
+const whiteColor = useMemo(() => new THREE.Color(2.5, 2.5, 2.5), []);
+  useFrame(() => {
+    if (groupRef.current) {
+      groupRef.current.traverse((child: any) => {
+        if (child.isMesh && child.material && child.material.color) {
+          if (child.userData.origColor === undefined) {
+            child.userData.origColor = child.material.color.clone();
+          }
+          child.material.color.lerpColors(child.userData.origColor, whiteColor, whiteness);
+        }
+      });
+    }
+  });
+
+  return (
+    <group ref={groupRef} position={[6.0, -5.5, -3.0]} rotation={[Math.PI, Math.PI / 40, 0]} scale={scale}>
+      <SwanModel scrollProgress={0.0} transformProgress={0.0} opacity={opacity} isReflection={true} clipY={clipY} />
+    </group>
+  );
+};
+
+
 const MainCanvas = () => {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -108,6 +235,8 @@ const MainCanvas = () => {
 
   const [mountBackWater, setMountBackWater] = useState(false);
 
+  const [globalFade, setGlobalFade] = useState(1);
+
 
   // Animation Progress States
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -120,15 +249,24 @@ const MainCanvas = () => {
   const [swanOpacity, setSwanOpacity] = useState(1);
   const [endSwanOpacity, setEndSwanOpacity] = useState(0);
 
+  const [endSwanScale, setEndSwanScale] = useState(0.32);    
+  const [endSwanWhite, setEndSwanWhite] = useState(0);
+  const [endSwanClipY, setEndSwanClipY] = useState(-0.01); // 👈 ADD THIS
+
   // Interaction States
   const [activeId, setActiveId] = useState<number | null>(null);
   const [focusTarget, setFocusTarget] = useState<THREE.Vector3 | null>(null);
   const [allBubblesReady, setAllBubblesReady] = useState(false);
   const [burstAll, setBurstAll] = useState(false);
   const [showCornerActions, setShowCornerActions] = useState(false);
+  const [useCornerLogo, setUseCornerLogo] = useState(false);
 
   const feather3Ref = useRef<any>(null);
   const cornerActionsVisibleRef = useRef(false);
+
+  // --- DIVE STATE ---
+  const [diveProgress, setDiveProgress] = useState(0);
+  
 
   // Image Sequence Loading
   const TOTAL_FRAMES = 499;
@@ -188,8 +326,8 @@ const MainCanvas = () => {
     if (!isLoaded || images.length === 0) return;
 
     const totalScroll = 15000;
-    const centerLogoWidth = isMobile ? "280px" : "420px";
-    const cornerLogoWidth = isMobile ? "88px" : "120px";
+    const centerLogoWidth = isMobile ? "360px" : "660px";
+    const cornerLogoWidth = isMobile ? "112px" : "160px";
 
     gsap.set(logoRef.current, {
       autoAlpha: 0, scale: 0.8, top: "50%", left: "50%",
@@ -204,89 +342,101 @@ const MainCanvas = () => {
         end: `+=${totalScroll}`,
         pin: true,
         scrub: 1.5,
-        onUpdate: (self) => {
+       onUpdate: (self) => {
           const raw = self.progress;
           const currentScroll = raw * 15000;
           const shouldShowCornerActions = raw >= 0.4;
 
-          if (self.progress >= 1 && self.direction === 1) {
-            window.scrollTo(0, self.end);
+          const diveStart = 14490;
+          const diveEnd = 14950; 
+          const dProg = THREE.MathUtils.clamp((currentScroll - diveStart) / (diveEnd - diveStart), 0, 1);
+          const smoothDive = dProg < 0.5 ? 2 * dProg * dProg : 1 - Math.pow(-2 * dProg + 2, 2) / 2;
+          setDiveProgress(smoothDive);
+
+          const freezePoint = 0.60; 
+          const isLoopingBack = smoothDive >= freezePoint;
+          // 🚀 AGGRESSIVE FADE: Everything is gone by 0.11 dive progress
+// 🚀 THE FIX: Start at 1.0 and drop to 0.0 as smoothDive reaches 0.11
+          const fade = 1.0 - THREE.MathUtils.smoothstep(smoothDive, 0.0, 0.11);
+          setGlobalFade(fade);
+
+          // 🚀 THE FIX: Teleport to exactly 45% (6750px). 
+          // This is the exact moment the logo frames vanish, the Swan mounts, and the 3D animation is at 0%.
+          if (self.progress >= 0.999 && self.direction === 1) {
+            window.scrollTo({ top: 6750, behavior: "instant" });
           }
 
           if (cornerActionsVisibleRef.current !== shouldShowCornerActions) {
             cornerActionsVisibleRef.current = shouldShowCornerActions;
             setShowCornerActions(shouldShowCornerActions);
+            setUseCornerLogo(shouldShowCornerActions);
           }
 
-          // Swan Opacity Fade
-          const fadeStart = 0.70;
-          const fadeEnd = 0.75;
+          const fadeStart = 0.70; const fadeEnd = 0.75;
           setSwanOpacity(raw < fadeStart ? 1 : Math.max(0, 1 - (raw - fadeStart) / (fadeEnd - fadeStart)));
 
-          // Base Swan Animations
-          // const swanRaw = Math.min(raw / 0.75, 1.0);
-          // if (swanRaw > 0.4) {
-          //   setScrollProgress(swanRaw < 0.60 ? 0 : (swanRaw - 0.60) / 0.40);
-          //   setTransformProgress(swanRaw < 0.60 ? 0 : swanRaw > 0.85 ? 1 : (swanRaw - 0.60) / 0.25);
-          //   setSplashProgress(swanRaw < 0.90 ? 0 : (swanRaw - 0.90) / 0.10);
-          // }
-
-          // Base Swan Animations (Stretched out to be slower)
-         // Base Swan Animations
-         // Base Swan Animations
-         // Base Swan Animations
           const swanRaw = Math.min(raw / 0.75, 1.0);
-          
           if (swanRaw > 0.4) {
-            setSplashProgress(swanRaw < 0.90 ? 0 : (swanRaw - 0.90) / 0.10);
+            setSplashProgress(isLoopingBack ? 0 : (swanRaw < 0.90 ? 0 : (swanRaw - 0.90) / 0.10));
           }
+          setScrollProgress(isLoopingBack ? 0 : (raw < 0.45 ? 0 : raw >= 1.0 ? 1 : (raw - 0.45) / 0.55));
+          setTransformProgress(isLoopingBack ? 0 : (raw < 0.45 ? 0 : raw >= 1.0 ? 1 : (raw - 0.45) / 0.55));
 
-          // 🚀 BOTH the animation AND the scaling now stretch to 95% of the page
-        // 🚀 STRETCHED TO THE ABSOLUTE MAXIMUM (Ends at 99% of scroll)
-         // 🚀 Just a little more! Starts at 42%, ends at 100%
-         setScrollProgress(raw < 0.45 ? 0 : raw >= 1.0 ? 1 : (raw - 0.45) / 0.55);
-          setTransformProgress(raw < 0.45 ? 0 : raw >= 1.0 ? 1 : (raw - 0.45) / 0.55);
+          const riseStart = 13280; const riseEnd = 13380;
+          setFallProgress(isLoopingBack ? 0 : THREE.MathUtils.clamp((currentScroll - riseStart) / (riseEnd - riseStart), 0, 1));
 
-          // Feathers Mount
-          if (raw >= 0.73 && raw < 0.99) {
-            setMountFeathers(true);
-            setAllBubblesReady(true);
-            setBurstAll(raw > 0.732);
-          } else {
+         const landStart = 13980; const landEnd = 15000;
+          const sProg = THREE.MathUtils.clamp((currentScroll - landStart) / (landEnd - landStart), 0, 1);
+          setSwanProgress(isLoopingBack ? 0 : sProg);
+
+          // 🚀 1. THE LOCK: Use smoothstep to ensure growth is DEAD ZERO until sProg > 0.6
+          // This prevents the "too early" jump you're seeing in the screenshots.
+          const growth = THREE.MathUtils.smoothstep(sProg, 0.60, 1.0); 
+          
+          // 🚀 2. CONTROLLED SCALE: Only starts growing after 60% of the swan's landing sequence
+          // We use 0.8 instead of 2.5 so it doesn't get "massive" too fast.
+          setEndSwanScale(isLoopingBack ? 0.32 : 0.32 + (growth * 0.8)); 
+          setEndSwanWhite(isLoopingBack ? 0 : growth);
+
+          // 🚀 3. CALM CLIPPING: Only lifts the blade as the growth actually happens.
+          // Starting at -0.01 and only going to -5.0 ensures it doesn't "get up on the water" too early.
+// 🚀 THE FIX: Change subtraction (-) to addition (+) 
+          // Adding to the constant moves a (0, -1, 0) plane UP in world space.
+          setEndSwanClipY(isLoopingBack ? -0.01 : -0.01 + (growth * 15.0));
+          if (isLoopingBack) {
             setMountFeathers(false);
             setAllBubblesReady(false);
-          }
-
-          // Water Mount
-          if (raw >= 0.83) {
-            setMountWater(true);
-          } else {
             setMountWater(false);
-          }
-
-          // End Sequence
-          const riseStart = 13280;
-          const riseEnd = 13380;
-          setFallProgress(THREE.MathUtils.clamp((currentScroll - riseStart) / (riseEnd - riseStart), 0, 1));
-
-          const landStart = 13980;
-          const landEnd = 15000;
-          const sProg = THREE.MathUtils.clamp((currentScroll - landStart) / (landEnd - landStart), 0, 1);
-          setSwanProgress(sProg);
-
-          setMountEndSwan(currentScroll >= 13900);
-          setEndSwanOpacity(THREE.MathUtils.smoothstep(sProg, 0.05, 0.50));
-
-          if (raw >= 0.73) {
-            setMount3D(false);
-          } else if (raw > 0.4) {
+            setMountEndSwan(false);
+            setEndSwanOpacity(0);
+            
             setMount3D(true);
-          }
+            setMountBackWater(false); 
+          } else {
+            if (raw >= 0.73 && raw < 0.99) {
+              setMountFeathers(true);
+              setAllBubblesReady(true);
+              setBurstAll(raw > 0.732);
+            } else {
+              setMountFeathers(false);
+              setAllBubblesReady(false);
+            }
 
-          if (raw >= 0.795) {
-            setMountBackWater(false);
-          } else if (raw > 0.4) {
-            setMountBackWater(true);
+            setMountWater(raw >= 0.83);
+            setMountEndSwan(currentScroll >= 13900);
+            setEndSwanOpacity(THREE.MathUtils.smoothstep(sProg, 0.05, 0.50));
+
+            if (raw >= 0.73) {
+              setMount3D(false);
+            } else if (raw > 0.4) {
+              setMount3D(true);
+            }
+
+            if (raw >= 0.795) {
+              setMountBackWater(false);
+            } else if (raw > 0.4) {
+              setMountBackWater(true);
+            }
           }
         }
       }
@@ -299,7 +449,7 @@ const MainCanvas = () => {
     tl.to(canvasWrapperRef.current, { autoAlpha: 1, filter: "blur(40px)", duration: 0.5 }, ">");
     tl.to(logoRef.current, { autoAlpha: 1, scale: 1, filter: "blur(0px)", duration: 0.5 }, "<");
     tl.to(frameCanvasRef.current, { autoAlpha: 0, duration: 0.5 }, "<");
-    tl.to(logoRef.current, { top: "32px", left: "40px", xPercent: 0, yPercent: 0, width: cornerLogoWidth, duration: 1.5, ease: "power2.inOut" }, ">");
+    tl.to(logoRef.current, { top: "16px", left: "20px", xPercent: 0, yPercent: 0, width: cornerLogoWidth, duration: 1.5, ease: "power2.inOut" }, ">");
     tl.to(canvasWrapperRef.current, { filter: "blur(0px)", duration: 1.5, ease: "power2.inOut" }, "<");
     tl.to({}, { duration: 4.0 });
     tl.to({}, { duration: 3.366 });
@@ -343,7 +493,7 @@ const MainCanvas = () => {
             <Environment preset="city" />
 
             <CameraZoomController mountFeathers={mountFeathers} activeId={activeId} startOffset={11680} />
-
+             <CameraDiveController diveProgress={diveProgress} activeId={activeId} />
             {mount3D && (
               <group>
                 <SwanModel scrollProgress={scrollProgress} transformProgress={transformProgress} />
@@ -361,32 +511,34 @@ const MainCanvas = () => {
             )}
 
             {mountWater && (
-              <WaterSurface fallProgress={fallProgress} swanProgress={swanProgress} id3Ref={feather3Ref} />
+              <WaterSurface fallProgress={fallProgress} swanProgress={swanProgress} id3Ref={feather3Ref} opacity={globalFade} />
             )}
 
             {mountFeathers && (
               <group>
                 <CameraFocusController target={focusTarget} enabled={!!focusTarget} />
-                <NaturalFeather id={5} variant="mid-drift" startPos={[-11.0, 12, 1]} targetPos={[-17.0, 2.5, 1]} started={true} delay={0.8} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} />
-                <NaturalFeather id={2} variant="small-drag" startPos={[-6.5, 14, -2]} targetPos={[-16.5, -19.0, -2]} started={true} delay={0.6} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} />
-                <NaturalFeather ref={feather3Ref} id={3} variant="upper-pendulum" startPos={[-2.0, 10, -3]} targetPos={[7.0, 5.0, -3]} started={true} delay={0.3} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} />
-                <NaturalFeather id={1} variant="main" startPos={[2.5, 16, 0]} targetPos={[2.5, -10.0, 0]} started={true} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} />
-                <NaturalFeather id={4} variant="side-roll-upper" startPos={[7.0, 12, -1]} targetPos={[30.0, -4.0, -1]} started={true} delay={0.5} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} />
-                <NaturalFeather id={6} variant="high-drag-zig" startPos={[11.5, 18, 0]} targetPos={[17.5, -20.0, 0]} started={true} delay={0.2} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} />
+                <NaturalFeather id={5} variant="mid-drift" startPos={[-11.0, 12, 1]} targetPos={[-17.0, 2.5, 1]} started={true} delay={0.8} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
+                <NaturalFeather id={2} variant="small-drag" startPos={[-6.5, 14, -2]} targetPos={[-16.5, -19.0, -2]} started={true} delay={0.6} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
+                <NaturalFeather ref={feather3Ref} id={3} variant="upper-pendulum" startPos={[-2.0, 10, -3]} targetPos={[7.0, 5.0, -3]} started={true} delay={0.3} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
+                <NaturalFeather id={1} variant="main" startPos={[2.5, 16, 0]} targetPos={[2.5, -10.0, 0]} started={true} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
+                <NaturalFeather id={4} variant="side-roll-upper" startPos={[7.0, 12, -1]} targetPos={[30.0, -4.0, -1]} started={true} delay={0.5} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
+                <NaturalFeather id={6} variant="high-drag-zig" startPos={[11.5, 18, 0]} targetPos={[17.5, -20.0, 0]} started={true} delay={0.2} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
               </group>
             )}
-
-            {mountEndSwan && (
-              <group position={[6.0, -5.5, -3.0]} rotation={[Math.PI, Math.PI / 40, 0]} scale={0.32}>
-                <SwanModel scrollProgress={0.0} transformProgress={0.0} opacity={endSwanOpacity} isReflection={true} clipY={-0.01} />
-              </group>
+{mountEndSwan && (
+              <EndSwanWrapper opacity={endSwanOpacity} scale={endSwanScale} whiteness={endSwanWhite} clipY={endSwanClipY} />
             )}
           </Suspense>
         </Canvas>
       </div>
 
-      <div ref={logoRef} className="absolute z-30 pointer-events-none" style={{ visibility: "hidden" }}>
-        <img src="assets/logo/beige-logo.svg" alt="Logo" className="w-full h-auto brightness-0 invert" />
+      <div ref={logoRef} className="absolute z-30 overflow-hidden pointer-events-none" style={{ visibility: "hidden" }}>
+        <img
+          src={useCornerLogo ? "assets/logo/beigelogo-mini.svg" : "assets/logo/beigelogo-small.svg"}
+          alt="Logo"
+          className="block w-full h-auto brightness-0 invert"
+          style={{ transform: "scale(1)" }}
+        />
       </div>
 
       <RoomDetailsPanel

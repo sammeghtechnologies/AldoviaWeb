@@ -12,7 +12,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 const NaturalFeather = forwardRef(({ 
   id, startPos, targetPos, started, variant, activeId, onBubbleClick,
-  allBubblesReady, burstAll, startOffset
+  allBubblesReady, burstAll, startOffset,opacity = 1
 }: any, ref: any) => {
 
   
@@ -138,6 +138,13 @@ const NaturalFeather = forwardRef(({
   useFrame(() => {
     if (!started) return;
 
+  
+Object.values(materials).forEach((mat: any) => {
+      if (mat) mat.opacity = opacity;
+    });
+    if (nodes?.Mesh002?.material) nodes.Mesh002.material.opacity = opacity;
+    if (nodes?.Mesh003?.material) nodes.Mesh003.material.opacity = opacity;
+    if (nodes?.Cylinder021?.material) nodes.Cylinder021.material.opacity = opacity;
     // Pause GSAP when it is the main active burst feather
     if (isBurst) {
       if (rotTimelineRef.current && !rotTimelineRef.current.paused()) {

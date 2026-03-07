@@ -9,13 +9,13 @@ const Footer: React.FC = () => {
 
 <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 right-[-12%] z-0 translate-y-[10%] md:translate-y-[28%] bg-no-repeat opacity-10 md:opacity-[0.15]"
+        className="pointer-events-none absolute bottom-[-32%] right-[-35%] z-0 translate-y-[10%] md:translate-y-[28%] bg-no-repeat opacity-10 md:opacity-[0.15]"
         style={{
-          backgroundImage: "url('/assets/logo/logo-wet-earth.png')",
-          backgroundSize: "min(64vw, 100vh)",
+          backgroundImage: "url('/assets/logo/brownsmall-bg.svg')",
+          backgroundSize: "min(100vw)",
           backgroundPosition: "right bottom",
-          width: "min(64vw, 100vh)",
-          height: "min(64vw, 100vh)",
+          width: "min(100vw)",
+          height: "min(100vw)",
         }}
       />
       <div className="max-w-6xl mx-auto">

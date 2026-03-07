@@ -29,9 +29,9 @@ const ImmersiveSection: React.FC = () => {
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute z-0 bg-no-repeat opacity-20 md:opacity-[0.15] right-[-25%] top-[0%] -translate-y-[22%] sm:right-[-14%] sm:top-[0%] sm:-translate-y-[22%] md:right-[-14%] md:top-[0%] md:-translate-y-[22%] lg:right-[-12%] lg:top-[2%] lg:-translate-y-[24%] [--logo-size:96vw] sm:[--logo-size:94vw] md:[--logo-size:64vw] lg:[--logo-size:58vw] xl:[--logo-size:54vw]"
+        className="pointer-events-none absolute z-0 bg-no-repeat opacity-20 md:opacity-[0.15] right-[-25%] top-[0%] -translate-y-[22%] sm:right-[-14%] sm:top-[0%] sm:-translate-y-[22%] md:right-[-14%] md:top-[0%] md:-translate-y-[22%] lg:right-[-42%] lg:top-[-13%] lg:-translate-y-[24%] [--logo-size:96vw] sm:[--logo-size:94vw] md:[--logo-size:64vw] lg:[--logo-size:100vw] xl:[--logo-size:100vw]"
         style={{
-          backgroundImage: "url('/assets/logo/logo-wet-earth.png')",
+          backgroundImage: "url('/assets/logo/brownsmall-bg.svg')",
           backgroundSize: "var(--logo-size)",
           backgroundPosition: "right top",
           width: "var(--logo-size)",

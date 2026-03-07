@@ -65,9 +65,9 @@ const CarouselSection: React.FC = () => {
     >
    <div
         aria-hidden="true"
-        className="pointer-events-none absolute z-0 bg-no-repeat opacity-20 md:opacity-[0.15] left-[-10%] top-[-10%] -translate-y-[14%] sm:right-[-16%] sm:top-[-9%] sm:-translate-y-[16%] md:right-[-14%] md:top-[-7%] md:-translate-y-[18%] lg:right-[-12%] lg:top-[2%] lg:-translate-y-[20%] [--logo-size:80vw] sm:[--logo-size:72vw] md:[--logo-size:64vw] lg:[--logo-size:58vw] xl:[--logo-size:54vw]"
+        className="pointer-events-none absolute z-0 bg-no-repeat opacity-20 md:opacity-[0.15] left-[-20%] top-[-35%] -translate-y-[1%] sm:right-[-1%] sm:top-[-1%] sm:-translate-y-[1%] md:right-[-1%] md:top-[-1%] md:-translate-y-[18%] lg:left-[-35%] lg:top-[-20%] lg:-translate-y-[20%] [--logo-size:100vw] sm:[--logo-size:100vw] md:[--logo-size:100vw] !lg:[--logo-size:100vw] xl:[--logo-size:100vw]"
         style={{
-          backgroundImage: "url('/assets/logo/logo-wet-earth.png')",
+          backgroundImage: "url('/assets/logo/brownsmall-bg.svg')",
           backgroundSize: "var(--logo-size)",
           backgroundPosition: "left top",
           width: "var(--logo-size)",
