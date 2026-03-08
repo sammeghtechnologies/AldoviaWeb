@@ -90,7 +90,7 @@ export default function ScrollSelectTabs({
             type="button"
             onClick={() => scrollTabs("left")}
             disabled={!canScrollLeft}
-            className={`z-10 grid shrink-0 place-items-center rounded-full border border-white/30 bg-black/35 text-white backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-35 ${
+            className={`z-10 grid shrink-0 place-items-center rounded-full border border-white/30 bg-black/35 text-white backdrop-blur-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-35 ${
               compactMobile ? "h-7 w-7 md:h-8 md:w-8" : "h-8 w-8"
             }`}
             aria-label="Scroll tabs left"
@@ -120,7 +120,7 @@ export default function ScrollSelectTabs({
                     }}
                     className={`!px-6 ${compactMobile ? "!py-1 md:!py-2 lg:!py-1" : "!py-2 lg:!py-1"} ${
                       isOverflowing && index === 0 ? "!ml-1 md:!ml-2" : ""
-                    } !rounded-[10px] text-sm font-medium transition-all duration-300 flex-shrink-0
+                    } !rounded-[10px] text-sm font-medium transition-all duration-300 flex-shrink-0 cursor-pointer
                 ${
                   isActive
                     ? activeClassName
@@ -138,7 +138,7 @@ export default function ScrollSelectTabs({
             type="button"
             onClick={() => scrollTabs("right")}
             disabled={!canScrollRight}
-            className={`z-10 grid shrink-0 place-items-center rounded-full border border-white/30 bg-black/35 text-white backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-35 ${
+            className={`z-10 grid shrink-0 place-items-center rounded-full border border-white/30 bg-black/35 text-white backdrop-blur-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-35 ${
               compactMobile ? "h-7 w-7 md:h-8 md:w-8" : "h-8 w-8"
             }`}
             aria-label="Scroll tabs right"

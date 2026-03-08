@@ -1,7 +1,9 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router";
 
 const HeroButtons: React.FC = () => {
+  const navigate = useNavigate();
   const buttonLayoutClass =
     "flex w-[314px] h-10 px-6 py-5 justify-center items-center gap-2 shrink-0";
 
@@ -14,12 +16,16 @@ const HeroButtons: React.FC = () => {
     >
       <div className="flex flex-col items-center gap-5 lg:flex-row !text-[var(--color-secondary)]">
         <button
+          type="button"
+          onClick={() => navigate("/rooms")}
           className={`${buttonLayoutClass} !text-[var(--color-secondary)] bg-[var(--color-primary)] hover:brightness-90 transition-all duration-500 text-white rounded-full text-lg shadow-2xl backdrop-blur-md`}
         >
           Book Your Stay
         </button>
 
         <button
+          type="button"
+          onClick={() => navigate("/venues")}
           className={`${buttonLayoutClass} !text-[var(--color-secondary)] border border-white/50 bg-white/10 backdrop-blur-lg hover:bg-white/20 transition-all duration-500 text-white rounded-full text-lg`}
         >
           Plan Your Event

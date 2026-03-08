@@ -351,7 +351,7 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
 //   // --- SMOOTH ROTATION & CAMERA FRAME ---
 //   useFrame(({ camera }) => {
 
-    
+
 //     if (group.current) {
 //       group.current.rotation.x = 0.1;
 //       group.current.rotation.z = 0;
@@ -369,7 +369,7 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
 //               }
 //     });
 
-    
+
 
 //     if (!isReflection) {
 //       camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetCamY.current, 0.05);
@@ -473,8 +473,8 @@ export const SwanModel = ({
 
   const isDragging = useRef(false);
   const previousX = useRef(0);
-  const previousY = useRef(0); 
-  const targetCamY = useRef(0); 
+  const previousY = useRef(0);
+  const targetCamY = useRef(0);
   const [targetRotY, setTargetRotY] = useState(-Math.PI / 160);
 
   // 🚀 1. SAFELY CREATE CLIP PLANE REF (Does not trigger re-renders)
@@ -486,7 +486,7 @@ export const SwanModel = ({
   const materialsRef = useRef<THREE.Material[]>([]);
 
   useLayoutEffect(() => {
-    materialsRef.current = []; 
+    materialsRef.current = [];
     const originalMaterials = new Map(); // 🚀 2. PROTECT THE GLOBAL CACHE
 
     scene.traverse((child: any) => {
@@ -529,11 +529,10 @@ export const SwanModel = ({
           // keep original texture maps
           mat.map = child.material.map;
           mat.normalMap = child.material.normalMap;
-          mat.roughnessMap = child.material.roughnessMap;
           mat.aoMap = child.material.aoMap;
 
           // brighter white like reference swan
-          mat.color = new THREE.Color(isReflection ? "#e4e7eb" : "#ffffff");
+          mat.color = new THREE.Color(isReflection ? "#ffffff" : "#ffffff");
 
           // feather softness
           mat.roughness = isReflection ? 0.5 : 0.32;
@@ -543,15 +542,9 @@ export const SwanModel = ({
           mat.envMapIntensity = isReflection ? 0.55 : 1.6;
 
           // smoother feather shading
-          if (mat.normalScale) {
-            mat.normalScale.set(
-              isReflection ? 1.4 : 1.25,
-              isReflection ? 1.4 : 1.25
-            );
-          }
+       
 
           // ambient occlusion for feather depth
-          mat.aoMapIntensity = isReflection ? 1.2 : 1.1;
 
           // subtle feather sheen like real feathers
           mat.sheen = isReflection ? 0.35 : 0.9;
@@ -559,16 +552,9 @@ export const SwanModel = ({
           mat.sheenRoughness = 0.6;
 
         } else {
-          mat.color.copy(originalColor);
-          mat.metalness = child.material.metalness ?? 0;
-          mat.roughness = isReflection ? Math.max(child.material.roughness ?? 0.5, 0.6) : child.material.roughness ?? 0.5;
-          mat.envMapIntensity = isReflection ? 0.45 : child.material.envMapIntensity ?? 1;
-        }
+         }
 
-        mat.flatShading = false;
-        mat.transparent = opacity < 1;
-        mat.depthWrite = true;
-        mat.depthTest = true;
+      
 
         // 🚀 3. APPLY BLADE SAFELY
         if (clipPlaneRef.current) {
@@ -578,7 +564,7 @@ export const SwanModel = ({
         }
 
         mat.needsUpdate = true;
-        child.material = mat; 
+        child.material = mat;
         materialsRef.current.push(mat);
       }
     });
@@ -622,7 +608,7 @@ export const SwanModel = ({
     }
 
     materialsRef.current.forEach((mat) => {
-mat.opacity = isReflection ? opacity * 0.85 : opacity;
+      mat.opacity = isReflection ? opacity * 0.85 : opacity;
       const needsTransparent = (isReflection ? opacity * 0.42 : opacity) < 1;
       if (mat.transparent !== needsTransparent) {
         mat.transparent = needsTransparent;
@@ -676,7 +662,7 @@ mat.opacity = isReflection ? opacity * 0.85 : opacity;
           e.stopPropagation();
           isDragging.current = true;
           previousX.current = e.clientX;
-          previousY.current = e.clientY; 
+          previousY.current = e.clientY;
           document.body.style.cursor = "grabbing";
         }}
         onPointerOver={() => {
@@ -1118,6 +1104,7 @@ const LogoRevealNew = ({
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     }
   }, [isReady, images.length, onLogoCornerReached, onBookNowVisibilityChange]);
+  
 
   return (
     <section ref={containerRef} className="relative w-full h-screen overflow-hidden bg-black">
@@ -1139,43 +1126,28 @@ const LogoRevealNew = ({
           shadows
           gl={{
             antialias: true,
-            toneMappingExposure: 1.15,
-            toneMapping: THREE.ACESFilmicToneMapping,
+            toneMappingExposure: 0.44,
+            toneMapping: THREE.LinearToneMapping,
             outputColorSpace: THREE.SRGBColorSpace,
             powerPreference: "high-performance"
           }}
           onCreated={() => setIsReady(true)}
         >
           <color attach="background" args={["#000000"]} />
-          <ambientLight intensity={0.65} />
-
+          <ambientLight
+            intensity={1.51}
+            color="#ffffff"
+          />
           <directionalLight
             position={[10, 20, 10]}
             intensity={2.2}
           />
 
-          <directionalLight
-            position={[7, 12, 8]}
-            intensity={3.2}
-            color="#ffffff"
-            castShadow
-            shadow-mapSize-width={2048}
-            shadow-mapSize-height={2048}
-            shadow-bias={-0.00015}
-          />
-
-          <directionalLight
-            position={[-8, 6, -12]}
-            intensity={1.35}
-            color="#dcecff"
-          />
-
-          <directionalLight
-            position={[0, -3, 10]}
-            intensity={0.7}
-            color="#b9d4f5"
-          />
-
+<directionalLight
+  position={[5, 10, 5]}
+  intensity={1.5}
+  color="#ffffff"
+/>
           <spotLight
             position={[0, 16, 11]}
             intensity={2.35}
@@ -1193,10 +1165,7 @@ const LogoRevealNew = ({
             <WaterPlane splashProgress={splashProgress} />
             <SplashDroplets splashProgress={splashProgress} />
             <SplashWalls splashProgress={splashProgress} />
-            <Environment
-              preset="studio"
-              background={false}
-            />
+            <Environment  background={false} />
           </Suspense>
         </Canvas>
       </div>

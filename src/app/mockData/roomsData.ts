@@ -14,52 +14,52 @@ export const roomsData: Room[] = [
     image: "/assets/pages/rooms/room1.webp",
     title: "Deluxe Room",
     description: "Contemporary comfort with garden views",
-    size: "350 sq ft",
+    size: "412 - 350 sq. ft.",
     guests: "2 guests",
     price: "8,500"
   },
   {
     id: 2,
     image: "/assets/pages/rooms/room2.webp",
-    title: "Premium Suite",
+    title: "Luxury Room",
     description: "Spacious elegance with premium interiors",
-    size: "550 sq ft",
+    size: "350 sq. ft.",
     guests: "3 guests",
     price: "15,000"
   },
   {
     id: 3,
     image: "/assets/pages/rooms/room3.webp",
-    title: "Delux Suite",
+    title: "1 Bedroom Suite",
     description: "Spacious elegance with premium interiors",
-    size: "550 sq ft",
+    size: "532 sq. ft.",
     guests: "3 guests",
     price: "15,000"
   },
   {
     id: 4,
     image: "/assets/pages/rooms/room4.webp",
-    title: "Luxury Suite",
+    title: "2 Bedroom Suite",
     description: "Spacious elegance with premium interiors",
-    size: "550 sq ft",
+    size: "730 sq. ft.",
     guests: "3 guests",
     price: "15,000"
   },
   {
     id: 5,
     image: "/assets/pages/rooms/room5.webp",
-    title: "Luxury Suite",
+    title: "Deluxe Suite",
     description: "Spacious elegance with premium interiors",
-    size: "550 sq ft",
+    size: "620 sq. ft.",
     guests: "3 guests",
     price: "15,000"
   },
   {
     id: 6,
     image: "/assets/pages/rooms/room1.webp",
-    title: "Luxury Suite",
+    title: "Executive Suite",
     description: "Spacious elegance with premium interiors",
-    size: "550 sq ft",
+    size: "1846 sq. ft.",
     guests: "3 guests",
     price: "15,000"
   }

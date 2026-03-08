@@ -429,17 +429,19 @@ const MenuFrame = ({
         ref={sidebarRef}
         className="fixed !top-0 !right-0 !h-full w-[380px] md:w-[420px] lg:w-[460px] max-w-[95%] translate-x-full pointer-events-auto !p-0 md:!p-0 lg:!p-0"
       >
-        <div className={`!h-full bg-gradient-to-b from-[#4b2f23]/75 via-[#4b2f23]/75 to-[#4b2f23]/75 ${disableBackdropBlur ? "" : "backdrop-blur-xl"} !px-8 !py-10 md:!px-10 md:!py-12 lg:!px-5 lg:!py-1 relative shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex flex-col`}>
+        <div className={`!h-full bg-gradient-to-b from-[var(--color-primary)] via-[var(--color-primary)] to-[var(--color-primary)] ${disableBackdropBlur ? "" : "backdrop-blur-xl"} !px-8 !py-10 md:!px-10 md:!py-12 lg:!px-5 lg:!py-1 relative shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex flex-col`}>
           <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden !pb-8 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {/* Spacer so Home starts below hamburger icon area */}
-            <div className="h-10 md:h-14 lg:h-12" />
+            <div className="h-14 md:h-16 lg:h-[4.5rem]" />
 
             {/* HOME */}
-            <div className="!p-1 flex items-center gap-5 mb-12 shadow-xl"
-            onClick={() => {
-              setIsOpen(false);
-              navigate("/home");
-            }} 
+            <button
+              type="button"
+              className="!p-1 flex w-full items-center gap-5 mb-12 text-left cursor-pointer transition-opacity duration-300 hover:opacity-70"
+              onClick={() => {
+                setIsOpen(false);
+                navigate("/home");
+              }}
             >
               <img
                 src={icons.home || "/assets/icons/home.svg"}
@@ -451,7 +453,7 @@ const MenuFrame = ({
               <span className="text-[17px] md:text-[1em] lg:text-[1em] tracking-wide text-white/90">
                 Home
               </span>
-            </div>
+            </button>
 
 
             <div className="border-t border-white/10 mb-10 !p-3" />

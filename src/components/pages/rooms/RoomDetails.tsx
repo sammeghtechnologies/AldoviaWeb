@@ -110,18 +110,24 @@ const RoomDetails = ({ room, setActiveRoom }: Props) => {
           </p>
 
           {/* --- AMENITIES: Occupancy and Bed Type --- */}
-          <div className="font-area-regular flex items-center gap-10 !mt-4 !mb-4 !text-[var(--color-primary)]/80 text-[15px] md:text-[16px]">
+          <div className="font-area-regular flex flex-wrap items-center gap-x-10 gap-y-4 !mt-4 !mb-4 !text-[var(--color-primary)]/80 text-[15px] md:text-[16px]">
+            <div className="flex items-center gap-3">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 7.5h18"/><path d="M6 4.5v6"/><path d="M18 4.5v6"/><path d="M4 12.5h16"/><path d="M6 15.5h12"/><path d="M9 18.5h6"/>
+              </svg>
+              <span className='!text-[var(--color-primary)]'>{displayRoom.size}</span>
+            </div>
             <div className="flex items-center gap-3">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
               </svg>
-              <span className='!text-[var(--color-primary)]'>2 adults + 2 children</span>
+              <span className='!text-[var(--color-primary)]'>{displayRoom.occupancy}</span>
             </div>
             <div className="flex items-center gap-3">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M2 4v16"/><path d="M2 11h20"/><path d="M2 17h20"/><path d="M22 4v16"/><path d="M18 11V4"/><path d="M6 11V4"/>
               </svg>
-              <span className='!text-[var(--color-primary)]'>King bed</span>
+              <span className='!text-[var(--color-primary)]'>{displayRoom.bedType}</span>
             </div>
           </div>
 

@@ -144,6 +144,7 @@ const HeroPage: React.FC = () => {
       >
         <Suspense fallback={<div className="h-12 w-full md:w-[492px]" />}>
           <SplitActionButtons
+            onPrimaryClick={() => navigate("/rooms")}
             onSecondaryClick={() => navigate("/venues")}
             className="!w-full md:!w-[492px]"
           />
