@@ -265,26 +265,27 @@ const ThreeDCube: React.FC<ThreeDCubeProps> = ({
           ))}
         </div>
       </div>
-     {/* Controls */}
-     <CarouselControls
-        total={faces.length}
-        index={faceIndex}
-        onNext={() => {
-          setFaceIndex((prev) => (prev + 1) % faces.length);
-          setRotation((prev) => ({ ...prev, y: prev.y - 90 }));
-        }}
-        onPrev={() => {
-          setFaceIndex((prev) => (prev - 1 + faces.length) % faces.length);
-          setRotation((prev) => ({ ...prev, y: prev.y + 90 }));
-        }}
-        progressTrackColor="rgba(73,38,28,0.18)"
-        progressFillColor="var(--color-secondary)"
-        buttonColor="var(--color-secondary)"
-        iconColor="var(--color-secondary)"
-        className="!mt-14 lg:!mt-24 !mb-8 w-full max-w-[400px] !px-0"
-        progressBarClassName="w-[160px] max-w-[160px] shrink-0 lg:!-ml-6"
-        buttonsClassName="lg:!ml-40"
-      />
+      {isDesktop ? (
+        <CarouselControls
+          total={faces.length}
+          index={faceIndex}
+          onNext={() => {
+            setFaceIndex((prev) => (prev + 1) % faces.length);
+            setRotation((prev) => ({ ...prev, y: prev.y - 90 }));
+          }}
+          onPrev={() => {
+            setFaceIndex((prev) => (prev - 1 + faces.length) % faces.length);
+            setRotation((prev) => ({ ...prev, y: prev.y + 90 }));
+          }}
+          progressTrackColor="rgba(73,38,28,0.18)"
+          progressFillColor="var(--color-secondary)"
+          buttonColor="var(--color-secondary)"
+          iconColor="var(--color-secondary)"
+          className="!mt-14 lg:!mt-24 !mb-8 w-full max-w-[400px] !px-0"
+          progressBarClassName="w-[160px] max-w-[160px] shrink-0 lg:!-ml-6"
+          buttonsClassName="lg:!ml-40"
+        />
+      ) : null}
     </div>
   );
 };

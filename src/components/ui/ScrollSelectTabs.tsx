@@ -90,7 +90,7 @@ export default function ScrollSelectTabs({
             type="button"
             onClick={() => scrollTabs("left")}
             disabled={!canScrollLeft}
-            className={`z-10 grid shrink-0 place-items-center rounded-full border border-white/30 bg-black/35 text-white backdrop-blur-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-35 ${
+            className={`z-10 hidden shrink-0 place-items-center rounded-full border border-white/30 bg-black/35 text-white backdrop-blur-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-35 md:grid ${
               compactMobile ? "h-7 w-7 md:h-8 md:w-8" : "h-8 w-8"
             }`}
             aria-label="Scroll tabs left"
@@ -138,7 +138,7 @@ export default function ScrollSelectTabs({
             type="button"
             onClick={() => scrollTabs("right")}
             disabled={!canScrollRight}
-            className={`z-10 grid shrink-0 place-items-center rounded-full border border-white/30 bg-black/35 text-white backdrop-blur-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-35 ${
+            className={`z-10 hidden shrink-0 place-items-center rounded-full border border-white/30 bg-black/35 text-white backdrop-blur-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-35 md:grid ${
               compactMobile ? "h-7 w-7 md:h-8 md:w-8" : "h-8 w-8"
             }`}
             aria-label="Scroll tabs right"
