@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import ScrollSelectTabs from "../../ui/ScrollSelectTabs";
 import ActivitiesInfoSection from "./ActivitiesInfoSection";
 import type { ActivityInfoData } from "./ActivitiesInfoSection";
@@ -25,6 +26,7 @@ const AcitivityDetails: React.FC<AcitivityDetailsProps> = ({
   const initialTab = defaultTab && tabs.includes(defaultTab) ? defaultTab : tabs[0] ?? "";
   const [activeTab, setActiveTab] = useState(initialTab);
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
+  const [showSectionArrows, setShowSectionArrows] = useState(false);
   const containerRef = useRef<HTMLElement | null>(null);
   const wheelLockRef = useRef(false);
   const touchStartYRef = useRef<number | null>(null);
@@ -76,6 +78,26 @@ const AcitivityDetails: React.FC<AcitivityDetailsProps> = ({
 
   useEffect(() => {
     const sectionRoot = containerRef.current;
+    if (!sectionRoot) return;
+
+    const updateArrowVisibility = () => {
+      const rect = sectionRoot.getBoundingClientRect();
+      const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+      setShowSectionArrows(isVisible);
+    };
+
+    updateArrowVisibility();
+    window.addEventListener("scroll", updateArrowVisibility, { passive: true });
+    window.addEventListener("resize", updateArrowVisibility);
+
+    return () => {
+      window.removeEventListener("scroll", updateArrowVisibility);
+      window.removeEventListener("resize", updateArrowVisibility);
+    };
+  }, []);
+
+  useEffect(() => {
+    const sectionRoot = containerRef.current;
     const sectionCount = activeSections.length;
     if (!sectionRoot || sectionCount <= 1) return;
 
@@ -97,6 +119,18 @@ const AcitivityDetails: React.FC<AcitivityDetailsProps> = ({
       return (index === 0 && direction < 0) || (index === sectionCount - 1 && direction > 0);
     };
 
+    const scrollToAdjacentSection = (direction: number) => {
+      const sibling =
+        direction > 0 ? sectionRoot.nextElementSibling : sectionRoot.previousElementSibling;
+
+      if (!(sibling instanceof HTMLElement)) return;
+
+      sibling.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    };
+
     const onWheel = (event: WheelEvent) => {
       if (!isSectionPinned() || wheelLockRef.current) return;
 
@@ -105,6 +139,7 @@ const AcitivityDetails: React.FC<AcitivityDetailsProps> = ({
         immediateDirection !== 0 &&
         shouldReleaseScroll(activeSectionIndexRef.current, immediateDirection)
       ) {
+        scrollToAdjacentSection(immediateDirection);
         lastWheelDirectionRef.current = 0;
         wheelDelta = 0;
         return;
@@ -134,6 +169,7 @@ const AcitivityDetails: React.FC<AcitivityDetailsProps> = ({
       const direction = wheelDelta > 0 ? 1 : -1;
 
       if (shouldReleaseScroll(activeSectionIndexRef.current, direction)) {
+        scrollToAdjacentSection(direction);
         lastWheelDirectionRef.current = 0;
         wheelDelta = 0;
         return;
@@ -173,6 +209,7 @@ const AcitivityDetails: React.FC<AcitivityDetailsProps> = ({
       const direction = deltaY > 0 ? 1 : -1;
 
       if (shouldReleaseScroll(activeSectionIndexRef.current, direction)) {
+        scrollToAdjacentSection(direction);
         touchStartYRef.current = currentY;
         return;
       }
@@ -222,9 +259,57 @@ const AcitivityDetails: React.FC<AcitivityDetailsProps> = ({
   const displayedSection = activeSections[activeSectionIndex] ?? activeSections[0];
   const desktopHeightStyle =
     activeSections.length > 1 ? { minHeight: `${activeSections.length * 100}vh` } : undefined;
+  const goToAdjacentSection = (direction: number) => {
+    const sectionRoot = containerRef.current;
+    if (!sectionRoot) return;
+
+    const isAtBoundary =
+      (activeSectionIndexRef.current === 0 && direction < 0) ||
+      (activeSectionIndexRef.current === activeSections.length - 1 && direction > 0);
+
+    if (isAtBoundary) {
+      const sibling =
+        direction > 0 ? sectionRoot.nextElementSibling : sectionRoot.previousElementSibling;
+
+      if (sibling instanceof HTMLElement) {
+        sibling.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+
+      return;
+    }
+
+    setActiveSectionIndex((currentIndex) => {
+      const nextIndex = Math.min(activeSections.length - 1, Math.max(0, currentIndex + direction));
+      activeSectionIndexRef.current = nextIndex;
+      return nextIndex;
+    });
+  };
 
   return (
     <section ref={containerRef} className="relative w-full" style={desktopHeightStyle}>
+      {showSectionArrows ? (
+        <div className="fixed right-4 top-1/2 z-[170] flex -translate-y-1/2 flex-col gap-3 md:right-6">
+          <button
+            type="button"
+            onClick={() => goToAdjacentSection(-1)}
+            className="grid h-11 w-11 place-items-center rounded-full border border-white/20 bg-black/35 text-white backdrop-blur-md transition-opacity hover:opacity-85"
+            aria-label="Go to previous section"
+          >
+            <ChevronUp className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => goToAdjacentSection(1)}
+            className="grid h-11 w-11 place-items-center rounded-full border border-white/20 bg-black/35 text-white backdrop-blur-md transition-opacity hover:opacity-85"
+            aria-label="Go to next section"
+          >
+            <ChevronDown className="h-5 w-5" />
+          </button>
+        </div>
+      ) : null}
       <div className="sticky top-0 h-screen">
         <div className="relative">
           <ActivitiesInfoSection
