@@ -140,32 +140,35 @@ const MenuFrame = ({
   const [isBeyondHero, setIsBeyondHero] = useState(false);
   const [isHomeExperienceInView, setIsHomeExperienceInView] = useState(false);
   const [isAboutAwardsInView, setIsAboutAwardsInView] = useState(false);
+  const [isSectionBoundaryZone, setIsSectionBoundaryZone] = useState(false);
   const shouldShowTopBarBackground =
     !isOpen && !disableTopBarBackground && (forceTopBarBackground || isBeyondHero);
   const isHeroSection = !isBeyondHero;
   const isHomeBeyondHero = location.pathname === "/home" && isBeyondHero;
   const isAboutUsPage = location.pathname === "/aboutus";
-  const defaultHamburgerIconSrc = isOpen
-    ? "assets/icons/feet-beige.png"
+  const useLightHamburgerIcon = forcePrimaryTopBarIcons
+    ? false
+    : isOpen
+    ? true
+    : isSectionBoundaryZone
+    ? false
     : isHomeExperienceInView
-    ? "assets/icons/feet-beige.png"
+    ? true
     : isAboutAwardsInView
-    ? "assets/icons/feet-beige.png"
+    ? true
     : isHeroSection
-    ? "assets/icons/feet-beige.png"
+    ? true
     : isAboutUsPage
-    ? "assets/icons/feet-brown.png"
+    ? false
     : isHomeBeyondHero
-    ? "assets/icons/feet-brown.png"
-    : shouldShowTopBarBackground
-      ? "assets/icons/feet-beige.png"
-      : "assets/icons/feet-brown.png";
-  const hamburgerIconSrc = forcePrimaryTopBarIcons
-    ? "assets/icons/feet-brown.png"
-    : defaultHamburgerIconSrc;
-  const topLogoSrc = hamburgerIconSrc.includes("feet-beige")
+    ? false
+    : shouldShowTopBarBackground;
+  const topLogoSrc = useLightHamburgerIcon
     ? "assets/logo/beigelogo-mini.svg"
     : "assets/logo/brownlogo-mini.svg";
+  const hamburgerColor = useLightHamburgerIcon
+    ? "var(--color-secondary)"
+    : "var(--color-primary)";
 
   // Logo animation
   useLayoutEffect(() => {
@@ -288,6 +291,29 @@ const MenuFrame = ({
     const onScroll = () => {
       const currentY = window.scrollY || 0;
       setIsBeyondHero(currentY > window.innerHeight * 0.6);
+
+      const sectionBoundaryMarkerY = currentY + window.innerHeight * 0.08;
+      const boundarySections = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-menu-boundary-section='true']")
+      );
+      const isInsideBoundaryZone = boundarySections.some((section) => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.offsetHeight;
+        const sectionBottom = sectionTop + sectionHeight;
+        const boundarySize = sectionHeight * 0.05;
+
+        return (
+          sectionBoundaryMarkerY >= sectionTop &&
+          sectionBoundaryMarkerY <= sectionBottom &&
+          (
+            sectionBoundaryMarkerY <= sectionTop + boundarySize ||
+            sectionBoundaryMarkerY >= sectionBottom - boundarySize
+          )
+        );
+      });
+
+      setIsSectionBoundaryZone(isInsideBoundaryZone);
+
       if (location.pathname === "/home") {
         const experience = document.getElementById("home-experience-section");
         if (experience) {
@@ -318,6 +344,27 @@ const MenuFrame = ({
     };
 
     setIsBeyondHero((window.scrollY || 0) > window.innerHeight * 0.6);
+    const initialMarkerY = (window.scrollY || 0) + window.innerHeight * 0.08;
+    const initialBoundarySections = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-menu-boundary-section='true']")
+    );
+    setIsSectionBoundaryZone(
+      initialBoundarySections.some((section) => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.offsetHeight;
+        const sectionBottom = sectionTop + sectionHeight;
+        const boundarySize = sectionHeight * 0.05;
+
+        return (
+          initialMarkerY >= sectionTop &&
+          initialMarkerY <= sectionBottom &&
+          (
+            initialMarkerY <= sectionTop + boundarySize ||
+            initialMarkerY >= sectionBottom - boundarySize
+          )
+        );
+      })
+    );
     if (location.pathname === "/home") {
       const experience = document.getElementById("home-experience-section");
       if (experience) {
@@ -400,18 +447,36 @@ const MenuFrame = ({
             </button>
           )}
 
-          {/* FEET MENU ICON */}
+          {/* MENU ICON */}
           <div
             id="hamburger"
             className={`!pr-8 cursor-pointer translate-x-2 transition-transform duration-300 active:scale-90 ${isOpen ? "rotate-90" : "rotate-0"
               }`}
             onClick={() => setIsOpen((prev) => !prev)}
           >
-            <img
-              src={hamburgerIconSrc}
-              alt="Menu"
-              className="w-16 h-16 object-contain transition-all"
-            />
+            <div
+              aria-label="Menu"
+              className="relative flex h-12 w-12 items-center justify-center transition-all"
+            >
+              <span
+                className={`absolute h-[2px] w-7 rounded-full transition-all duration-300 ${
+                  isOpen ? "translate-y-0 rotate-45" : "-translate-y-2.5"
+                }`}
+                style={{ backgroundColor: hamburgerColor }}
+              />
+              <span
+                className={`absolute h-[2px] w-7 rounded-full transition-all duration-300 ${
+                  isOpen ? "opacity-0" : "opacity-100"
+                }`}
+                style={{ backgroundColor: hamburgerColor }}
+              />
+              <span
+                className={`absolute h-[2px] w-7 rounded-full transition-all duration-300 ${
+                  isOpen ? "translate-y-0 -rotate-45" : "translate-y-2.5"
+                }`}
+                style={{ backgroundColor: hamburgerColor }}
+              />
+            </div>
           </div>
         </div>
         </div>

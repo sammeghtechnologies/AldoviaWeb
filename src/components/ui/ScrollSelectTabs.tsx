@@ -59,13 +59,23 @@ export default function ScrollSelectTabs({
   }, [items, updateScrollState]);
 
   useEffect(() => {
+    const container = containerRef.current;
     const activeTab = tabRefs.current[active];
-    if (!activeTab) return;
+    if (!container || !activeTab) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const tabRect = activeTab.getBoundingClientRect();
+    const tabIsLeftClipped = tabRect.left < containerRect.left;
+    const tabIsRightClipped = tabRect.right > containerRect.right;
+
+    if (!tabIsLeftClipped && !tabIsRightClipped) {
+      return;
+    }
 
     activeTab.scrollIntoView({
       behavior: "smooth",
       block: "nearest",
-      inline: "center",
+      inline: "nearest",
     });
   }, [active]);
 

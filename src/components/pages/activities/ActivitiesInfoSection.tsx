@@ -91,6 +91,7 @@ const ActivitiesInfoSection: React.FC<ActivitiesInfoSectionProps> = ({
   return (
     <section
       ref={sectionRef}
+      data-menu-boundary-section="true"
       className="relative min-h-screen w-full overflow-hidden snap-start bg-[radial-gradient(circle_at_35%_20%,rgba(207,171,87,0.25),rgba(28,25,23,0.96)_52%,rgba(14,14,14,1)_100%)]"
     >
       <div
@@ -132,7 +133,8 @@ const ActivitiesInfoSection: React.FC<ActivitiesInfoSectionProps> = ({
 
               <div className="lg:!pt-3">
                 <div
-                  className={`transition-all duration-[850ms] ease-out ${
+                  data-activity-content-scroll="true"
+                  className={`max-h-[42vh] overflow-y-auto !pr-2 transition-all duration-[850ms] ease-out [scrollbar-width:thin] [scrollbar-color:rgba(207,171,87,0.75)_rgba(255,255,255,0.08)] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#CFAB57]/80 md:max-h-[48vh] lg:max-h-[62vh] ${
                     isContentVisible
                       ? "translate-y-0 opacity-100 delay-100"
                       : "translate-y-24 opacity-0"

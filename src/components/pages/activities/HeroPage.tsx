@@ -161,7 +161,7 @@ const ActivitiesHeroPage: React.FC = () => {
         {
           title: "Pickleball",
           subtitle: "Fast-paced paddle sport action",
-          backgroundImage: "/assets/pages/activities/pickleball/pickleball.jpg",
+          backgroundImage: "/assets/pages/activities/pickleball/pickleball.webp",
           images: [
             "/assets/pages/activities/pickleball/pickleball.webp",
             "/assets/pages/activities/pickleball/pickleball.webp",
