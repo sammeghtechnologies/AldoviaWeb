@@ -146,7 +146,7 @@ const ExperienceInfoCard: React.FC<{
             </p>
 
             <ul className="!mt-6 !pr-4 !space-y-2 !text-[.95em] lg:!pr-6 lg:!text-[18px] !leading-[1.45] !text-[var(--color-secondary)] xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] xl:gap-x-10">
-              {item.includes.map((includeLine, includeIndex) => (
+              {item.includes.map((includeLine) => (
                 <li key={`${item.id}-${includeLine}`} className="min-w-0 overflow-visible flex items-start gap-3 !text-[var(--color-secondary)]">
                   <span className="!mt-0.5 shrink-0 !text-[var(--color-secondary)]">✔</span>
                   <span className="block min-w-0 overflow-visible break-words !text-[var(--color-secondary)]">
