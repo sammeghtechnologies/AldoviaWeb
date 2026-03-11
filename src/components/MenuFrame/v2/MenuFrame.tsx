@@ -680,8 +680,8 @@ const MenuFrame = ({
                   />
                 </div>
                 <div className="flex flex-col gap-2 leading-tight">
-                  <span>080 35077000 (Sales)</span>
-                  <span>080 31013031 (Hotel)</span>
+                  <span>+08 3507 7000 (Hotel)</span>
+                  <span>+08 3101 3831 (Sales)</span>
                 </div>
               </div>
 

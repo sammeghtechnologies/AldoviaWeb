@@ -195,8 +195,8 @@ const AnimatedImageHero: React.FC<AnimatedImageHeroProps> = ({
                   : "text-white"
               } ${primaryButtonClassName}`}
             >
-              <span className="inline-flex items-center gap-2">
-                <span>{buttonLabel}</span>
+              <span className="inline-flex items-center gap-2 whitespace-nowrap">
+                <span className="whitespace-nowrap">{buttonLabel}</span>
                 {buttonLabel === "Request Proposal" && <ArrowRight className="h-4 w-4" />}
               </span>
             </button>
@@ -211,9 +211,9 @@ const AnimatedImageHero: React.FC<AnimatedImageHeroProps> = ({
                   : "!border !border-[rgba(255,255,255,0.30)] !bg-[rgba(255,255,255,0.10)] !text-[var(--color-secondary)] backdrop-blur-md hover:!bg-[rgba(255,255,255,0.18)]"
               }`}
             >
-              <span className="inline-flex items-center gap-2">
+              <span className="inline-flex items-center gap-2 whitespace-nowrap">
                 {secondaryButtonLabel === "Download Brochure" && <Download className="h-4 w-4" />}
-                <span>{isPlanYourEvent ? planEventSecondaryLabel : secondaryButtonLabel}</span>
+                <span className="whitespace-nowrap">{isPlanYourEvent ? planEventSecondaryLabel : secondaryButtonLabel}</span>
               </span>
             </button>
           )}

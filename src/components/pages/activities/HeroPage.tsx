@@ -306,7 +306,7 @@ const ActivitiesHeroPage: React.FC = () => {
         images={activityImages}
         title="Curated Activities"
         subtitle="Discover wellness, adventure, and relaxation across 70 acres of resort grounds."
-        buttonLabel="Plan Your Event"
+        buttonLabel="Explore Activities"
         enableEntryAnimation
         entryDuration={2.1}
         enableTypingSubtitle

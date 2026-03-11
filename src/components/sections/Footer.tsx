@@ -4,7 +4,7 @@ import { Instagram, Facebook, Twitter, Phone, Mail, MapPin } from "lucide-react"
 const Footer: React.FC = () => {
   return (
     <footer
-      className="relative w-full overflow-hidden bg-[var(--color-secondary)] bg-no-repeat text-[var(--color-primary)] font-area font-normal !pt-20 !pb-10 !px-6 md:!px-12 lg:!px-20"
+      className="relative w-full overflow-hidden bg-[var(--color-secondary)] bg-no-repeat text-[var(--color-primary)] font-area font-normal !pb-10 !px-6 md:!px-12 lg:!px-20 lg:min-h-[min(900px,100vh)]"
     >
 
 <div
@@ -18,19 +18,19 @@ const Footer: React.FC = () => {
           height: "var(--logo-size)",
         }}
       />
-      <div className="relative z-10 max-w-6xl mx-auto">
+      <div className="relative z-10 max-w-12xl mx-auto lg:flex lg:min-h-[min(100vh)] lg:flex-col lg:justify-center">
 
         {/* Brand */}
-        <div className="flex w-max-12 !mb-14 justify-center">
-         <img
-           src="/assets/logo/aldoviatext.png"
-           alt="Aldovia"
-           className="mx-auto w-full max-w-[280px] h-auto"
-         />
+        <div className="flex w-full justify-center !mb-14 px-4">
+          <img
+            src="/assets/logo/aldoviatext.png"
+            alt="Aldovia"
+            className="w-full max-w-[280px] sm:max-w-[320px] md:max-w-[360px] lg:max-w-[420px] h-auto object-contain"
+          />
         </div>
 
         {/* Links Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
+        <div className="grid w-full max-w-12xl mx-auto grid-cols-2 gap-10 md:grid-cols-4 lg:justify-items-center lg:gap-x-16 xl:gap-x-24">
 
           {/* Stay */}
           <div>
@@ -85,17 +85,25 @@ const Footer: React.FC = () => {
             <span className="block !mt-3 !mb-2 h-[2px] w-16 rounded-full bg-[var(--color-primary)]" />
 
             <ul className="space-y-3 text-sm">
-              <li className="flex items-center gap-2">
-                <Phone size={16} /> 080 35077000 (Sales)
+              <li className="flex items-start gap-2">
+                <Phone size={16} className="mt-[2px] shrink-0" />
+                <div className="leading-relaxed">
+                  <div>+08 3507 7000</div>
+                  <div>For Bookings, Please Contact</div>
+                  <div>+08 3101 3831 (09 am to 06 pm)</div>
+                </div>
               </li>
               <li className="!pt-3 flex items-center gap-2">
-                <Phone size={16} /> 080 31013031 (Hotel)
-              </li>
-              <li className="!pt-3 flex items-center gap-2">
-                <Mail size={16} /> info@aldovia.in
+                <Mail size={16} className="shrink-0" />
+                <a href="mailto:info@aldovia.in" className="underline underline-offset-2">
+                  info@aldovia.in
+                </a>
               </li>
               <li className="!pt-3 flex items-start gap-2">
-                <MapPin size={16} /> Bangalore, Karnataka
+                <MapPin size={16} className="mt-[2px] shrink-0" />
+                <span className="leading-relaxed !text-[var(--color-primary)]">
+                  Swiss Town, Hollywood Junction, Sadahalli Post, Devanahalli Taluk, Bangalore, India, 562110
+                </span>
               </li>
             </ul>
           </div>

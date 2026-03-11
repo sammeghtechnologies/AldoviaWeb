@@ -38,7 +38,6 @@ const ExperienceInfoCard: React.FC<{
   const [prevImage, setPrevImage] = useState<string | null>(null);
   const [imageScale, setImageScale] = useState(1);
   const [typedDescription, setTypedDescription] = useState("");
-  const [typedIncludes, setTypedIncludes] = useState<string[]>([]);
 
   useEffect(() => {
     setImageScale(1.08);
@@ -61,37 +60,6 @@ const ExperienceInfoCard: React.FC<{
 
     return () => window.clearInterval(timer);
   }, [item.description]);
-
-  useEffect(() => {
-    const includeLines = item.includes ?? [];
-    setTypedIncludes(includeLines.map(() => ""));
-    if (!includeLines.length) return;
-
-    let lineIndex = 0;
-    let charIndex = 0;
-
-    const timer = window.setInterval(() => {
-      const currentLine = includeLines[lineIndex] ?? "";
-      charIndex += 1;
-
-      setTypedIncludes((prev) => {
-        const next = [...prev];
-        next[lineIndex] = currentLine.slice(0, charIndex);
-        return next;
-      });
-
-      if (charIndex >= currentLine.length) {
-        lineIndex += 1;
-        charIndex = 0;
-      }
-
-      if (lineIndex >= includeLines.length) {
-        window.clearInterval(timer);
-      }
-    }, 20);
-
-    return () => window.clearInterval(timer);
-  }, [item.includes]);
 
   const handleImageChange = (newImage: string) => {
     if (!newImage || newImage === activeImage) return;
@@ -145,7 +113,7 @@ const ExperienceInfoCard: React.FC<{
 
       <div className="relative !mt-10 z-10 h-full !p-4 md:!p-5 lg:!p-10 !pt-16 md:!pt-18 lg:!pt-24 !pb-4 lg:!pb-10 !text-[var(--color-secondary)]">
         <div className="flex h-full flex-col justify-start lg:flex-row lg:items-start lg:justify-between lg:gap-12">
-          <div className="w-full max-w-[340px] lg:max-w-[560px] !translate-y-5 lg:!translate-y-0 lg:!translate-x-10 !bg-black/35 lg:!bg-black/25 !rounded-xl !px-3 !py-3 lg:!px-5 lg:!py-5">
+          <div className="w-full max-w-[380px] md:max-w-[460px] lg:max-w-[600px] !translate-y-5 lg:!translate-y-0 lg:!translate-x-10 !bg-black/35 lg:!bg-black/25 !rounded-xl !px-4 !py-4 lg:!px-6 lg:!py-6">
             <SlidingTitleReveal
               lines={[item.title]}
               className="font-lust !text-[2em] lg:!text-[56px] !leading-tight !font-medium !mb-1 !text-[var(--color-secondary)]"
@@ -177,11 +145,13 @@ const ExperienceInfoCard: React.FC<{
               {typedDescription}
             </p>
 
-            <ul className="!mt-6 !space-y-1.5 !text-[.9em] lg:!text-[18px] !leading-[1.4] !text-[var(--color-secondary)] lg:grid lg:grid-cols-2 lg:gap-x-6">
+            <ul className="!mt-6 !pr-4 !space-y-2 !text-[.95em] lg:!pr-6 lg:!text-[18px] !leading-[1.45] !text-[var(--color-secondary)] xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] xl:gap-x-10">
               {item.includes.map((includeLine, includeIndex) => (
-                <li key={`${item.id}-${includeLine}`} className="flex items-center gap-2 !text-[var(--color-secondary)]">
-                  <span className="!text-[var(--color-secondary)]">✔</span>
-                  {typedIncludes[includeIndex] ?? ""}
+                <li key={`${item.id}-${includeLine}`} className="min-w-0 overflow-visible flex items-start gap-3 !text-[var(--color-secondary)]">
+                  <span className="!mt-0.5 shrink-0 !text-[var(--color-secondary)]">✔</span>
+                  <span className="block min-w-0 overflow-visible break-words !text-[var(--color-secondary)]">
+                    {includeLine}
+                  </span>
                 </li>
               ))}
             </ul>
