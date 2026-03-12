@@ -21,7 +21,7 @@ export default function ScrollSelectTabs({
   floatingOnScroll = false,
   floatingClassName = "sticky top-4 z-[140]",
   innerWrapperClassName = "!mx-auto !w-full !max-w-[1200px] lg:!w-[80%]",
-  activeClassName = "!bg-[#FFE694] !text-[var(--color-primary)] shadow-md",
+  activeClassName = "!text-[#FFE694]",
   inactiveClassName = "!bg-transparent !text-[var(--color-secondary)] opacity-80 hover:opacity-95",
   disableDesktopShift = false,
   compactMobile = false,
@@ -88,6 +88,11 @@ export default function ScrollSelectTabs({
     });
   };
 
+  const activeTabClassName =
+    "!bg-transparent !text-sm md:!text-base lg:!text-lg !font-semibold scale-[1.06]";
+  const inactiveTabClassName =
+    "!text-[13px] md:!text-sm lg:!text-base !font-medium scale-100";
+
   return (
     <div
       className={`w-full !mt-0 !mb-3 ${
@@ -130,11 +135,11 @@ export default function ScrollSelectTabs({
                     }}
                     className={`!px-6 ${compactMobile ? "!py-1 md:!py-2 lg:!py-1" : "!py-2 lg:!py-1"} ${
                       isOverflowing && index === 0 ? "!ml-1 md:!ml-2" : ""
-                    } !rounded-[10px] text-sm font-medium transition-all duration-300 flex-shrink-0 cursor-pointer
+                    } !rounded-[10px] font-medium flex-shrink-0 cursor-pointer transform-gpu will-change-transform transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]
                 ${
                   isActive
-                    ? activeClassName
-                    : inactiveClassName
+                    ? `${activeClassName} ${activeTabClassName}`
+                    : `${inactiveClassName} ${inactiveTabClassName}`
                 }`}
                   >
                     {item}
