@@ -5,14 +5,29 @@ import { Play } from "lucide-react";
 interface VideoCardProps {
   image: string;
   title: string;
+  onClick?: () => void;
 }
 
-const VideoCard: React.FC<VideoCardProps> = ({ image, title }) => {
+const VideoCard: React.FC<VideoCardProps> = ({ image, title, onClick }) => {
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
       transition={{ duration: 0.4 }}
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={
+        onClick
+          ? (event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
       className="relative h-[260px] md:h-[300px] rounded-3xl overflow-hidden shadow-xl cursor-pointer group"
+      aria-label={onClick ? title : undefined}
     >
 
       {/* Background Image */}

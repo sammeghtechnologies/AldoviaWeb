@@ -26,6 +26,8 @@ const Logo_top = ({
       <img
         src={logoSrc}
         alt="Aldovia"
+        width={408}
+        height={312}
         className="logo-image w-[6em] lg:w-[7rem] h-auto object-contain block"
       />
     </button>
@@ -53,6 +55,8 @@ const MenuIcon = ({
           <img
             src={icon}
             alt=""
+            width={24}
+            height={24}
             className="w-6 h-6 object-contain opacity-90"
             style={{ filter: "brightness(0) invert(1)" }}
           />
@@ -93,6 +97,8 @@ const MenuSection = ({
         <img
           src={isOpen ? icons.collapse : icons.expand}
           alt="toggle"
+          width={16}
+          height={16}
           className="w-4 h-4"
           style={{ filter: "brightness(0) invert(1)" }} // Keeps them white
         />
@@ -511,7 +517,9 @@ const MenuFrame = ({
               <img
                 src={icons.home || "/assets/icons/home.svg"}
                 alt=""
-                className="w-6 h6- object-contain opacity-90"
+                width={24}
+                height={24}
+                className="w-6 h-6 object-contain opacity-90"
                 style={{ filter: "brightness(0) invert(1)" }}
               />
 
@@ -675,6 +683,8 @@ const MenuFrame = ({
                   <img
                     src={icons.phone || "/assets/icons/phone.svg"}
                     alt=""
+                    width={20}
+                    height={20}
                     className="w-5 h-5"
                     style={{ filter: "brightness(0) invert(1)" }}
                   />
@@ -690,6 +700,8 @@ const MenuFrame = ({
                   <img
                     src={icons.mail || "/assets/icons/mail.svg"}
                     alt=""
+                    width={20}
+                    height={20}
                     className="w-5 h-5"
                     style={{ filter: "brightness(0) invert(1)" }}
                   />
