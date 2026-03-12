@@ -454,6 +454,231 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
 /* =========================================================
    🦢 SWAN (INTERACTIVE + CAMERA TRACKING)
 ========================================================= */
+// export const SwanModel = ({
+//   scrollProgress,
+//   opacity = 1,
+//   isReflection = false,
+//   clipY,
+//   transformProgress,
+// }: {
+//   scrollProgress: number;
+//   opacity?: number;
+//   isReflection?: boolean;
+//   clipY?: number;
+//   transformProgress: number;
+// }) => {
+//   const group = useRef<THREE.Group>(null);
+//   const { scene, animations } = useGLTF("/models/Swan_anim_v23.glb");
+//   const { actions } = useAnimations(animations, group);
+
+//   const isDragging = useRef(false);
+//   const previousX = useRef(0);
+//   const previousY = useRef(0);
+//   const targetCamY = useRef(0);
+//   const [targetRotY, setTargetRotY] = useState(-Math.PI / 160);
+
+//   // 🚀 1. SAFELY CREATE CLIP PLANE REF (Does not trigger re-renders)
+//   const clipPlaneRef = useRef<THREE.Plane | null>(null);
+//   if (clipY !== undefined && !clipPlaneRef.current) {
+//     clipPlaneRef.current = new THREE.Plane(new THREE.Vector3(0, -1, 0), clipY);
+//   }
+
+//   const materialsRef = useRef<THREE.Material[]>([]);
+
+//   useLayoutEffect(() => {
+//     materialsRef.current = [];
+//     const originalMaterials = new Map(); // 🚀 2. PROTECT THE GLOBAL CACHE
+
+//     scene.traverse((child: any) => {
+//       if (child.isMesh) {
+
+//         child.geometry.computeVertexNormals(); // fix shading
+//         child.geometry.normalizeNormals();
+//         child.material.flatShading = false;
+//         child.material.needsUpdate = true;
+//         child.material.side = THREE.DoubleSide;
+//         child.material.depthWrite = true;
+//         child.material.depthTest = true;
+//         child.material.alphaTest = 0.5;
+//       }
+
+//       if (child.isMesh && child.material) {
+//         child.castShadow = true;
+//         child.receiveShadow = true;
+
+//         // Save pristine material
+//         if (!originalMaterials.has(child.uuid)) {
+//           originalMaterials.set(child.uuid, child.material);
+//         }
+
+//         const mat = child.material.clone();
+
+//         mat.side = THREE.DoubleSide;
+//         mat.alphaTest = isReflection ? 0.01 : 0.5;
+//         mat.depthWrite = true;
+//         mat.depthTest = true;
+//         mat.transparent = true;
+
+//         const originalColor = child.material.color?.clone?.() ?? new THREE.Color("#ffffff");
+//         const luminance =
+//           originalColor.r * 0.2126 + originalColor.g * 0.7152 + originalColor.b * 0.0722;
+//         const isFeatherMaterial = luminance > 0.6;
+
+//         if (isFeatherMaterial) {
+
+//           // keep original texture maps
+//           mat.map = child.material.map;
+//           mat.normalMap = child.material.normalMap;
+//           mat.aoMap = child.material.aoMap;
+
+//           // brighter white like reference swan
+//           mat.color = new THREE.Color(isReflection ? "#ffffff" : "#ffffff");
+
+//           // feather softness
+//           mat.roughness = isReflection ? 0.5 : 0.32;
+//           mat.metalness = 0.0;
+
+//           // environment lighting response
+//           mat.envMapIntensity = isReflection ? 0.55 : 1.6;
+
+//           // smoother feather shading
+       
+
+//           // ambient occlusion for feather depth
+
+//           // subtle feather sheen like real feathers
+//           mat.sheen = isReflection ? 0.35 : 0.9;
+//           mat.sheenColor = new THREE.Color("#ffffff");
+//           mat.sheenRoughness = 0.6;
+
+//         } else {
+//          }
+
+      
+
+//         // 🚀 3. APPLY BLADE SAFELY
+//         if (clipPlaneRef.current) {
+//           mat.clippingPlanes = [clipPlaneRef.current];
+//         } else {
+//           mat.clippingPlanes = null; // Destroys inherited blades from cache
+//         }
+
+//         mat.needsUpdate = true;
+//         child.material = mat;
+//         materialsRef.current.push(mat);
+//       }
+//     });
+
+//     return () => {
+//       // 🚀 4. RESTORE CACHE ON UNMOUNT
+//       scene.traverse((child: any) => {
+//         if (child.isMesh && originalMaterials.has(child.uuid)) {
+//           child.material = originalMaterials.get(child.uuid);
+//         }
+//       });
+//       materialsRef.current.forEach((mat) => mat.dispose());
+//     };
+//   }, [scene, isReflection]); // 🚀 5. REMOVED clipPlane dependency!
+
+//   useEffect(() => {
+//     const action = actions["rigAction"] || actions[Object.keys(actions)[0]];
+//     if (action) action.play().paused = true;
+//     return () => {
+//       if (action) action.stop();
+//     };
+//   }, [actions]);
+
+//   useEffect(() => {
+//     const action = actions["rigAction"] || actions[Object.keys(actions)[0]];
+//     if (action && action.getClip()) {
+//       action.time = action.getClip().duration * scrollProgress;
+//     }
+//   }, [scrollProgress, actions]);
+
+//   useFrame(({ camera }) => {
+//     // 🚀 6. DYNAMICALLY LIFT BLADE IN RENDER LOOP (Zero lag)
+//     if (clipPlaneRef.current && clipY !== undefined) {
+//       clipPlaneRef.current.constant = clipY;
+//     }
+
+//     if (group.current) {
+//       group.current.rotation.x = 0.1;
+//       group.current.rotation.z = 0;
+//       group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, targetRotY, 0.1);
+//     }
+
+//     materialsRef.current.forEach((mat) => {
+//       mat.opacity = isReflection ? opacity * 0.85 : opacity;
+//       const needsTransparent = (isReflection ? opacity * 0.42 : opacity) < 1;
+//       if (mat.transparent !== needsTransparent) {
+//         mat.transparent = needsTransparent;
+//         mat.needsUpdate = true;
+//       }
+//     });
+
+//     if (!isReflection) {
+//       camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetCamY.current, 0.05);
+//       camera.lookAt(0, -5, 0);
+//     }
+//   });
+
+//   useEffect(() => {
+//     const handleGlobalPointerUp = () => {
+//       isDragging.current = false;
+//       document.body.style.cursor = "auto";
+//     };
+
+//     const handleGlobalPointerMove = (e: PointerEvent) => {
+//       if (!isDragging.current) return;
+//       const deltaX = e.clientX - previousX.current;
+//       const deltaY = e.clientY - previousY.current;
+//       setTargetRotY((prev) => prev + deltaX * 0.015);
+//       targetCamY.current += deltaY * 0.15;
+//       targetCamY.current = THREE.MathUtils.clamp(targetCamY.current, -10, 40);
+//       previousX.current = e.clientX;
+//       previousY.current = e.clientY;
+//     };
+
+//     window.addEventListener("pointerup", handleGlobalPointerUp);
+//     window.addEventListener("pointermove", handleGlobalPointerMove);
+
+//     return () => {
+//       window.removeEventListener("pointerup", handleGlobalPointerUp);
+//       window.removeEventListener("pointermove", handleGlobalPointerMove);
+//     };
+//   }, []);
+
+//   const baseScale = isMobile ? 380 : 600;
+//   const currentScale = baseScale + transformProgress * (isMobile ? 250 : 400);
+
+//   return (
+//     <>
+//       <primitive
+//         ref={group}
+//         object={scene}
+//         scale={currentScale}
+//         position={[0, -14, 0]}
+//         onPointerDown={(e: any) => {
+//           e.stopPropagation();
+//           isDragging.current = true;
+//           previousX.current = e.clientX;
+//           previousY.current = e.clientY;
+//           document.body.style.cursor = "grabbing";
+//         }}
+//         onPointerOver={() => {
+//           if (!isDragging.current) document.body.style.cursor = "grab";
+//         }}
+//         onPointerOut={() => {
+//           if (!isDragging.current) document.body.style.cursor = "auto";
+//         }}
+//       />
+//       {!isReflection && (
+//         <pointLight color="#fffaf2" intensity={1.8} distance={58} decay={2} position={[5.5, 9, 12]} />
+//       )}
+//     </>
+//   );
+// };
+
 export const SwanModel = ({
   scrollProgress,
   opacity = 1,
@@ -468,13 +693,13 @@ export const SwanModel = ({
   transformProgress: number;
 }) => {
   const group = useRef<THREE.Group>(null);
-  const { scene, animations } = useGLTF("/models/Swan_anim_v16.glb");
+  const { scene, animations } = useGLTF("/models/Swan_anim_v23.glb");
   const { actions } = useAnimations(animations, group);
 
   const isDragging = useRef(false);
   const previousX = useRef(0);
-  const previousY = useRef(0);
-  const targetCamY = useRef(0);
+  const previousY = useRef(0); 
+  const targetCamY = useRef(0); 
   const [targetRotY, setTargetRotY] = useState(-Math.PI / 160);
 
   // 🚀 1. SAFELY CREATE CLIP PLANE REF (Does not trigger re-renders)
@@ -486,14 +711,12 @@ export const SwanModel = ({
   const materialsRef = useRef<THREE.Material[]>([]);
 
   useLayoutEffect(() => {
-    materialsRef.current = [];
+    materialsRef.current = []; 
     const originalMaterials = new Map(); // 🚀 2. PROTECT THE GLOBAL CACHE
 
     scene.traverse((child: any) => {
       if (child.isMesh) {
-
-        child.geometry.computeVertexNormals(); // fix shading
-        child.geometry.normalizeNormals();
+        child.geometry.computeVertexNormals(); 
         child.material.flatShading = false;
         child.material.needsUpdate = true;
         child.material.side = THREE.DoubleSide;
@@ -520,41 +743,38 @@ export const SwanModel = ({
         mat.transparent = true;
 
         const originalColor = child.material.color?.clone?.() ?? new THREE.Color("#ffffff");
-        const luminance =
-          originalColor.r * 0.2126 + originalColor.g * 0.7152 + originalColor.b * 0.0722;
+        const luminance = originalColor.r * 0.2126 + originalColor.g * 0.7152 + originalColor.b * 0.0722;
         const isFeatherMaterial = luminance > 0.6;
 
         if (isFeatherMaterial) {
+          mat.color = new THREE.Color(isReflection ? "#d9dde2" : "#f7f7f4");
+          mat.roughness = isReflection ? 0.48 : 0.34;        
+          mat.metalness = 0.0;         
+          mat.envMapIntensity = isReflection ? 0.55 : 1.45;  
+          mat.normalScale?.set(1.55, 1.55);
+          mat.aoMapIntensity = 1.3;
+          mat.sheen = isReflection ? 0.45 : 0.95;
+          mat.sheenColor = new THREE.Color(isReflection ? "#d7dde4" : "#ffffff");
+          mat.sheenRoughness = isReflection ? 0.88 : 0.72;
+        // } else {
+        //   mat.color.copy(originalColor);
+        //   mat.metalness = child.material.metalness ?? 0;
+        //   mat.roughness = isReflection ? Math.max(child.material.roughness ?? 0.5, 0.6) : child.material.roughness ?? 0.5;
+        //   mat.envMapIntensity = isReflection ? 0.45 : child.material.envMapIntensity ?? 1;
+        // }
+}else {
+  // Trust the glTF's baked environment map impact
+  mat.envMapIntensity = 1; 
+  
+  // 🚀 Increase roughness to 0.6 or 0.7. 
+  // This makes the light spread out and shows the feather textures better.
+  mat.roughness = 0.65; 
+}
 
-          // keep original texture maps
-          mat.map = child.material.map;
-          mat.normalMap = child.material.normalMap;
-          mat.aoMap = child.material.aoMap;
-
-          // brighter white like reference swan
-          mat.color = new THREE.Color(isReflection ? "#ffffff" : "#ffffff");
-
-          // feather softness
-          mat.roughness = isReflection ? 0.5 : 0.32;
-          mat.metalness = 0.0;
-
-          // environment lighting response
-          mat.envMapIntensity = isReflection ? 0.55 : 1.6;
-
-          // smoother feather shading
-       
-
-          // ambient occlusion for feather depth
-
-          // subtle feather sheen like real feathers
-          mat.sheen = isReflection ? 0.35 : 0.9;
-          mat.sheenColor = new THREE.Color("#ffffff");
-          mat.sheenRoughness = 0.6;
-
-        } else {
-         }
-
-      
+        mat.flatShading = false;
+        mat.transparent = opacity < 1;
+        mat.depthWrite = true;
+        mat.depthTest = true;
 
         // 🚀 3. APPLY BLADE SAFELY
         if (clipPlaneRef.current) {
@@ -564,7 +784,7 @@ export const SwanModel = ({
         }
 
         mat.needsUpdate = true;
-        child.material = mat;
+        child.material = mat; 
         materialsRef.current.push(mat);
       }
     });
@@ -608,7 +828,7 @@ export const SwanModel = ({
     }
 
     materialsRef.current.forEach((mat) => {
-      mat.opacity = isReflection ? opacity * 0.85 : opacity;
+mat.opacity = isReflection ? opacity * 0.85 : opacity;
       const needsTransparent = (isReflection ? opacity * 0.42 : opacity) < 1;
       if (mat.transparent !== needsTransparent) {
         mat.transparent = needsTransparent;
@@ -662,7 +882,7 @@ export const SwanModel = ({
           e.stopPropagation();
           isDragging.current = true;
           previousX.current = e.clientX;
-          previousY.current = e.clientY;
+          previousY.current = e.clientY; 
           document.body.style.cursor = "grabbing";
         }}
         onPointerOver={() => {
@@ -672,9 +892,25 @@ export const SwanModel = ({
           if (!isDragging.current) document.body.style.cursor = "auto";
         }}
       />
-      {!isReflection && (
-        <pointLight color="#fffaf2" intensity={1.8} distance={58} decay={2} position={[5.5, 9, 12]} />
-      )}
+     {!isReflection && (
+  <>
+    {/* Ambient light provides the base visibility in shadows */}
+    <ambientLight intensity={0.4} color="#ffffff" />
+    
+    {/* 🚀 Lower the intensity. 2.5 is too much for a white swan. 
+        Start with 1.2 and adjust slowly. */}
+    <directionalLight 
+      intensity={1.2} 
+      color="#ffffff" 
+      position={[10, 20, 10]} 
+      castShadow 
+    />
+    
+    {/* 'city' is good, but 'warehouse' or 'apartment' often provides 
+        better 'Neutral' shading for white models. */}
+    <Environment preset="warehouse" /> 
+  </>
+)}
     </>
   );
 };
@@ -817,6 +1053,105 @@ export const SplashDroplets = ({ splashProgress, opacity = 1 }: { splashProgress
 /* =========================================================
    🌊 WATER PLANE
 ========================================================= */
+// export const WaterPlane = ({ splashProgress, opacity = 1 }: { splashProgress: number, opacity?: number }) => {
+//   const reflectorRef = useRef<any>(null);
+//   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+//   const geometry = useMemo(() => new THREE.PlaneGeometry(5000, 5000), []);
+
+//   const reflector = useMemo(() => {
+//     const refl = new Reflector(geometry, {
+//       textureWidth: isMobile ? 1024 : 2048,
+//       textureHeight: isMobile ? 1024 : 2048,
+//       color: 0x808080,
+//     });
+//     refl.rotation.x = -Math.PI / 2;
+//     refl.position.y = -15;
+//     const material = refl.material as THREE.ShaderMaterial;
+//     material.transparent = true;
+//     material.opacity = opacity;
+
+//     material.onBeforeCompile = (shader) => {
+//       shader.uniforms.uTime = { value: 0 };
+//       shader.uniforms.uTakeoff = { value: 0 };
+//       shader.fragmentShader = `uniform float uTime; uniform float uTakeoff;\n` + shader.fragmentShader;
+
+//       shader.fragmentShader = shader.fragmentShader.replace(
+//         `vec4 base = texture2DProj( tDiffuse, vUv );`,
+//         `
+//         float projectedY = vUv.y / vUv.w;
+//         float varRippleMask = smoothstep(0.65, 0.40, projectedY);
+//         vec2 baseUV = vUv.xy / vUv.w - 0.5;
+//         vec2 perspectiveUV = vec2(baseUV.x - 0.0, (baseUV.y - (-0.15)) * 3.5);
+//         float distCenter = length(perspectiveUV);
+        
+//         // 🔥 1. SPLASH POWER
+//         float splashPower = smoothstep(0.0, 0.15, uTakeoff) * (1.0 - smoothstep(0.8, 1.0, uTakeoff));
+//         vec2 wakeUV = perspectiveUV - vec2(0.0, uTakeoff * 0.2); 
+//         float wakeDist = length(wakeUV);
+        
+//         // 🔥 2. EXTREME TURBULENCE (Tamed down for the swan)
+//         float turbulence = (sin(wakeUV.x * 200.0 + uTime * 30.0) * cos(wakeUV.y * 200.0 - uTime * 25.0)) * splashPower;
+//         float wakeMask = 1.0 - smoothstep(0.0, 0.3 + (uTakeoff * 1.5), wakeDist);
+        
+//         // Standard ambient ripples (now tied to scroll)
+//         float ambientRipple = sin(baseUV.x * 120.0 + uTime * 1.0) * cos(baseUV.y * 120.0 + uTime * 1.0);
+//         float rippleStrength = mix(0.0005, 0.003, varRippleMask) * (1.0 - splashPower);
+        
+//         // Ring fade logic
+//         float ringPhase = distCenter * 70.0 - uTime * 1.2;
+//         float ringFade = smoothstep(0.0, 0.02, distCenter) * (1.0 - smoothstep(0.05, 0.20, distCenter)) * (1.0 - splashPower); 
+//         vec2 waveDistortion = normalize(perspectiveUV + vec2(0.0001)) * cos(ringPhase) * 0.0015 * ringFade;
+        
+//         // 🔥 3. HEAVY DISTORTION (Reduced from 0.08 to 0.02 for a calmer takeoff)
+//         vec2 wakeDistortion = normalize(wakeUV + vec2(0.0001)) * (turbulence * wakeMask) * 0.02; 
+        
+//         // 🔥 4. SPLASH CHAOS (Reduced from 0.015 to 0.003)
+//         vec2 splashChaos = vec2(sin(uTime * 15.0 + baseUV.y * 100.0), cos(uTime * 15.0 + baseUV.x * 100.0)) * splashPower * 0.003;
+
+//         // 🔥 5. RAINDROP IMPACTS (Tiny, scattered rainy ripples)
+//         // We create 3 separate, highly dense grids to simulate random drops across the surface
+//         vec2 dropGrid1 = fract(perspectiveUV * 40.0 + uTime * 0.2) - 0.5;
+//         vec2 dropGrid2 = fract(perspectiveUV * 65.0 - uTime * 0.3 + vec2(0.3, 0.7)) - 0.5;
+//         vec2 dropGrid3 = fract(perspectiveUV * 90.0 + uTime * 0.15 + vec2(0.6, 0.2)) - 0.5;
+        
+//         float dropD1 = length(dropGrid1);
+//         float dropD2 = length(dropGrid2);
+//         float dropD3 = length(dropGrid3);
+        
+//         // High frequency sine waves mapped tightly to the centers of the grids
+//         float rainRip1 = sin(dropD1 * 150.0 - uTime * 60.0) * smoothstep(0.15, 0.02, dropD1);
+//         float rainRip2 = sin(dropD2 * 200.0 - uTime * 80.0) * smoothstep(0.1, 0.01, dropD2);
+//         float rainRip3 = sin(dropD3 * 250.0 - uTime * 90.0) * smoothstep(0.08, 0.005, dropD3);
+        
+//         // Combine them into a subtle ambient rain effect (multiplier 0.003 controls rain strength)
+//         vec2 rainDistortion = (normalize(dropGrid1 + 0.0001) * rainRip1 + 
+//                                normalize(dropGrid2 + 0.0001) * rainRip2 + 
+//                                normalize(dropGrid3 + 0.0001) * rainRip3) * 0.003;
+
+//         // Combine all physics
+//         vec2 totalDistortion = vec2(ambientRipple * rippleStrength) + waveDistortion + wakeDistortion + splashChaos + rainDistortion;
+
+//         vec4 base = texture2DProj(tDiffuse, vec4(vUv.xy + (totalDistortion * vUv.w), vUv.zw));
+//         `
+//       );
+//       reflectorRef.current = { userData: { shader } };
+//     };
+//     return refl;
+//   }, [geometry, isMobile]);
+
+//   useFrame(() => {
+//     if (reflectorRef.current?.userData.shader) {
+//       // ✅ Multiply splashProgress so the waves scrub rapidly back and forth as you scroll
+//       const scrollSpeedMultiplier = 30.0;
+
+//       reflectorRef.current.userData.shader.uniforms.uTime.value = splashProgress * scrollSpeedMultiplier;
+//       reflectorRef.current.userData.shader.uniforms.uTakeoff.value = splashProgress;
+//     }
+//   });
+
+//   return <primitive object={reflector} />;
+// };
+
 export const WaterPlane = ({ splashProgress, opacity = 1 }: { splashProgress: number, opacity?: number }) => {
   const reflectorRef = useRef<any>(null);
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
@@ -826,7 +1161,7 @@ export const WaterPlane = ({ splashProgress, opacity = 1 }: { splashProgress: nu
     const refl = new Reflector(geometry, {
       textureWidth: isMobile ? 1024 : 2048,
       textureHeight: isMobile ? 1024 : 2048,
-      color: 0x808080,
+      color: 0x120C02,
     });
     refl.rotation.x = -Math.PI / 2;
     refl.position.y = -15;
@@ -839,65 +1174,46 @@ export const WaterPlane = ({ splashProgress, opacity = 1 }: { splashProgress: nu
       shader.uniforms.uTakeoff = { value: 0 };
       shader.fragmentShader = `uniform float uTime; uniform float uTakeoff;\n` + shader.fragmentShader;
 
-      shader.fragmentShader = shader.fragmentShader.replace(
-        `vec4 base = texture2DProj( tDiffuse, vUv );`,
-        `
-        float projectedY = vUv.y / vUv.w;
-        float varRippleMask = smoothstep(0.65, 0.40, projectedY);
-        vec2 baseUV = vUv.xy / vUv.w - 0.5;
-        vec2 perspectiveUV = vec2(baseUV.x - 0.0, (baseUV.y - (-0.15)) * 3.5);
-        float distCenter = length(perspectiveUV);
-        
-        // 🔥 1. SPLASH POWER
-        float splashPower = smoothstep(0.0, 0.15, uTakeoff) * (1.0 - smoothstep(0.8, 1.0, uTakeoff));
-        vec2 wakeUV = perspectiveUV - vec2(0.0, uTakeoff * 0.2); 
-        float wakeDist = length(wakeUV);
-        
-        // 🔥 2. EXTREME TURBULENCE (Tamed down for the swan)
-        float turbulence = (sin(wakeUV.x * 200.0 + uTime * 30.0) * cos(wakeUV.y * 200.0 - uTime * 25.0)) * splashPower;
-        float wakeMask = 1.0 - smoothstep(0.0, 0.3 + (uTakeoff * 1.5), wakeDist);
-        
-        // Standard ambient ripples (now tied to scroll)
-        float ambientRipple = sin(baseUV.x * 120.0 + uTime * 1.0) * cos(baseUV.y * 120.0 + uTime * 1.0);
-        float rippleStrength = mix(0.0005, 0.003, varRippleMask) * (1.0 - splashPower);
-        
-        // Ring fade logic
-        float ringPhase = distCenter * 70.0 - uTime * 1.2;
-        float ringFade = smoothstep(0.0, 0.02, distCenter) * (1.0 - smoothstep(0.05, 0.20, distCenter)) * (1.0 - splashPower); 
-        vec2 waveDistortion = normalize(perspectiveUV + vec2(0.0001)) * cos(ringPhase) * 0.0015 * ringFade;
-        
-        // 🔥 3. HEAVY DISTORTION (Reduced from 0.08 to 0.02 for a calmer takeoff)
-        vec2 wakeDistortion = normalize(wakeUV + vec2(0.0001)) * (turbulence * wakeMask) * 0.02; 
-        
-        // 🔥 4. SPLASH CHAOS (Reduced from 0.015 to 0.003)
-        vec2 splashChaos = vec2(sin(uTime * 15.0 + baseUV.y * 100.0), cos(uTime * 15.0 + baseUV.x * 100.0)) * splashPower * 0.003;
+shader.fragmentShader = shader.fragmentShader.replace(
+  `vec4 base = texture2DProj( tDiffuse, vUv );`,
+  `
+  float projectedY = vUv.y / vUv.w;
+  
+  // Basic Distortion logic
+  float varRippleMask = smoothstep(0.65, 0.40, projectedY);
+  vec2 baseUV = vUv.xy / vUv.w - 0.5;
+  vec2 perspectiveUV = vec2(baseUV.x - 0.0, (baseUV.y - (-0.15)) * 3.5);
+  
+  float splashPower = smoothstep(0.0, 0.15, uTakeoff) * (1.0 - smoothstep(0.8, 1.0, uTakeoff));
+  vec2 wakeUV = perspectiveUV - vec2(0.0, uTakeoff * 0.2); 
+  
+  float turbulence = (sin(wakeUV.x * 200.0 + uTime * 30.0) * cos(wakeUV.y * 200.0 - uTime * 25.0)) * splashPower;
+  float wakeMask = 1.0 - smoothstep(0.0, 0.3 + (uTakeoff * 1.5), length(wakeUV));
+  float ambientRipple = sin(baseUV.x * 120.0 + uTime * 1.0) * cos(baseUV.y * 120.0 + uTime * 1.0);
+  float rippleStrength = mix(0.0005, 0.003, varRippleMask) * (1.0 - splashPower);
 
-        // 🔥 5. RAINDROP IMPACTS (Tiny, scattered rainy ripples)
-        // We create 3 separate, highly dense grids to simulate random drops across the surface
-        vec2 dropGrid1 = fract(perspectiveUV * 40.0 + uTime * 0.2) - 0.5;
-        vec2 dropGrid2 = fract(perspectiveUV * 65.0 - uTime * 0.3 + vec2(0.3, 0.7)) - 0.5;
-        vec2 dropGrid3 = fract(perspectiveUV * 90.0 + uTime * 0.15 + vec2(0.6, 0.2)) - 0.5;
-        
-        float dropD1 = length(dropGrid1);
-        float dropD2 = length(dropGrid2);
-        float dropD3 = length(dropGrid3);
-        
-        // High frequency sine waves mapped tightly to the centers of the grids
-        float rainRip1 = sin(dropD1 * 150.0 - uTime * 60.0) * smoothstep(0.15, 0.02, dropD1);
-        float rainRip2 = sin(dropD2 * 200.0 - uTime * 80.0) * smoothstep(0.1, 0.01, dropD2);
-        float rainRip3 = sin(dropD3 * 250.0 - uTime * 90.0) * smoothstep(0.08, 0.005, dropD3);
-        
-        // Combine them into a subtle ambient rain effect (multiplier 0.003 controls rain strength)
-        vec2 rainDistortion = (normalize(dropGrid1 + 0.0001) * rainRip1 + 
-                               normalize(dropGrid2 + 0.0001) * rainRip2 + 
-                               normalize(dropGrid3 + 0.0001) * rainRip3) * 0.003;
+  // Simple total distortion
+  vec2 totalDistortion = vec2(ambientRipple * rippleStrength) + (turbulence * wakeMask * 0.015);
 
-        // Combine all physics
-        vec2 totalDistortion = vec2(ambientRipple * rippleStrength) + waveDistortion + wakeDistortion + splashChaos + rainDistortion;
+  // 🚀 1. BLUR TAPS (Reduced complexity to ensure it renders)
+  float blurScale = smoothstep(0.65, 0.1, projectedY) * 0.01; 
+  vec4 blurSum = vec4(0.0);
+  blurSum += texture2DProj(tDiffuse, vec4(vUv.xy + (totalDistortion * vUv.w) + vec2(blurScale, blurScale) * vUv.w, vUv.zw));
+  blurSum += texture2DProj(tDiffuse, vec4(vUv.xy + (totalDistortion * vUv.w) + vec2(-blurScale, -blurScale) * vUv.w, vUv.zw));
+  
+  vec4 base = blurSum / 2.0;
 
-        vec4 base = texture2DProj(tDiffuse, vec4(vUv.xy + (totalDistortion * vUv.w), vUv.zw));
-        `
-      );
+  // 🚀 2. THE COLOR FIX (Force Whitish-Gray)
+  // This turns all reflected colors into a single gray value based on brightness
+  float brightness = dot(base.rgb, vec3(0.299, 0.587, 0.114));
+  base.rgb = vec3(brightness * 0.95); // 1.3 makes it pop more as "white"
+
+  // 🚀 3. THE "SINGLE REFLECTION" FADE
+  // This dissolves the neck as it goes down so you never see the second head
+  float verticalFade = smoothstep(0.35, 0.65, projectedY);
+  base.a *= verticalFade;
+  `
+);
       reflectorRef.current = { userData: { shader } };
     };
     return refl;
@@ -905,9 +1221,7 @@ export const WaterPlane = ({ splashProgress, opacity = 1 }: { splashProgress: nu
 
   useFrame(() => {
     if (reflectorRef.current?.userData.shader) {
-      // ✅ Multiply splashProgress so the waves scrub rapidly back and forth as you scroll
       const scrollSpeedMultiplier = 30.0;
-
       reflectorRef.current.userData.shader.uniforms.uTime.value = splashProgress * scrollSpeedMultiplier;
       reflectorRef.current.userData.shader.uniforms.uTakeoff.value = splashProgress;
     }
@@ -915,7 +1229,6 @@ export const WaterPlane = ({ splashProgress, opacity = 1 }: { splashProgress: nu
 
   return <primitive object={reflector} />;
 };
-
 /* =========================================================
    🎬 MAIN COMBINED COMPONENT
 ========================================================= */
@@ -1186,6 +1499,6 @@ const LogoRevealNew = ({
   );
 };
 
-useGLTF.preload("/models/Swan_anim_v17.glb");
+useGLTF.preload("/models/Swan_anim_v23.glb");
 
 export default LogoRevealNew;

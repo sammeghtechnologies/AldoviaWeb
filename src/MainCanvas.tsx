@@ -485,7 +485,7 @@ const MainCanvas = () => {
       <canvas ref={frameCanvasRef} className="absolute inset-0 z-10 w-full h-full object-cover" />
 
       <div ref={canvasWrapperRef} className="absolute inset-0 z-20 overflow-hidden">
-        <Canvas gl={{ antialias: true, toneMapping: THREE.NoToneMapping, powerPreference: "high-performance", localClippingEnabled: true }}>
+        <Canvas gl={{ antialias: true, toneMapping: THREE.LinearToneMapping, toneMappingExposure: 0.8 , powerPreference: "high-performance", localClippingEnabled: true }}>
           <color attach="background" args={["#000000"]} />
           <Suspense fallback={null}>
             <PerspectiveCamera makeDefault position={[0, 0, 70]} fov={isMobile ? 65 : 40} />
