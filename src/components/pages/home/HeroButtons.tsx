@@ -6,6 +6,11 @@ const HeroButtons: React.FC = () => {
   const navigate = useNavigate();
   const buttonLayoutClass =
     "flex w-[314px] h-10 px-6 py-5 justify-center items-center gap-2 shrink-0";
+  const scrollToExperience = React.useCallback(() => {
+    const el = document.getElementById("home-experience-section");
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   return (
     <motion.div
@@ -36,12 +41,14 @@ const HeroButtons: React.FC = () => {
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 1, duration: 0.6, ease: "easeOut" }}
+        type="button"
+        onClick={scrollToExperience}
         className="mt-2 flex items-center gap-2 text-lg group !text-[var(--color-secondary)]"
       >
         <span className="transition-transform group-hover:translate-x-2">
           →
         </span>
-        Explore Aldovia
+        Explore Experience
       </motion.button>
     </motion.div>
   );

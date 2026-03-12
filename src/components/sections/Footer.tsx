@@ -25,6 +25,8 @@ const Footer: React.FC = () => {
           <img
             src="/assets/logo/aldoviatext.png"
             alt="Aldovia"
+            width={1400}
+            height={312}
             className="w-full max-w-[280px] sm:max-w-[320px] md:max-w-[360px] lg:max-w-[420px] h-auto object-contain"
           />
         </div>
