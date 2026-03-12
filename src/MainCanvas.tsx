@@ -216,6 +216,78 @@ const whiteColor = useMemo(() => new THREE.Color(2.5, 2.5, 2.5), []);
   );
 };
 
+const SwanRippleRings = ({
+  enabled,
+  center,
+  opacity,
+}: {
+  enabled: boolean;
+  center: [number, number, number];
+  opacity: number;
+}) => {
+  const ringRefs = useRef<THREE.Mesh[]>([]);
+  const ringGeo = useMemo(() => new THREE.RingGeometry(0.985, 1.0, 256, 1), []);
+  const ringMaterials = useMemo(
+    () =>
+      Array.from({ length: 6 }, () => {
+        const mat = new THREE.MeshBasicMaterial({
+          color: new THREE.Color("#ffffff"),
+          transparent: true,
+          opacity: 0,
+          blending: THREE.AdditiveBlending,
+          depthTest: false,
+          depthWrite: false,
+          side: THREE.DoubleSide,
+        });
+        return mat;
+      }),
+    []
+  );
+
+  useEffect(() => {
+    return () => {
+      ringGeo.dispose();
+      ringMaterials.forEach((mat) => mat.dispose());
+    };
+  }, [ringGeo, ringMaterials]);
+
+  useFrame(({ clock }) => {
+    if (!enabled) return;
+    const time = clock.elapsedTime;
+    ringRefs.current.forEach((ring, i) => {
+      if (!ring) return;
+      const mat = ring.material as THREE.MeshBasicMaterial;
+      const t = ((time * 0.12) + i * 0.22) % 1;
+      const scale = THREE.MathUtils.lerp(0.8, 16, t);
+      const wobble = 1 + Math.sin(time * 0.35 + i) * 0.04;
+      ring.scale.set(scale * wobble, scale, 1);
+      ring.position.set(center[0], center[1], center[2]);
+      mat.opacity = (1.0 - t) * 0.55 * opacity;
+      ring.visible = mat.opacity > 0.01;
+    });
+  });
+
+  if (!enabled) return null;
+
+  return (
+    <group>
+      {ringMaterials.map((mat, i) => (
+        <mesh
+          key={`end-swan-ring-${i}`}
+          ref={(el) => {
+            if (el) ringRefs.current[i] = el;
+          }}
+          rotation={[-Math.PI / 2, 0, 0]}
+          geometry={ringGeo}
+          material={mat}
+          renderOrder={999}
+          visible={false}
+        />
+      ))}
+    </group>
+  );
+};
+
 
 const MainCanvas = () => {
   const navigate = useNavigate();
@@ -525,6 +597,11 @@ const MainCanvas = () => {
                 <NaturalFeather id={6} variant="high-drag-zig" startPos={[11.5, 18, 0]} targetPos={[17.5, -20.0, 0]} started={true} delay={0.2} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
               </group>
             )}
+            <SwanRippleRings
+              enabled={mountEndSwan}
+              center={[6.0, -5.48, -3.0]}
+              opacity={endSwanOpacity}
+            />
 {mountEndSwan && (
               <EndSwanWrapper opacity={endSwanOpacity} scale={endSwanScale} whiteness={endSwanWhite} clipY={endSwanClipY} />
             )}
