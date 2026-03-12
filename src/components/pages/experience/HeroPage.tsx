@@ -8,6 +8,11 @@ import Footer from "../../sections/Footer";
 
 const ExperienceHeroPage: React.FC = () => {
   const navigate = useNavigate();
+  const scrollToDetails = React.useCallback(() => {
+    const el = document.getElementById("experience-info-section");
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
   const experienceImages = [
     "/assets/herobackgrounds/dining/ambrosia.webp",
     "/assets/herobackgrounds/dining/Buvette.jpg",
@@ -278,6 +283,7 @@ const ExperienceHeroPage: React.FC = () => {
         title="Experiences & Packages"
         subtitle="Explore curated stays, celebrations, dining, and signature moments."
         buttonLabel="Explore Experiences"
+        onButtonClick={scrollToDetails}
         enableEntryAnimation
         entryDuration={2.1}
         enableStaggeredTitle
@@ -287,7 +293,9 @@ const ExperienceHeroPage: React.FC = () => {
         controlsClassName="!mt-0 !px-0"
         controlsProgressBarClassName="!w-[140px] !max-w-[140px] shrink-0"
       />
-      <ExperienceInfoSection sections={infoSections} />
+      <div id="experience-info-section" className="scroll-mt-[12vh]">
+        <ExperienceInfoSection sections={infoSections} />
+      </div>
       <Footer/>
     </section>
   );
