@@ -4,6 +4,7 @@ import {
   Environment,
   useGLTF,
   useAnimations,
+  useTexture,
 } from "@react-three/drei";
 import {
   Suspense,
@@ -695,6 +696,16 @@ export const SwanModel = ({
   const group = useRef<THREE.Group>(null);
   const { scene, animations } = useGLTF("/models/Swan_anim_v24.glb");
   const { actions } = useAnimations(animations, group);
+  const featherNormal = useTexture(new URL("./textures/feather_normal.jpg", import.meta.url).href);
+
+  useEffect(() => {
+    featherNormal.wrapS = THREE.RepeatWrapping;
+    featherNormal.wrapT = THREE.RepeatWrapping;
+    featherNormal.repeat.set(2.4, 2.4);
+    featherNormal.flipY = false;
+    featherNormal.colorSpace = THREE.NoColorSpace;
+    featherNormal.needsUpdate = true;
+  }, [featherNormal]);
 
   const isDragging = useRef(false);
   const previousX = useRef(0);
@@ -756,6 +767,14 @@ if (isFeatherMaterial) {
   // Soften the sheen for the reflection
   mat.sheen = isReflection ? 0.2 : 0.95;
   mat.sheenColor = new THREE.Color(isReflection ? "#999999" : "#ffffff");
+
+  // Add subtle micro texture detail on neck/body (normal map)
+  (mat as any).normalMap = featherNormal;
+  if ((mat as any).normalScale?.set) {
+    (mat as any).normalScale.set(isReflection ? 0.35 : 0.95, isReflection ? 0.35 : 0.95);
+  } else {
+    (mat as any).normalScale = new THREE.Vector2(isReflection ? 0.35 : 0.95, isReflection ? 0.35 : 0.95);
+  }
 }else {
   // Trust the glTF's baked environment map impact
   mat.envMapIntensity = 1; 
@@ -1116,7 +1135,15 @@ export const SplashDroplets = ({ splashProgress, opacity = 1 }: { splashProgress
 
 //   return <primitive object={reflector} />;
 // };
-export const WaterPlane = ({ splashProgress, opacity = 1 }: { splashProgress: number, opacity?: number }) => {
+export const WaterPlane = ({
+  splashProgress,
+  scrollProgress = 0,
+  opacity = 1,
+}: {
+  splashProgress: number;
+  scrollProgress?: number;
+  opacity?: number;
+}) => {
   const reflectorRef = useRef<any>(null);
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const geometry = useMemo(() => new THREE.PlaneGeometry(5000, 5000), []);
@@ -1332,9 +1359,15 @@ shader.fragmentShader = shader.fragmentShader.replace(
     // Visible ripple rings around the swan position (swan sits near [0, -14, 0]).
     const time = state.clock.elapsedTime;
     const ringCenterY = -14.98;
+    // Hide ripples during "flying" part of the animation.
+    const flyFade = 1.0 - THREE.MathUtils.smoothstep(scrollProgress, 0.55, 0.72);
+
+    // Hide ripples during the splash burst.
+    const splashFade = 1.0 - THREE.MathUtils.smoothstep(splashProgress, 0.02, 0.12);
+
     const intensity = THREE.MathUtils.smoothstep(splashProgress, 0.0, 0.12) * opacity;
     const base = 0.12 * opacity;
-    const alphaScale = base + intensity * 0.55;
+    const alphaScale = (base + intensity * 0.55) * flyFade * splashFade;
 
     ringRefs.current.forEach((ring, i) => {
       if (!ring) return;
@@ -1666,7 +1699,7 @@ const LogoRevealNew = ({
 
           <Suspense fallback={null}>
             <SwanModel scrollProgress={scrollProgress} transformProgress={transformProgress} />
-            <WaterPlane splashProgress={splashProgress} />
+            <WaterPlane splashProgress={splashProgress} scrollProgress={scrollProgress} />
             <SplashDroplets splashProgress={splashProgress} />
             <SplashWalls splashProgress={splashProgress} />
             <Environment  background={false} />

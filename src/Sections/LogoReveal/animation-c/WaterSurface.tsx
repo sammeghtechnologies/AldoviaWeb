@@ -1,7 +1,7 @@
-import { useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { MeshReflectorMaterial, useGLTF } from "@react-three/drei";
+import { MeshReflectorMaterial, useGLTF, useTexture } from "@react-three/drei";
 // @ts-ignore
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
 
@@ -26,6 +26,17 @@ export default function WaterSurface({
   const swanGroupRef = useRef<THREE.Group>(null!);
 
   const { scene: swanScene, animations } = useGLTF("/models/swan.glb") as any;
+  const featherNormal = useTexture(new URL("../textures/feather_normal.jpg", import.meta.url).href);
+
+  useEffect(() => {
+    featherNormal.wrapS = THREE.RepeatWrapping;
+    featherNormal.wrapT = THREE.RepeatWrapping;
+    // Higher tiling makes feather micro-detail visible (less "smooth plastic")
+    featherNormal.repeat.set(6.0, 6.0);
+    featherNormal.flipY = false;
+    featherNormal.colorSpace = THREE.NoColorSpace;
+    featherNormal.needsUpdate = true;
+  }, [featherNormal]);
 
   const ringSeeds = useMemo(() => Array.from({ length: RING_COUNT }).map(() => Math.random() * 10), []);
 
@@ -87,6 +98,54 @@ export default function WaterSurface({
     }
     return clone;
   }, [swanScene, animations]);
+
+  useEffect(() => {
+    if (!swanModel) return;
+
+    swanModel.traverse((child: any) => {
+      if (!child?.isMesh || !child.material) return;
+
+      const originalMaterial = child.material;
+      const materialClone = originalMaterial.clone?.() ?? originalMaterial;
+
+      const originalColor =
+        materialClone.color?.clone?.() ?? new THREE.Color("#ffffff");
+      const luminance =
+        originalColor.r * 0.2126 +
+        originalColor.g * 0.7152 +
+        originalColor.b * 0.0722;
+      const isFeatherLike = luminance > 0.6;
+
+      if (isFeatherLike) {
+        materialClone.normalMap = featherNormal;
+        if (materialClone.normalScale?.set) {
+          materialClone.normalScale.set(2.2, 2.2);
+        } else {
+          materialClone.normalScale = new THREE.Vector2(2.2, 2.2);
+        }
+
+        // Make the normal detail read better under highlights.
+        if (typeof materialClone.roughness === "number") {
+          materialClone.roughness = Math.min(materialClone.roughness, 0.42);
+        } else {
+          materialClone.roughness = 0.42;
+        }
+        if (typeof materialClone.metalness === "number") {
+          materialClone.metalness = 0.0;
+        } else {
+          materialClone.metalness = 0.0;
+        }
+        if (typeof materialClone.envMapIntensity === "number") {
+          materialClone.envMapIntensity = Math.max(materialClone.envMapIntensity, 1.35);
+        } else {
+          materialClone.envMapIntensity = 1.35;
+        }
+      }
+
+      materialClone.needsUpdate = true;
+      child.material = materialClone;
+    });
+  }, [swanModel, featherNormal]);
 
   const mixer = useMemo(() => new THREE.AnimationMixer(swanModel), [swanModel]);
   const hasStartedAnim = useRef(false);
