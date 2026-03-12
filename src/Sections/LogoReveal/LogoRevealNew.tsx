@@ -693,7 +693,7 @@ export const SwanModel = ({
   transformProgress: number;
 }) => {
   const group = useRef<THREE.Group>(null);
-  const { scene, animations } = useGLTF("/models/Swan_anim_v23.glb");
+  const { scene, animations } = useGLTF("/models/Swan_anim_v24.glb");
   const { actions } = useAnimations(animations, group);
 
   const isDragging = useRef(false);
@@ -745,23 +745,16 @@ export const SwanModel = ({
         const originalColor = child.material.color?.clone?.() ?? new THREE.Color("#ffffff");
         const luminance = originalColor.r * 0.2126 + originalColor.g * 0.7152 + originalColor.b * 0.0722;
         const isFeatherMaterial = luminance > 0.6;
-
-        if (isFeatherMaterial) {
-          mat.color = new THREE.Color(isReflection ? "#d9dde2" : "#f7f7f4");
-          mat.roughness = isReflection ? 0.48 : 0.34;        
-          mat.metalness = 0.0;         
-          mat.envMapIntensity = isReflection ? 0.55 : 1.45;  
-          mat.normalScale?.set(1.55, 1.55);
-          mat.aoMapIntensity = 1.3;
-          mat.sheen = isReflection ? 0.45 : 0.95;
-          mat.sheenColor = new THREE.Color(isReflection ? "#d7dde4" : "#ffffff");
-          mat.sheenRoughness = isReflection ? 0.88 : 0.72;
-        // } else {
-        //   mat.color.copy(originalColor);
-        //   mat.metalness = child.material.metalness ?? 0;
-        //   mat.roughness = isReflection ? Math.max(child.material.roughness ?? 0.5, 0.6) : child.material.roughness ?? 0.5;
-        //   mat.envMapIntensity = isReflection ? 0.45 : child.material.envMapIntensity ?? 1;
-        // }
+// Inside SwanModel component, within the useLayoutEffect loop:
+if (isFeatherMaterial) {
+  mat.color = new THREE.Color(isReflection ? "#a0a0a0" : "#f7f7f4"); // 🚀 Darker base for reflection
+  mat.roughness = isReflection ? 0.8 : 0.34;        // 🚀 Higher roughness blurs highlights
+  mat.metalness = 0.0;         
+  mat.envMapIntensity = isReflection ? 0.2 : 1.45;  // 🚀 Dropped intensity significantly
+  
+  // Soften the sheen for the reflection
+  mat.sheen = isReflection ? 0.2 : 0.95;
+  mat.sheenColor = new THREE.Color(isReflection ? "#999999" : "#ffffff");
 }else {
   // Trust the glTF's baked environment map impact
   mat.envMapIntensity = 1; 
@@ -1062,10 +1055,12 @@ export const SplashDroplets = ({ splashProgress, opacity = 1 }: { splashProgress
 //     const refl = new Reflector(geometry, {
 //       textureWidth: isMobile ? 1024 : 2048,
 //       textureHeight: isMobile ? 1024 : 2048,
-//       color: 0x808080,
+//       // 🚀 Lifted to 0x252525 so it's actually visible, unlike the last one
+//       color: 0x252525, 
 //     });
 //     refl.rotation.x = -Math.PI / 2;
-//     refl.position.y = -15;
+//     refl.position.y = -15.1; // Physical placement
+    
 //     const material = refl.material as THREE.ShaderMaterial;
 //     material.transparent = true;
 //     material.opacity = opacity;
@@ -1079,59 +1074,32 @@ export const SplashDroplets = ({ splashProgress, opacity = 1 }: { splashProgress
 //         `vec4 base = texture2DProj( tDiffuse, vUv );`,
 //         `
 //         float projectedY = vUv.y / vUv.w;
-//         float varRippleMask = smoothstep(0.65, 0.40, projectedY);
-//         vec2 baseUV = vUv.xy / vUv.w - 0.5;
-//         vec2 perspectiveUV = vec2(baseUV.x - 0.0, (baseUV.y - (-0.15)) * 3.5);
-//         float distCenter = length(perspectiveUV);
+//         vec2 baseUV = vUv.xy / vUv.w;
         
-//         // 🔥 1. SPLASH POWER
-//         float splashPower = smoothstep(0.0, 0.15, uTakeoff) * (1.0 - smoothstep(0.8, 1.0, uTakeoff));
-//         vec2 wakeUV = perspectiveUV - vec2(0.0, uTakeoff * 0.2); 
-//         float wakeDist = length(wakeUV);
-        
-//         // 🔥 2. EXTREME TURBULENCE (Tamed down for the swan)
-//         float turbulence = (sin(wakeUV.x * 200.0 + uTime * 30.0) * cos(wakeUV.y * 200.0 - uTime * 25.0)) * splashPower;
-//         float wakeMask = 1.0 - smoothstep(0.0, 0.3 + (uTakeoff * 1.5), wakeDist);
-        
-//         // Standard ambient ripples (now tied to scroll)
-//         float ambientRipple = sin(baseUV.x * 120.0 + uTime * 1.0) * cos(baseUV.y * 120.0 + uTime * 1.0);
-//         float rippleStrength = mix(0.0005, 0.003, varRippleMask) * (1.0 - splashPower);
-        
-//         // Ring fade logic
-//         float ringPhase = distCenter * 70.0 - uTime * 1.2;
-//         float ringFade = smoothstep(0.0, 0.02, distCenter) * (1.0 - smoothstep(0.05, 0.20, distCenter)) * (1.0 - splashPower); 
-//         vec2 waveDistortion = normalize(perspectiveUV + vec2(0.0001)) * cos(ringPhase) * 0.0015 * ringFade;
-        
-//         // 🔥 3. HEAVY DISTORTION (Reduced from 0.08 to 0.02 for a calmer takeoff)
-//         vec2 wakeDistortion = normalize(wakeUV + vec2(0.0001)) * (turbulence * wakeMask) * 0.02; 
-        
-//         // 🔥 4. SPLASH CHAOS (Reduced from 0.015 to 0.003)
-//         vec2 splashChaos = vec2(sin(uTime * 15.0 + baseUV.y * 100.0), cos(uTime * 15.0 + baseUV.x * 100.0)) * splashPower * 0.003;
+//         // 1. SIMPLE WATER JITTER (For that "Reference Photo" look)
+//         // This breaks up the belly shape into soft horizontal streaks
+//         float ripple = sin(baseUV.x * 150.0 + uTime * 2.0) * 0.002;
+//         float jitter = cos(baseUV.y * 100.0 - uTime * 1.5) * 0.003;
+//         vec2 distortedUv = vec2(vUv.x + ripple, vUv.y + jitter);
 
-//         // 🔥 5. RAINDROP IMPACTS (Tiny, scattered rainy ripples)
-//         // We create 3 separate, highly dense grids to simulate random drops across the surface
-//         vec2 dropGrid1 = fract(perspectiveUV * 40.0 + uTime * 0.2) - 0.5;
-//         vec2 dropGrid2 = fract(perspectiveUV * 65.0 - uTime * 0.3 + vec2(0.3, 0.7)) - 0.5;
-//         vec2 dropGrid3 = fract(perspectiveUV * 90.0 + uTime * 0.15 + vec2(0.6, 0.2)) - 0.5;
-        
-//         float dropD1 = length(dropGrid1);
-//         float dropD2 = length(dropGrid2);
-//         float dropD3 = length(dropGrid3);
-        
-//         // High frequency sine waves mapped tightly to the centers of the grids
-//         float rainRip1 = sin(dropD1 * 150.0 - uTime * 60.0) * smoothstep(0.15, 0.02, dropD1);
-//         float rainRip2 = sin(dropD2 * 200.0 - uTime * 80.0) * smoothstep(0.1, 0.01, dropD2);
-//         float rainRip3 = sin(dropD3 * 250.0 - uTime * 90.0) * smoothstep(0.08, 0.005, dropD3);
-        
-//         // Combine them into a subtle ambient rain effect (multiplier 0.003 controls rain strength)
-//         vec2 rainDistortion = (normalize(dropGrid1 + 0.0001) * rainRip1 + 
-//                                normalize(dropGrid2 + 0.0001) * rainRip2 + 
-//                                normalize(dropGrid3 + 0.0001) * rainRip3) * 0.003;
+//         // 🚀 2. THE REFLECTION SAMPLING
+//         // We sample once but with the jitter to keep it bright but soft
+//         vec4 base = texture2DProj(tDiffuse, vec4(distortedUv, vUv.zw));
 
-//         // Combine all physics
-//         vec2 totalDistortion = vec2(ambientRipple * rippleStrength) + waveDistortion + wakeDistortion + splashChaos + rainDistortion;
+//         // 🚀 3. THE "GAP" MASK
+//         // This creates a clean 0.5cm black gap right under the swan
+//         // Adjustment: Increase 0.47 to 0.49 for a LARGER gap.
+//         float gap = smoothstep(0.47, 0.51, projectedY);
+        
+//         // 🚀 4. DEPTH FADE (The "Single Reflection" Fix)
+//         // This kills the reflection of the neck/head so you only see the body
+//         float depthFade = smoothstep(0.35, 0.55, projectedY);
 
-//         vec4 base = texture2DProj(tDiffuse, vec4(vUv.xy + (totalDistortion * vUv.w), vUv.zw));
+//         // Dampen the white just enough to not "bloom"
+//         base.rgb *= 0.8; 
+        
+//         // Apply the gap and the fade
+//         base.a *= (gap * depthFade);
 //         `
 //       );
 //       reflectorRef.current = { userData: { shader } };
@@ -1141,17 +1109,12 @@ export const SplashDroplets = ({ splashProgress, opacity = 1 }: { splashProgress
 
 //   useFrame(() => {
 //     if (reflectorRef.current?.userData.shader) {
-//       // ✅ Multiply splashProgress so the waves scrub rapidly back and forth as you scroll
-//       const scrollSpeedMultiplier = 30.0;
-
-//       reflectorRef.current.userData.shader.uniforms.uTime.value = splashProgress * scrollSpeedMultiplier;
-//       reflectorRef.current.userData.shader.uniforms.uTakeoff.value = splashProgress;
+//       reflectorRef.current.userData.shader.uniforms.uTime.value = splashProgress * 20.0;
 //     }
 //   });
 
 //   return <primitive object={reflector} />;
 // };
-
 export const WaterPlane = ({ splashProgress, opacity = 1 }: { splashProgress: number, opacity?: number }) => {
   const reflectorRef = useRef<any>(null);
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
@@ -1161,7 +1124,7 @@ export const WaterPlane = ({ splashProgress, opacity = 1 }: { splashProgress: nu
     const refl = new Reflector(geometry, {
       textureWidth: isMobile ? 1024 : 2048,
       textureHeight: isMobile ? 1024 : 2048,
-      color: 0x120C02,
+      color: 0x0a0a0a,
     });
     refl.rotation.x = -Math.PI / 2;
     refl.position.y = -15;
@@ -1179,38 +1142,37 @@ shader.fragmentShader = shader.fragmentShader.replace(
   `
   float projectedY = vUv.y / vUv.w;
   
-  // Basic Distortion logic
-  float varRippleMask = smoothstep(0.65, 0.40, projectedY);
-  vec2 baseUV = vUv.xy / vUv.w - 0.5;
-  vec2 perspectiveUV = vec2(baseUV.x - 0.0, (baseUV.y - (-0.15)) * 3.5);
-  
-  float splashPower = smoothstep(0.0, 0.15, uTakeoff) * (1.0 - smoothstep(0.8, 1.0, uTakeoff));
-  vec2 wakeUV = perspectiveUV - vec2(0.0, uTakeoff * 0.2); 
-  
-  float turbulence = (sin(wakeUV.x * 200.0 + uTime * 30.0) * cos(wakeUV.y * 200.0 - uTime * 25.0)) * splashPower;
-  float wakeMask = 1.0 - smoothstep(0.0, 0.3 + (uTakeoff * 1.5), length(wakeUV));
-  float ambientRipple = sin(baseUV.x * 120.0 + uTime * 1.0) * cos(baseUV.y * 120.0 + uTime * 1.0);
-  float rippleStrength = mix(0.0005, 0.003, varRippleMask) * (1.0 - splashPower);
+  // 1. Calculate distance from the surface
+  // We use this to make things blurrier/wavier as they go deeper
+  float distFromSurface = smoothstep(0.55, 0.1, projectedY); 
 
-  // Simple total distortion
-  vec2 totalDistortion = vec2(ambientRipple * rippleStrength) + (turbulence * wakeMask * 0.015);
+  // 2. LOWERED WAVE DISTORTION
+  // Reduced frequency (40.0 -> 20.0) and amplitude (0.02 -> 0.008)
+  vec2 baseUV = vUv.xy / vUv.w;
+  float ripple = sin(baseUV.x * 20.0 + uTime * 1.5) * cos(baseUV.y * 15.0 + uTime * 1.0);
+  vec2 distortion = vec2(ripple) * (distFromSurface * 0.008); 
 
-  // 🚀 1. BLUR TAPS (Reduced complexity to ensure it renders)
-  float blurScale = smoothstep(0.65, 0.1, projectedY) * 0.01; 
+  // 3. BALANCED BLUR
+  // Slightly tighter blur so the neck stays recognizable
+  float blurSize = distFromSurface * 0.008; 
+  
   vec4 blurSum = vec4(0.0);
-  blurSum += texture2DProj(tDiffuse, vec4(vUv.xy + (totalDistortion * vUv.w) + vec2(blurScale, blurScale) * vUv.w, vUv.zw));
-  blurSum += texture2DProj(tDiffuse, vec4(vUv.xy + (totalDistortion * vUv.w) + vec2(-blurScale, -blurScale) * vUv.w, vUv.zw));
+  blurSum += texture2DProj(tDiffuse, vec4(vUv.xy + (distortion * vUv.w), vUv.zw));
+  blurSum += texture2DProj(tDiffuse, vec4(vUv.xy + (distortion * vUv.w) + vec2(blurSize, blurSize) * vUv.w, vUv.zw));
+  blurSum += texture2DProj(tDiffuse, vec4(vUv.xy + (distortion * vUv.w) + vec2(-blurSize, blurSize) * vUv.w, vUv.zw));
+  blurSum += texture2DProj(tDiffuse, vec4(vUv.xy + (distortion * vUv.w) + vec2(blurSize, -blurSize) * vUv.w, vUv.zw));
+  blurSum += texture2DProj(tDiffuse, vec4(vUv.xy + (distortion * vUv.w) + vec2(-blurSize, -blurSize) * vUv.w, vUv.zw));
   
-  vec4 base = blurSum / 2.0;
+  vec4 base = blurSum / 5.0;
 
-  // 🚀 2. THE COLOR FIX (Force Whitish-Gray)
-  // This turns all reflected colors into a single gray value based on brightness
+  // 4. LOWERED BRIGHTNESS
+  // Changed from 1.1/1.3 down to 0.7 to prevent the 'blown out' look
   float brightness = dot(base.rgb, vec3(0.299, 0.587, 0.114));
-  base.rgb = vec3(brightness * 0.95); // 1.3 makes it pop more as "white"
+  base.rgb = vec3(brightness * 0.75); 
 
-  // 🚀 3. THE "SINGLE REFLECTION" FADE
-  // This dissolves the neck as it goes down so you never see the second head
-  float verticalFade = smoothstep(0.35, 0.65, projectedY);
+  // 5. EXTENDED NECK VISIBILITY
+  // Lowered the start of the fade (0.3 -> 0.15) so the neck shows more
+  float verticalFade = smoothstep(0.15, 0.6, projectedY);
   base.a *= verticalFade;
   `
 );
@@ -1499,6 +1461,6 @@ const LogoRevealNew = ({
   );
 };
 
-useGLTF.preload("/models/Swan_anim_v23.glb");
+useGLTF.preload("/models/Swan_anim_v24.glb");
 
 export default LogoRevealNew;
