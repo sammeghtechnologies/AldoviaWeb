@@ -166,7 +166,7 @@ const HeroSection = ({ activeRoom, setActiveRoom }: Props) => {
           onChange={handleRoomTabChange}
           disableDesktopShift
           compactMobile
-          activeClassName="bg-[#F3EFE6] !text-[#4c3628] !font-bold shadow-md"
+          activeClassName="!bg-transparent !text-[#FFE694] !font-bold !shadow-none"
           inactiveClassName="bg-transparent !text-[#F3EFE6]/90 hover:!text-[#F3EFE6] hover:bg-white/10 !font-semibold"
         />
       </div>
