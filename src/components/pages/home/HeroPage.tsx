@@ -78,7 +78,7 @@ const HeroPage: React.FC = () => {
           transition={{ duration: 8, ease: "easeOut" }}
           className="absolute inset-0 h-full w-full object-cover"
         >
-          <source src="/assets/herobackgrounds/home/home.mp4" type="video/mp4" />
+          <source src="https://res.cloudinary.com/dla9ezffr/video/upload/v1773313435/home_q988lh.mp4" type="video/mp4" />
         </motion.video>
 
         {/* Keep center lights visible while preserving text readability */}
@@ -118,7 +118,7 @@ const HeroPage: React.FC = () => {
         </Suspense>
       </DeferredSection>
 
-      <div id="home-experience-section">
+      <div id="home-experience-section" className="scroll-mt-[12vh]">
         <DeferredSection placeholderClassName="min-h-[70vh] bg-[#FBF6E6]" rootMargin="300px 0px">
           <Suspense fallback={<div className="min-h-[70vh] bg-[#FBF6E6]" />}>
             <ExperienceSection/>
