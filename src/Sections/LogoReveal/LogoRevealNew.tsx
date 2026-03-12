@@ -1142,19 +1142,18 @@ shader.fragmentShader = shader.fragmentShader.replace(
   `
   float projectedY = vUv.y / vUv.w;
   
-  // 1. Calculate distance from the surface
-  // We use this to make things blurrier/wavier as they go deeper
-  float distFromSurface = smoothstep(0.55, 0.1, projectedY); 
+  // 1. We keep a very small mask just to keep the water contact point clean
+  float surfaceMask = smoothstep(0.6, 0.55, projectedY); 
 
-  // 2. LOWERED WAVE DISTORTION
-  // Reduced frequency (40.0 -> 20.0) and amplitude (0.02 -> 0.008)
+  // 2. UNIFORM DISTORTION (Removed depth logic)
+  // This applies the same wave amount to the body and the neck head
   vec2 baseUV = vUv.xy / vUv.w;
   float ripple = sin(baseUV.x * 20.0 + uTime * 1.5) * cos(baseUV.y * 15.0 + uTime * 1.0);
-  vec2 distortion = vec2(ripple) * (distFromSurface * 0.008); 
+  vec2 distortion = vec2(ripple) * 0.0015; // Low constant distortion
 
-  // 3. BALANCED BLUR
-  // Slightly tighter blur so the neck stays recognizable
-  float blurSize = distFromSurface * 0.008; 
+  // 3. CONSTANT BLUR
+  // Keeping this low (0.002) so the neck stays sharp and visible
+  float blurSize = 0.002; 
   
   vec4 blurSum = vec4(0.0);
   blurSum += texture2DProj(tDiffuse, vec4(vUv.xy + (distortion * vUv.w), vUv.zw));
@@ -1165,15 +1164,14 @@ shader.fragmentShader = shader.fragmentShader.replace(
   
   vec4 base = blurSum / 5.0;
 
-  // 4. LOWERED BRIGHTNESS
-  // Changed from 1.1/1.3 down to 0.7 to prevent the 'blown out' look
+  // 4. YOUR PREFERRED BRIGHTNESS
   float brightness = dot(base.rgb, vec3(0.299, 0.587, 0.114));
-  base.rgb = vec3(brightness * 0.75); 
+  base.rgb = vec3(brightness * 0.69); 
 
-  // 5. EXTENDED NECK VISIBILITY
-  // Lowered the start of the fade (0.3 -> 0.15) so the neck shows more
-  float verticalFade = smoothstep(0.15, 0.6, projectedY);
-  base.a *= verticalFade;
+  // 5. REMOVED DEPTH FADE
+  // The neck is now 100% visible. 
+  // We only use surfaceMask to ensure no "ghosting" above the water line.
+  base.a *= 1.0; 
   `
 );
       reflectorRef.current = { userData: { shader } };
