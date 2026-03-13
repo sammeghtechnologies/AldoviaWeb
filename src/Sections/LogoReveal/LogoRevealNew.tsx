@@ -723,7 +723,6 @@ export const SwanModel = ({
         child.material.depthWrite = true;
         child.material.depthTest = true;
         child.material.alphaTest = 0.5;
-        child.renderOrder = isReflection ? 80 : 2000;
       }
 
       if (child.isMesh && child.material) {
@@ -1116,7 +1115,15 @@ export const SplashDroplets = ({ splashProgress, opacity = 1 }: { splashProgress
 
 //   return <primitive object={reflector} />;
 // };
-export const WaterPlane = ({ splashProgress, opacity = 1 }: { splashProgress: number, opacity?: number }) => {
+export const WaterPlane = ({
+  splashProgress,
+  scrollProgress = 0,
+  opacity = 1,
+}: {
+  splashProgress: number;
+  scrollProgress?: number;
+  opacity?: number;
+}) => {
   const reflectorRef = useRef<any>(null);
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const geometry = useMemo(() => new THREE.PlaneGeometry(5000, 5000), []);
@@ -1229,7 +1236,7 @@ export const WaterPlane = ({ splashProgress, opacity = 1 }: { splashProgress: nu
     const refl = new Reflector(geometry, {
       textureWidth: isMobile ? 1024 : 2048,
       textureHeight: isMobile ? 1024 : 2048,
-      color: 0x0a0a0a,
+      color: 0x000000,
     });
     refl.rotation.x = -Math.PI / 2;
     refl.position.y = -15;
@@ -1247,19 +1254,18 @@ shader.fragmentShader = shader.fragmentShader.replace(
   `
   float projectedY = vUv.y / vUv.w;
   
-  // 1. Calculate distance from the surface
-  // We use this to make things blurrier/wavier as they go deeper
-  float distFromSurface = smoothstep(0.55, 0.1, projectedY); 
+  // 1. We keep a very small mask just to keep the water contact point clean
+  float surfaceMask = smoothstep(0.6, 0.55, projectedY); 
 
-  // 2. LOWERED WAVE DISTORTION
-  // Reduced frequency (40.0 -> 20.0) and amplitude (0.02 -> 0.008)
+  // 2. UNIFORM DISTORTION (Removed depth logic)
+  // This applies the same wave amount to the body and the neck head
   vec2 baseUV = vUv.xy / vUv.w;
   float ripple = sin(baseUV.x * 20.0 + uTime * 1.5) * cos(baseUV.y * 15.0 + uTime * 1.0);
-  vec2 distortion = vec2(ripple) * (distFromSurface * 0.008); 
+  vec2 distortion = vec2(ripple) * 0.0012; // Low constant distortion
 
-  // 3. BALANCED BLUR
-  // Slightly tighter blur so the neck stays recognizable
-  float blurSize = distFromSurface * 0.008; 
+  // 3. CONSTANT BLUR
+  // Keeping this low (0.002) so the neck stays sharp and visible
+  float blurSize = 0.0016; 
   
   vec4 blurSum = vec4(0.0);
   blurSum += texture2DProj(tDiffuse, vec4(vUv.xy + (distortion * vUv.w), vUv.zw));
@@ -1268,16 +1274,43 @@ shader.fragmentShader = shader.fragmentShader.replace(
   blurSum += texture2DProj(tDiffuse, vec4(vUv.xy + (distortion * vUv.w) + vec2(blurSize, -blurSize) * vUv.w, vUv.zw));
   blurSum += texture2DProj(tDiffuse, vec4(vUv.xy + (distortion * vUv.w) + vec2(-blurSize, -blurSize) * vUv.w, vUv.zw));
   
-  vec4 base = blurSum / 1.0;
+  vec4 base = blurSum / 5.0;
 
-  // 4. LOWERED BRIGHTNESS
-  // Changed from 1.1/1.3 down to 0.7 to prevent the 'blown out' look
-  float brightness = dot(base.rgb, vec3(0.299, 0.587, 0.114));
-  base.rgb = vec3(brightness * .8); 
+  // 4. GRAY MIRROR LOOK (closer to ref image) but keep slight chroma (beak stays orange-ish)
+  vec3 origColor = base.rgb;
+  float brightness = dot(origColor, vec3(0.299, 0.587, 0.114));
+  float gray = clamp(pow(brightness, 0.88) * 1.25 + 0.04, 0.0, 1.0);
+  float saturationKeep = 0.28;
+  base.rgb = mix(vec3(gray), origColor, saturationKeep);
+
+  // 4.1 THIN RIPPLE LINE HIGHLIGHTS
+  float linePhase = (baseUV.y + uTime * 0.02) * 92.0 + ripple * 3.0;
+  float lines = smoothstep(0.94, 1.0, abs(sin(linePhase)));
+  base.rgb += vec3(1.0) * lines * 0.14 * (1.0 - surfaceMask);
+
+  // 4.15 PRE-REFLECTION SHADOW (dark band before reflection starts)
+  // Creates that black waterline shade under the swan body like the reference.
+  float preShadow = smoothstep(0.505, 0.635, projectedY) * (1.0 - smoothstep(0.635, 0.865, projectedY));
+  float preShadowStrength = clamp(pow(preShadow, 0.75) * 3.6, 0.0, 1.0);
+  base.rgb = mix(base.rgb, vec3(0.0), preShadowStrength);
+
+  // 4.2 CONTACT SHADOW (black shade at the waterline like ref image)
+  // A sharp dark seam + a softer shadow band beneath it.
+  float seam = smoothstep(0.515, 0.545, projectedY) * (1.0 - smoothstep(0.545, 0.575, projectedY));
+  float underShadow = smoothstep(0.545, 0.590, projectedY) * (1.0 - smoothstep(0.590, 0.670, projectedY));
+  base.rgb *= 1.0 - seam * 0.28;
+  base.rgb *= 1.0 - underShadow * 0.22;
+  // Extra darkness only near the *start* of the under-shadow (keeps the bottom cleaner).
+  float underShadowStart = smoothstep(0.545, 0.565, projectedY) * (1.0 - smoothstep(0.565, 0.610, projectedY));
+  base.rgb *= 1.0 - underShadowStart * 0.42;
+
+  // 4.3 SMALL AIR-GAP (adds separation between swan and reflection)
+  float gap = smoothstep(0.505, 0.540, projectedY) * (1.0 - smoothstep(0.540, 0.575, projectedY));
+  base.a *= 1.0 - gap;
 
   // 5. EXTENDED NECK VISIBILITY
   // Lowered the start of the fade (0.3 -> 0.15) so the neck shows more
-  float verticalFade = smoothstep(0.1, 0.6, projectedY);
+  float verticalFade = smoothstep(0.135, 0.62, projectedY);
   base.a *= verticalFade;
   `
 );
@@ -1306,9 +1339,15 @@ shader.fragmentShader = shader.fragmentShader.replace(
     // Visible ripple rings around the swan position (swan sits near [0, -14, 0]).
     const time = state.clock.elapsedTime;
     const ringCenterY = -14.98;
+    // Hide ripples during "flying" part of the animation.
+    const flyFade = 1.0 - THREE.MathUtils.smoothstep(scrollProgress, 0.55, 0.72);
+
+    // Hide ripples during the splash burst.
+    const splashFade = 1.0 - THREE.MathUtils.smoothstep(splashProgress, 0.02, 0.12);
+
     const intensity = THREE.MathUtils.smoothstep(splashProgress, 0.0, 0.12) * opacity;
     const base = 0.12 * opacity;
-    const alphaScale = base + intensity * 0.55;
+    const alphaScale = (base + intensity * 0.55) * flyFade * splashFade;
 
     ringRefs.current.forEach((ring, i) => {
       if (!ring) return;

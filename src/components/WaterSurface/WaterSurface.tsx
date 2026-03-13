@@ -6,7 +6,7 @@ import { Reflector } from "three/addons/objects/Reflector.js";
 const WATER_LEVEL = 0; 
 const START_OFFSET = 5.0;
 
-const WaterSurface = ({ fallProgress, swanProgress, id3Ref,opacity = 1 }: any) => {
+const WaterSurface = ({ fallProgress, swanProgress, id3Ref, opacity = 1, xOffset = 0 }: any) => {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const ripplePlaneRef = useRef<THREE.Mesh>(null!);
   
@@ -24,6 +24,7 @@ const WaterSurface = ({ fallProgress, swanProgress, id3Ref,opacity = 1 }: any) =
 
     refl.rotation.x = -Math.PI / 2;
     refl.position.y = WATER_LEVEL - START_OFFSET;
+    refl.position.x = xOffset;
 
     const material = refl.material as THREE.ShaderMaterial;
     material.transparent = true;
@@ -32,6 +33,7 @@ const WaterSurface = ({ fallProgress, swanProgress, id3Ref,opacity = 1 }: any) =
     material.uniforms.globalOpacity = { value: 0.0 };
     material.uniforms.uTime = { value: 0.0 };
     material.uniforms.uReflectionIntensity = { value: 0.0 }; 
+    material.uniforms.uCenterX = { value: xOffset };
 
     // 🌟 1. Grab World Position in the Vertex Shader
     material.vertexShader = `
@@ -49,6 +51,7 @@ const WaterSurface = ({ fallProgress, swanProgress, id3Ref,opacity = 1 }: any) =
       uniform float globalOpacity;
       uniform float uTime;
       uniform float uReflectionIntensity; 
+      uniform float uCenterX;
       varying vec3 vWorldPos;
       ${material.fragmentShader}
     `.replace(
@@ -62,7 +65,7 @@ const WaterSurface = ({ fallProgress, swanProgress, id3Ref,opacity = 1 }: any) =
       
       // --- 🌙 LOCALIZED MOONLIGHT LOGIC ---
       
-      vec2 spotlightOffset = vec2(2.5, 0.0); 
+      vec2 spotlightOffset = vec2(uCenterX + 2.5, 0.0); 
       float dist = length(vWorldPos.xz - spotlightOffset);
       float centerMask = smoothstep(12.0, 0.0, dist); 
       
@@ -149,6 +152,7 @@ const WaterSurface = ({ fallProgress, swanProgress, id3Ref,opacity = 1 }: any) =
 
     const targetY = THREE.MathUtils.lerp(WATER_LEVEL - START_OFFSET, WATER_LEVEL, fallProgress);
     reflector.position.y = THREE.MathUtils.lerp(reflector.position.y, targetY, 0.1);
+    reflector.position.x = xOffset;
 
     const material = reflector.material as THREE.ShaderMaterial;
     
@@ -163,6 +167,10 @@ const WaterSurface = ({ fallProgress, swanProgress, id3Ref,opacity = 1 }: any) =
 
     if (material.uniforms.uTime) {
         material.uniforms.uTime.value = time;
+    }
+
+    if (material.uniforms.uCenterX) {
+      material.uniforms.uCenterX.value = xOffset;
     }
 
     if (material.uniforms.color) {
@@ -194,10 +202,11 @@ const WaterSurface = ({ fallProgress, swanProgress, id3Ref,opacity = 1 }: any) =
 
       // 2. Ripple Sync
       if (ripplePlaneRef.current) {
-        const tailX = worldPos.x + 2.8; 
         const tailZ = worldPos.z - 0.5;
         
-        ripplePlaneRef.current.position.set(tailX - 5, reflector.position.y + 0.001, tailZ);
+        // Keep ripples centered horizontally on screen (camera looks down world X=0).
+        // Still follow the feather in Z so the "impact" depth feels correct.
+        ripplePlaneRef.current.position.set(reflector.position.x, reflector.position.y + 0.001, tailZ);
 
         if (swanProgress > 0.00) {
           ripplePlaneRef.current.visible = true;
