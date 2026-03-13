@@ -1115,16 +1115,128 @@ export const SplashDroplets = ({ splashProgress, opacity = 1 }: { splashProgress
 
 //   return <primitive object={reflector} />;
 // };
-export const WaterPlane = ({ splashProgress, opacity = 1 }: { splashProgress: number, opacity?: number }) => {
+export const WaterPlane = ({
+  splashProgress,
+  scrollProgress = 0,
+  opacity = 1,
+}: {
+  splashProgress: number;
+  scrollProgress?: number;
+  opacity?: number;
+}) => {
   const reflectorRef = useRef<any>(null);
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const geometry = useMemo(() => new THREE.PlaneGeometry(5000, 5000), []);
+  const ringRefs = useRef<THREE.Mesh[]>([]);
+  const ringCount = 10;
+  const ringSeeds = useMemo(() => Array.from({ length: ringCount }).map(() => Math.random() * 10), [ringCount]);
+  const ringGeo = useMemo(() => new THREE.RingGeometry(0.988, 1.0, 256, 1), []);
+  const ringGlowGeo = useMemo(() => new THREE.RingGeometry(0.955, 1.02, 256, 1), []);
+  const ringMaterialBase = useMemo(() => {
+    const mat = new THREE.ShaderMaterial({
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthTest: true,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+      polygonOffset: true,
+      polygonOffsetFactor: -1,
+      polygonOffsetUnits: -1,
+      uniforms: {
+        uTime: { value: 0 },
+        uOpacity: { value: 0 },
+        uSeed: { value: 0 },
+        uInner: { value: 0.988 },
+        uOuter: { value: 1.0 },
+        uAmp: { value: 0.028 },
+        uLift: { value: 0.55 },
+      },
+      vertexShader: `
+        uniform float uTime;
+        uniform float uSeed;
+        uniform float uAmp;
+        uniform float uLift;
+        varying float vDist;
+        varying float vNoise;
+
+        void main() {
+          vec3 pos = position;
+          float ang = atan(pos.y, pos.x);
+          float dist = length(pos.xy);
+
+          float n1 = sin(ang * 7.0 + uTime * 0.85 + uSeed * 6.2831);
+          float n2 = cos(ang * 13.0 - uTime * 0.55 + uSeed * 3.11);
+          float n3 = sin((pos.x + pos.y) * 2.2 + uTime * 0.35 + uSeed * 9.0);
+          float noise = (n1 * 0.55 + n2 * 0.35 + n3 * 0.25);
+
+          float wob = noise * uAmp;
+          vec2 dir = normalize(pos.xy + vec2(1e-6));
+          pos.xy = dir * (dist + wob);
+
+          // "3D" lift along the ring normal (becomes Y after rotation)
+          pos.z += wob * uLift;
+
+          vDist = length(pos.xy);
+          vNoise = noise;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float uOpacity;
+        uniform float uInner;
+        uniform float uOuter;
+        varying float vDist;
+        varying float vNoise;
+
+        void main() {
+          float edge = 0.0032;
+          float band = smoothstep(uInner, uInner + edge, vDist)
+                     * (1.0 - smoothstep(uOuter - edge, uOuter, vDist));
+          float variation = 0.92 + 0.08 * (vNoise * 0.5 + 0.5);
+          float alpha = band * uOpacity;
+          gl_FragColor = vec4(vec3(variation), alpha);
+        }
+      `,
+    });
+    return mat;
+  }, []);
+  const ringGlowMaterialBase = useMemo(() => {
+    const mat = ringMaterialBase.clone();
+    mat.uniforms = THREE.UniformsUtils.clone(ringMaterialBase.uniforms);
+    mat.uniforms.uInner.value = 0.955;
+    mat.uniforms.uOuter.value = 1.02;
+    mat.uniforms.uAmp.value = 0.038;
+    mat.uniforms.uLift.value = 0.35;
+    mat.polygonOffsetFactor = -2;
+    mat.polygonOffsetUnits = -2;
+    return mat;
+  }, [ringMaterialBase]);
+  const ringMaterials = useMemo(
+    () =>
+      Array.from({ length: ringCount }, (_, i) => {
+        const mat = ringMaterialBase.clone();
+        mat.uniforms = THREE.UniformsUtils.clone(ringMaterialBase.uniforms);
+        mat.uniforms.uSeed.value = ringSeeds[i] ?? 0;
+        return mat;
+      }),
+    [ringCount, ringMaterialBase, ringSeeds]
+  );
+  const ringGlowMaterials = useMemo(
+    () =>
+      Array.from({ length: ringCount }, (_, i) => {
+        const mat = ringGlowMaterialBase.clone();
+        mat.uniforms = THREE.UniformsUtils.clone(ringGlowMaterialBase.uniforms);
+        mat.uniforms.uSeed.value = ringSeeds[i] ?? 0;
+        return mat;
+      }),
+    [ringCount, ringGlowMaterialBase, ringSeeds]
+  );
 
   const reflector = useMemo(() => {
     const refl = new Reflector(geometry, {
       textureWidth: isMobile ? 1024 : 2048,
       textureHeight: isMobile ? 1024 : 2048,
-      color: 0x0a0a0a,
+      color: 0x000000,
     });
     refl.rotation.x = -Math.PI / 2;
     refl.position.y = -15;
@@ -1149,11 +1261,11 @@ shader.fragmentShader = shader.fragmentShader.replace(
   // This applies the same wave amount to the body and the neck head
   vec2 baseUV = vUv.xy / vUv.w;
   float ripple = sin(baseUV.x * 20.0 + uTime * 1.5) * cos(baseUV.y * 15.0 + uTime * 1.0);
-  vec2 distortion = vec2(ripple) * 0.0015; // Low constant distortion
+  vec2 distortion = vec2(ripple) * 0.0012; // Low constant distortion
 
   // 3. CONSTANT BLUR
   // Keeping this low (0.002) so the neck stays sharp and visible
-  float blurSize = 0.002; 
+  float blurSize = 0.0016; 
   
   vec4 blurSum = vec4(0.0);
   blurSum += texture2DProj(tDiffuse, vec4(vUv.xy + (distortion * vUv.w), vUv.zw));
@@ -1164,14 +1276,42 @@ shader.fragmentShader = shader.fragmentShader.replace(
   
   vec4 base = blurSum / 5.0;
 
-  // 4. YOUR PREFERRED BRIGHTNESS
-  float brightness = dot(base.rgb, vec3(0.299, 0.587, 0.114));
-  base.rgb = vec3(brightness * 0.69); 
+  // 4. GRAY MIRROR LOOK (closer to ref image) but keep slight chroma (beak stays orange-ish)
+  vec3 origColor = base.rgb;
+  float brightness = dot(origColor, vec3(0.299, 0.587, 0.114));
+  float gray = clamp(pow(brightness, 0.88) * 1.25 + 0.04, 0.0, 1.0);
+  float saturationKeep = 0.28;
+  base.rgb = mix(vec3(gray), origColor, saturationKeep);
 
-  // 5. REMOVED DEPTH FADE
-  // The neck is now 100% visible. 
-  // We only use surfaceMask to ensure no "ghosting" above the water line.
-  base.a *= 1.0; 
+  // 4.1 THIN RIPPLE LINE HIGHLIGHTS
+  float linePhase = (baseUV.y + uTime * 0.02) * 92.0 + ripple * 3.0;
+  float lines = smoothstep(0.94, 1.0, abs(sin(linePhase)));
+  base.rgb += vec3(1.0) * lines * 0.14 * (1.0 - surfaceMask);
+
+  // 4.15 PRE-REFLECTION SHADOW (dark band before reflection starts)
+  // Creates that black waterline shade under the swan body like the reference.
+  float preShadow = smoothstep(0.505, 0.635, projectedY) * (1.0 - smoothstep(0.635, 0.865, projectedY));
+  float preShadowStrength = clamp(pow(preShadow, 0.75) * 3.6, 0.0, 1.0);
+  base.rgb = mix(base.rgb, vec3(0.0), preShadowStrength);
+
+  // 4.2 CONTACT SHADOW (black shade at the waterline like ref image)
+  // A sharp dark seam + a softer shadow band beneath it.
+  float seam = smoothstep(0.515, 0.545, projectedY) * (1.0 - smoothstep(0.545, 0.575, projectedY));
+  float underShadow = smoothstep(0.545, 0.590, projectedY) * (1.0 - smoothstep(0.590, 0.670, projectedY));
+  base.rgb *= 1.0 - seam * 0.28;
+  base.rgb *= 1.0 - underShadow * 0.22;
+  // Extra darkness only near the *start* of the under-shadow (keeps the bottom cleaner).
+  float underShadowStart = smoothstep(0.545, 0.565, projectedY) * (1.0 - smoothstep(0.565, 0.610, projectedY));
+  base.rgb *= 1.0 - underShadowStart * 0.42;
+
+  // 4.3 SMALL AIR-GAP (adds separation between swan and reflection)
+  float gap = smoothstep(0.505, 0.540, projectedY) * (1.0 - smoothstep(0.540, 0.575, projectedY));
+  base.a *= 1.0 - gap;
+
+  // 5. EXTENDED NECK VISIBILITY
+  // Lowered the start of the fade (0.3 -> 0.15) so the neck shows more
+  float verticalFade = smoothstep(0.135, 0.62, projectedY);
+  base.a *= verticalFade;
   `
 );
       reflectorRef.current = { userData: { shader } };
@@ -1179,15 +1319,105 @@ shader.fragmentShader = shader.fragmentShader.replace(
     return refl;
   }, [geometry, isMobile]);
 
-  useFrame(() => {
+  useEffect(() => {
+    return () => {
+      ringGeo.dispose();
+      ringMaterials.forEach((mat) => mat.dispose());
+      ringGlowGeo.dispose();
+      ringGlowMaterials.forEach((mat) => mat.dispose());
+      ringMaterialBase.dispose();
+      ringGlowMaterialBase.dispose();
+    };
+  }, [ringGeo, ringMaterials, ringGlowGeo, ringGlowMaterials, ringMaterialBase, ringGlowMaterialBase]);
+
+  useFrame((state) => {
     if (reflectorRef.current?.userData.shader) {
-      const scrollSpeedMultiplier = 30.0;
-      reflectorRef.current.userData.shader.uniforms.uTime.value = splashProgress * scrollSpeedMultiplier;
+      reflectorRef.current.userData.shader.uniforms.uTime.value = state.clock.elapsedTime;
       reflectorRef.current.userData.shader.uniforms.uTakeoff.value = splashProgress;
     }
+
+    // Visible ripple rings around the swan position (swan sits near [0, -14, 0]).
+    const time = state.clock.elapsedTime;
+    const ringCenterY = -14.98;
+    // Hide ripples during "flying" part of the animation.
+    const flyFade = 1.0 - THREE.MathUtils.smoothstep(scrollProgress, 0.55, 0.72);
+
+    // Hide ripples during the splash burst.
+    const splashFade = 1.0 - THREE.MathUtils.smoothstep(splashProgress, 0.02, 0.12);
+
+    const intensity = THREE.MathUtils.smoothstep(splashProgress, 0.0, 0.12) * opacity;
+    const base = 0.12 * opacity;
+    const alphaScale = (base + intensity * 0.55) * flyFade * splashFade;
+
+    ringRefs.current.forEach((ring, i) => {
+      if (!ring) return;
+      const mat = ring.material as THREE.ShaderMaterial;
+      const seed = ringSeeds[i] ?? 0;
+      const t = ((time * 0.055) + i * 0.18 + seed) % 1;
+      const scale = THREE.MathUtils.lerp(1.2, 50, t);
+      ring.position.set(0, ringCenterY, 0);
+      const wobbleX = 1 + Math.sin(time * 0.45 + seed * 2.0) * 0.08;
+      const wobbleZ = 1 + Math.cos(time * 0.40 + seed * 1.7) * 0.07;
+      ring.scale.set(scale * wobbleX, scale * wobbleZ, 1);
+      ring.rotation.z = seed * 0.35 + time * 0.06;
+      const fade = Math.pow(1.0 - t, 0.45);
+      mat.uniforms.uTime.value = time;
+      mat.uniforms.uOpacity.value = fade * alphaScale * 0.85;
+      mat.uniforms.uAmp.value = 0.024 + 0.012 * (0.5 + 0.5 * Math.sin(time * 0.65 + seed * 3.0));
+      ring.visible = mat.uniforms.uOpacity.value > 0.01;
+    });
+
+    ringGlowMaterials.forEach((mat, i) => {
+      const ring = ringRefs.current[i + ringCount];
+      if (!ring) return;
+      const seed = ringSeeds[i] ?? 0;
+      const t = ((time * 0.055) + i * 0.18 + seed) % 1;
+      const scale = THREE.MathUtils.lerp(1.2, 50, t);
+      ring.position.set(0, ringCenterY, 0);
+      const wobbleX = 1 + Math.sin(time * 0.45 + seed * 2.0) * 0.085;
+      const wobbleZ = 1 + Math.cos(time * 0.40 + seed * 1.7) * 0.075;
+      ring.scale.set(scale * wobbleX, scale * wobbleZ, 1);
+      ring.rotation.z = seed * 0.35 + time * 0.06;
+      const fade = Math.pow(1.0 - t, 0.45);
+      const glowMat = mat as THREE.ShaderMaterial;
+      glowMat.uniforms.uTime.value = time;
+      glowMat.uniforms.uOpacity.value = fade * alphaScale * 0.35;
+      glowMat.uniforms.uAmp.value = 0.032 + 0.014 * (0.5 + 0.5 * Math.sin(time * 0.6 + seed * 2.2));
+      ring.visible = glowMat.uniforms.uOpacity.value > 0.01;
+    });
   });
 
-  return <primitive object={reflector} />;
+  return (
+    <group>
+      <primitive object={reflector} />
+      {ringMaterials.map((mat, i) => (
+        <mesh
+          key={`waterplane-ring-${i}`}
+          ref={(el) => {
+            if (el) ringRefs.current[i] = el;
+          }}
+          rotation={[-Math.PI / 2, 0, 0]}
+          geometry={ringGeo}
+          material={mat}
+          renderOrder={100}
+          visible={false}
+        />
+      ))}
+      {ringGlowMaterials.map((mat, i) => (
+        <mesh
+          key={`waterplane-ring-glow-${i}`}
+          ref={(el) => {
+            if (el) ringRefs.current[i + ringCount] = el;
+          }}
+          rotation={[-Math.PI / 2, 0, 0]}
+          geometry={ringGlowGeo}
+          material={mat}
+          renderOrder={99}
+          visible={false}
+        />
+      ))}
+    </group>
+  );
 };
 /* =========================================================
    🎬 MAIN COMBINED COMPONENT
