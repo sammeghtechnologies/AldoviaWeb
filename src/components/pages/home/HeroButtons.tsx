@@ -37,7 +37,7 @@ const HeroButtons: React.FC = () => {
         </button>
       </div>
 
-      <motion.button
+      {/* <motion.button
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 1, duration: 0.6, ease: "easeOut" }}
@@ -48,8 +48,8 @@ const HeroButtons: React.FC = () => {
         <span className="transition-transform group-hover:translate-x-2">
           →
         </span>
-        Explore Experience
-      </motion.button>
+        Explore Aldovia
+      </motion.button> */}
     </motion.div>
   );
 };

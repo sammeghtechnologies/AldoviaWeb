@@ -1,5 +1,13 @@
 import React from "react";
-import { motion, useMotionValueEvent, useScroll, useSpring, useTransform } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValueEvent,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "framer-motion";
 import CarouselControls from "../ui/CarouselControls";
 import SlidingTitleReveal from "../ui/SlidingTitleReveal";
 
@@ -166,6 +174,50 @@ const categorySwitchVariants = {
     filter: "blur(0px)",
     transition: { duration: 0.78, ease: [0.18, 0.94, 0.2, 1] as const },
   },
+  exit: {
+    opacity: 0,
+    x: -80,
+    scale: 0.92,
+    filter: "blur(4px)",
+    transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] as const },
+  },
+};
+
+type ExperienceCardImageProps = {
+  src: string;
+  alt: string;
+  className?: string;
+};
+
+const ExperienceCardImage: React.FC<ExperienceCardImageProps> = ({ src, alt, className }) => {
+  const shouldReduceMotion = useReducedMotion();
+  const [loaded, setLoaded] = React.useState(false);
+
+  React.useEffect(() => {
+    setLoaded(false);
+  }, [src]);
+
+  return (
+    <motion.img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      decoding="async"
+      draggable={false}
+      onLoad={() => setLoaded(true)}
+      onError={() => setLoaded(true)}
+      initial={false}
+      animate={
+        shouldReduceMotion
+          ? { opacity: 1, filter: "blur(0px)", scale: 1 }
+          : loaded
+            ? { opacity: 1, filter: "blur(0px)", scale: 1 }
+            : { opacity: 0, filter: "blur(14px)", scale: 1.02 }
+      }
+      transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.65, ease: [0.22, 1, 0.36, 1] as const }}
+      className={className}
+    />
+  );
 };
 
 const ExperienceSection: React.FC = () => {
@@ -427,72 +479,60 @@ const ExperienceSection: React.FC = () => {
         </div>
 
         {/* Cards */}
-        <motion.div
-          key={`category-switch-${activeCategory}`}
-          variants={categorySwitchVariants}
-          initial="hidden"
-          animate="visible"
-        >
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
-            ref={cardsRowRef}
-            onScroll={onCardsScroll}
-            style={{ scale: cardsScale, x: cardsX, transformOrigin: "center top" }}
-            variants={cardsContainerVariants}
+            key={`category-switch-${activeCategory}`}
+            variants={categorySwitchVariants}
             initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth !pb-4 !pr-12 md:!pr-2 [scroll-padding-inline:12vw] md:[scroll-padding-inline:6rem] scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            animate="visible"
+            exit="exit"
           >
-
-            {filteredExperiences.map((item, cardIndex) => (
-              <motion.div
-                key={item.id}
-                ref={(node) => {
-                  cardRefs.current[cardIndex] = node;
-                }}
-                variants={cardVariants}
-                whileHover={{ y: -6, scale: 1.01 }}
-                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] as const }}
-                className={`relative rounded-2xl overflow-hidden group shrink-0 snap-center w-[70vw] sm:w-[340px] md:w-[400px] transition-all duration-500 ${cardIndex === index
-                    ? "md:scale-100 md:opacity-100"
-                    : "md:scale-[0.94] md:opacity-60"
+            <motion.div
+              ref={cardsRowRef}
+              onScroll={onCardsScroll}
+              style={{ scale: cardsScale, x: cardsX, transformOrigin: "center top" }}
+              variants={cardsContainerVariants}
+              initial="hidden"
+              animate="visible"
+              className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth !pb-4 !pr-12 md:!pr-2 [scroll-padding-inline:12vw] md:[scroll-padding-inline:6rem] scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            >
+              {filteredExperiences.map((item, cardIndex) => (
+                <motion.div
+                  key={item.id}
+                  ref={(node) => {
+                    cardRefs.current[cardIndex] = node;
+                  }}
+                  variants={cardVariants}
+                  whileHover={{ y: -6, scale: 1.01 }}
+                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] as const }}
+                  className={`relative rounded-2xl overflow-hidden group shrink-0 snap-center w-[70vw] sm:w-[340px] md:w-[400px] transition-all duration-500 ${
+                    cardIndex === index ? "md:scale-100 md:opacity-100" : "md:scale-[0.94] md:opacity-60"
                   }`}
-              >
-                {/* Image */}
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="w-full h-[420px] object-cover
-                           transition duration-700
-                           group-hover:scale-105"
-                />
+                >
+                  {/* Image */}
+                  <ExperienceCardImage
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-[420px] object-cover bg-[#2B1B15] transition duration-700 group-hover:scale-105"
+                  />
 
-                {/* Overlay Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.18)_0%,rgba(255,255,255,0.02)_28%,rgba(255,255,255,0)_42%)] opacity-70 transition duration-700 group-hover:opacity-90" />
+                  {/* Overlay Gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.18)_0%,rgba(255,255,255,0.02)_28%,rgba(255,255,255,0)_42%)] opacity-70 transition duration-700 group-hover:opacity-90" />
 
-                {/* Content */}
-                <div className="absolute bottom-6 left-6 right-6 !text-[var(--color-secondary)]">
+                  {/* Content */}
+                  <div className="absolute bottom-6 left-6 right-6 !text-[var(--color-secondary)]">
+                    <span className="text-[11px] tracking-widest uppercase px-3 py-1 rounded-full">{item.tag}</span>
 
-                  <span className="text-[11px] tracking-widest uppercase
-                                 px-3 py-1 rounded-full">
-                    {item.tag}
-                  </span>
+                    <h3 className="mt-4 text-[22px] font-medium [font-family:'Playfair_Display']">{item.title}</h3>
 
-                  <h3 className="mt-4 text-[22px] font-medium [font-family:'Playfair_Display']">
-                    {item.title}
-                  </h3>
-
-                  <p className="text-sm text-[#E0D6D0] mt-1">
-                    {item.subtitle}
-                  </p>
-
-                </div>
-              </motion.div>
-            ))}
-
+                    <p className="text-sm text-[#E0D6D0] mt-1">{item.subtitle}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
           </motion.div>
-        </motion.div>
+        </AnimatePresence>
 
         <CarouselControls
           total={filteredExperiences.length}
