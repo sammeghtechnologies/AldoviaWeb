@@ -17,7 +17,8 @@ const NaturalFeather = forwardRef(({
 
   
   
-  const { nodes, materials } = useGLTF("/models/feather_2.glb") as any;
+  const { nodes, materials } = useGLTF("/models/feather1.glb") as any;
+  console.log("NEW GLTF NODES:", nodes); // <--- ADD THIS
 
   const localGroupRef = useRef<THREE.Group>(null!);
   const groupRef = ref || localGroupRef; 
@@ -52,12 +53,12 @@ const NaturalFeather = forwardRef(({
 
   const getFeatherScale = () => {
     switch (variant) {
-        case "small-drag": return 1.35;
-        case "high-drag-zig": return 1.32;
-        case "side-roll-upper": return 1.28;
-        case "mid-drift": return 1.35;
-        case "upper-pendulum": return 1.45;
-        default: return 1.45;
+        case "small-drag": return 0.55/2;
+        case "high-drag-zig": return 0.52/2;
+        case "side-roll-upper": return 0.48/2;
+        case "mid-drift": return 0.55/2;
+        case "upper-pendulum": return 0.65/2;
+        default: return 0.65/2;
     }
   };
 
@@ -81,8 +82,8 @@ const NaturalFeather = forwardRef(({
     const deltaY = e.clientY - previousPointer.current.y;
 
     // Apply drag to target rotation
-    targetDragRot.current.x += deltaY * 0.01;
-    targetDragRot.current.y += deltaX * 0.01;
+    targetDragRot.current.x += deltaY * 0.06;
+    targetDragRot.current.y += deltaX * 0.06;
 
     previousPointer.current = { x: e.clientX, y: e.clientY };
   };
@@ -129,10 +130,8 @@ const NaturalFeather = forwardRef(({
       mat.needsUpdate = true;
     };
 
-    Object.values(materials).forEach((mat: any) => applyMaterialStyle(mat));
-    applyMaterialStyle(nodes?.Mesh002?.material);
-    applyMaterialStyle(nodes?.Mesh003?.material);
-    applyMaterialStyle(nodes?.Cylinder021?.material);
+  Object.values(materials).forEach((mat: any) => applyMaterialStyle(mat));
+applyMaterialStyle(nodes?.singlefeather5?.material);
   }, [materials, nodes]);
 
   useFrame(() => {
@@ -140,11 +139,9 @@ const NaturalFeather = forwardRef(({
 
   
 Object.values(materials).forEach((mat: any) => {
-      if (mat) mat.opacity = opacity;
-    });
-    if (nodes?.Mesh002?.material) nodes.Mesh002.material.opacity = opacity;
-    if (nodes?.Mesh003?.material) nodes.Mesh003.material.opacity = opacity;
-    if (nodes?.Cylinder021?.material) nodes.Cylinder021.material.opacity = opacity;
+  if (mat) mat.opacity = opacity;
+});
+if (nodes?.singlefeather5?.material) nodes.singlefeather5.material.opacity = opacity;
     // Pause GSAP when it is the main active burst feather
     if (isBurst) {
       if (rotTimelineRef.current && !rotTimelineRef.current.paused()) {
@@ -271,8 +268,8 @@ Object.values(materials).forEach((mat: any) => {
              .to(rotateRef.current.rotation, { z: targetRot.z - 0.2, duration: 11 / 3, ease: "sine.inOut" }, 1.0);
       scrubTl.to(groupRef.current.position, { x: "-=4.0", y: THREE.MathUtils.lerp(peakY, landingY, 0.6), duration: 11 / 3, ease: "sine.inOut" }, 1 + (11 / 3))
              .to(rotateRef.current.rotation, { z: targetRot.z + 0.2, duration: 11 / 3, ease: "sine.inOut" }, 1 + (11 / 3));
-      scrubTl.to(groupRef.current.position, { x: targetPos[0], y: landingY, duration: 11 / 3, ease: "power1.inOut" }, 1 + (22 / 3))
-             .to(rotateRef.current.rotation, { z: targetRot.z, duration: 11 / 3, ease: "sine.inOut" }, 1 + (22 / 3));
+     scrubTl.to(groupRef.current.position, { x: targetPos[0]-4.5, y: landingY, duration: 11 / 3, ease: "power1.inOut" }, 1 + (22 / 3))
+             .to(rotateRef.current.rotation, { x: Math.PI / 2, z: 0, duration: 11 / 3, ease: "sine.inOut" }, 1 + (22 / 3));
     } else {
       const recoilX = (id % 2 === 0 ? 1.5 : -1.5) * (1 + (id % 3) * 0.2); 
       const recoilY = -1.5 - (id % 2); 
@@ -316,11 +313,9 @@ Object.values(materials).forEach((mat: any) => {
       <group ref={rotateRef}>
         <Center>
             {/* 🚀 Mouse drag controls this INNER group */}
-            <group ref={innerRotateRef} scale={getFeatherScale()}> 
-              <mesh geometry={nodes.Cylinder021.geometry} material={materials["Material.006"]} rotation={[-0.566, 0.458, 0.274]} />
-              <mesh geometry={nodes.Mesh002.geometry} material={nodes.Mesh002.material} rotation={[0, 0.529, 0]} />
-              <mesh geometry={nodes.Mesh003.geometry} material={nodes.Mesh003.material} rotation={[0, 0.529, 0]} />
-            </group>
+<group ref={innerRotateRef} scale={getFeatherScale()}> 
+  <mesh geometry={nodes.singlefeather5.geometry} material={nodes.singlefeather5.material} />
+</group>
         </Center>
       </group>
       
@@ -332,5 +327,5 @@ Object.values(materials).forEach((mat: any) => {
   );
 });
 
-useGLTF.preload("/models/feather_2.glb");
+useGLTF.preload("/models/feather1.glb");
 export default NaturalFeather;
