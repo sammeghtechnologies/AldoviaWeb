@@ -1,4 +1,4 @@
-import { Center, useGLTF } from "@react-three/drei";
+import { Center, useGLTF, Text } from "@react-three/drei";
 import { useEffect, useLayoutEffect, useRef, useState, Suspense, forwardRef } from "react";
 import * as THREE from "three";
 import BurstParticles from "../BurstParticles/BurstParticles";
@@ -12,7 +12,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 const NaturalFeather = forwardRef(({ 
   id, startPos, targetPos, started, variant, activeId, onBubbleClick,
-  allBubblesReady, burstAll, startOffset,opacity = 1
+  allBubblesReady, burstAll, startOffset,opacity = 1, label
 }: any, ref: any) => {
 
   
@@ -47,6 +47,7 @@ const NaturalFeather = forwardRef(({
       case "mid-drift": return 5.4;
       case "upper-pendulum": return 5.9;
       case "side-roll-upper": return 4.5;
+      case "spiral-dive": return 5.2;
       default: return 5.5;
     }
   };
@@ -58,6 +59,7 @@ const NaturalFeather = forwardRef(({
         case "side-roll-upper": return 0.48/2;
         case "mid-drift": return 0.55/2;
         case "upper-pendulum": return 0.65/2;
+        case "spiral-dive": return 0.58/2;
         default: return 0.65/2;
     }
   };
@@ -218,6 +220,13 @@ if (nodes?.singlefeather5?.material) nodes.singlefeather5.material.opacity = opa
            .to(groupRef.current.position, { x: laneX - 1.0, y: THREE.MathUtils.lerp(dropHeight, targetPos[1], 0.8), duration: 5.0, ease: "sine.inOut" })
            .to(groupRef.current.position, { x: laneX, y: targetPos[1], duration: 5.0, ease: "power1.inOut" });
       rotTl.to(rotateRef.current.rotation, { x: Math.PI * 0.15, z: Math.PI / 2, y: Math.PI * 4, duration: 18, ease: "sine.inOut" });
+    } else if (variant === "spiral-dive") {
+      // 🚀 7TH FEATHER: Aggressive corkscrew that pushes out wide, loops tightly, and settles
+      posTl.to(groupRef.current.position, { x: laneX + 2.0, y: THREE.MathUtils.lerp(dropHeight, targetPos[1], 0.3), z: startPos[2] + 1.5, duration: 3.0, ease: "power2.in" })
+           .to(groupRef.current.position, { x: laneX - 2.0, y: THREE.MathUtils.lerp(dropHeight, targetPos[1], 0.6), z: startPos[2] - 1.5, duration: 3.0, ease: "sine.inOut" })
+           .to(groupRef.current.position, { x: laneX + 0.5, y: THREE.MathUtils.lerp(dropHeight, targetPos[1], 0.8), z: startPos[2] + 0.5, duration: 2.5, ease: "sine.inOut" })
+           .to(groupRef.current.position, { x: laneX, y: targetPos[1], duration: 3.0, ease: "power1.out" });
+      rotTl.to(rotateRef.current.rotation, { x: Math.PI / 2.5, y: Math.PI * 8, z: Math.PI / 3, duration: 11.5, ease: "power1.inOut" });
     } else {
         posTl.to(groupRef.current.position, { x: laneX + 1.2, y: THREE.MathUtils.lerp(dropHeight, targetPos[1], 0.25), z: startPos[2] - 2, duration: 2.0, ease: "power2.out" })
              .to(groupRef.current.position, { x: laneX - 1.2, y: THREE.MathUtils.lerp(dropHeight, targetPos[1], 0.5), duration: 5.0, ease: "sine.inOut" })
@@ -322,6 +331,21 @@ if (nodes?.singlefeather5?.material) nodes.singlefeather5.material.opacity = opa
       {showBurst && <BurstParticles active={showBurst} radius={getBubbleRadius()} />}
       <group ref={bubbleGroupRef} scale={0}>
         <Suspense fallback={null}><FloatBubble scale={1} radius={getBubbleRadius()} isBurst={false} /></Suspense>
+        {/* 🚀 NEW: Text Label that scales and disappears with the bubble */}
+        {label && (
+          <Text
+            position={[0, -getBubbleRadius() - 1.4, 0]} // Adjusted slightly for the new text size
+            fontSize={0.85}                             // 👈 Bumped up from 0.65 to 0.85
+            color="#ffffff"
+            anchorX="center"
+            anchorY="middle"
+            letterSpacing={0.15}
+            outlineWidth={0.04}                         // Slightly thicker outline for readability
+            outlineColor="#000000" 
+          >
+            {label}
+          </Text>
+        )}
       </group>
     </group>
   );

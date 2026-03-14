@@ -4,7 +4,7 @@ import { PerspectiveCamera, Environment} from "@react-three/drei";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import ScrollTrigger from "gsap/ScrollTrigger";
-import { useNavigate } from "react-router";
+// import { useNavigate } from "react-router";
 import * as THREE from "three";
 import { useMemo } from "react";
 import { SwanModel, WaterPlane, SplashDroplets,SplashWalls } from "./Sections/LogoReveal/LogoRevealNew";
@@ -32,11 +32,12 @@ const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 const CameraZoomController = ({ mountFeathers, activeId, startOffset }: { mountFeathers: boolean, activeId: number | null, startOffset: number }) => {
   const { camera } = useThree();
   const scrollProxy = useRef({ x: 0, y: 0, z: 70 });
-  const activeIdRef = useRef(activeId);
+  const activeIdRef = useRef<number | null>(null);
   const isReturning = useRef(false);
   const hasOpened = useRef(false);
-
-  useEffect(() => { activeIdRef.current = activeId; }, [activeId]);
+  
+  // 🚀 NEW: Store the original camera tilt
+  const baseRotation = useRef(new THREE.Euler());
 
   // Handle Scroll Zoom
   useGSAP(() => {
@@ -56,7 +57,6 @@ const CameraZoomController = ({ mountFeathers, activeId, startOffset }: { mountF
         scrub: 1.5,
       },
       onUpdate: () => {
-        // Only move camera with scroll if NO feather is selected and we aren't currently gliding back
         if (activeIdRef.current === null && !isReturning.current) {
           camera.position.set(scrollProxy.current.x, scrollProxy.current.y, scrollProxy.current.z);
         }
@@ -67,31 +67,42 @@ const CameraZoomController = ({ mountFeathers, activeId, startOffset }: { mountF
   // Handle Return from Click-Zoom
   useEffect(() => {
     if (activeId !== null) {
+      // 🚀 Capture the exact camera tilt right before zooming in
+      if (activeIdRef.current === null) {
+        baseRotation.current.copy(camera.rotation);
+      }
       hasOpened.current = true;
       isReturning.current = false;
     } else if (activeId === null && hasOpened.current && mountFeathers) {
       isReturning.current = true;
+      
       gsap.to(camera.position, {
         x: scrollProxy.current.x,
         y: scrollProxy.current.y,
         z: scrollProxy.current.z,
         duration: 1.5,
-        ease: "expo.inOut",
+        ease: "power3.inOut",
         overwrite: "auto",
         onComplete: () => { isReturning.current = false; }
       });
+      
+      // 🚀 Return to the EXACT tilt it had before, instead of [0,0,0]
       gsap.to(camera.rotation, {
-        x: 0, y: 0, z: 0,
+        x: baseRotation.current.x,
+        y: baseRotation.current.y,
+        z: baseRotation.current.z,
         duration: 1.5,
-        ease: "expo.inOut",
+        ease: "power3.inOut",
         overwrite: "auto"
       });
     }
+    
+    // Update ref after evaluating
+    activeIdRef.current = activeId;
   }, [activeId, mountFeathers, camera]);
 
   return null;
 };
-
 
 // --- THE INFINITE LOOP CAMERA CONTROLLER ---
 
@@ -220,7 +231,7 @@ const whiteColor = useMemo(() => new THREE.Color(2.5, 2.5, 2.5), []);
 
 
 const MainCanvas = () => {
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const frameCanvasRef = useRef<HTMLCanvasElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
@@ -481,9 +492,9 @@ const MainCanvas = () => {
             powerPreference: "high-performance",
             localClippingEnabled: true,
           }}
-          onCreated={({ gl }) => {
-            gl.useLegacyLights = false;
-          }}
+          // onCreated={({ gl }) => {
+          //   gl.useLegacyLights = false;
+          // }}
         >
           <color attach="background" args={["#141518"]} />
           <Suspense fallback={null}>
@@ -515,9 +526,7 @@ const MainCanvas = () => {
               <group>
                 <SwanModel scrollProgress={scrollProgress} transformProgress={transformProgress} />
                 <WaterPlane splashProgress={splashProgress} opacity={swanOpacity} />
-                                 <SplashWalls splashProgress={splashProgress} opacity={swanOpacity} />
-
-               
+                <SplashWalls splashProgress={splashProgress} opacity={swanOpacity} />
               </group>
             )}
 
@@ -534,12 +543,13 @@ const MainCanvas = () => {
             {mountFeathers && (
               <group>
                 <CameraFocusController target={focusTarget} enabled={!!focusTarget} />
-                <NaturalFeather id={5} variant="mid-drift" startPos={[-11.0, 12, 1]} targetPos={[-17.0, 2.5, 1]} started={true} delay={0.8} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
-                <NaturalFeather id={2} variant="small-drag" startPos={[-6.5, 14, -2]} targetPos={[-16.5, -19.0, -2]} started={true} delay={0.6} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
-                <NaturalFeather ref={feather3Ref} id={3} variant="upper-pendulum" startPos={[0.0, 10, -3]} targetPos={[9.0, 5.0, -3]} started={true} delay={0.3} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
-                <NaturalFeather id={1} variant="main" startPos={[2.5, 16, 0]} targetPos={[2.5, -10.0, 0]} started={true} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
-                <NaturalFeather id={4} variant="side-roll-upper" startPos={[7.0, 12, -1]} targetPos={[30.0, -4.0, -1]} started={true} delay={0.5} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
-                <NaturalFeather id={6} variant="high-drag-zig" startPos={[11.5, 18, 0]} targetPos={[17.5, -20.0, 0]} started={true} delay={0.2} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
+                <NaturalFeather id={5} label="CONVENTION CENTER" variant="mid-drift" startPos={[-11.0, 12, 1]} targetPos={[-17.0, 2.5, 1]} started={true} delay={0.8} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
+                <NaturalFeather id={2} label="EVENTS" variant="small-drag" startPos={[-6.5, 14, -2]} targetPos={[-16.5, -19.0, -2]} started={true} delay={0.6} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
+                <NaturalFeather ref={feather3Ref} id={3} label="EXPERIENCE & PACKAGES" variant="upper-pendulum" startPos={[0.0, 10, -3]} targetPos={[9.0, 5.0, -3]} started={true} delay={0.3} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
+                <NaturalFeather id={1} label="ROOMS" variant="main" startPos={[2.5, 16, 0]} targetPos={[2.5, -10.0, 0]} started={true} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
+                <NaturalFeather id={4} label="ACTIVITIES" variant="side-roll-upper" startPos={[7.0, 12, -1]} targetPos={[30.0, -4.0, -1]} started={true} delay={0.5} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
+                <NaturalFeather id={6} label="DINING" variant="high-drag-zig" startPos={[11.5, 18, 0]} targetPos={[17.5, -20.0, 0]} started={true} delay={0.2} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
+                <NaturalFeather id={7} label="VIRTUAL TOUR" variant="spiral-dive" startPos={[-32.0, 9.0, -1]} targetPos={[-32.0, -6.0, -1]} started={true} delay={0.7} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
               </group>
             )}
 {mountEndSwan && (
