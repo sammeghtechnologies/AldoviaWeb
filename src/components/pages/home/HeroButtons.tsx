@@ -6,7 +6,7 @@ const HeroButtons: React.FC = () => {
   const navigate = useNavigate();
   const buttonLayoutClass =
     "flex w-[314px] h-10 px-6 py-5 justify-center items-center gap-2 shrink-0";
-  const scrollToExperience = React.useCallback(() => {
+  React.useCallback(() => {
     const el = document.getElementById("home-experience-section");
     if (!el) return;
     el.scrollIntoView({ behavior: "smooth", block: "start" });

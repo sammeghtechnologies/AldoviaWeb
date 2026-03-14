@@ -1147,7 +1147,6 @@ export const SplashDroplets = ({ splashProgress, opacity = 1 }: { splashProgress
 // };
 export const WaterPlane = ({
   splashProgress,
-  scrollProgress = 0,
   opacity = 1,
 }: {
   splashProgress: number;
@@ -1720,7 +1719,7 @@ const LogoRevealNew = ({
 	            outputColorSpace: THREE.SRGBColorSpace,
 	            powerPreference: "high-performance"
 	          }}
-	          onCreated={({ gl }) => {
+	          onCreated={() => {
 	            setIsReady(true);
 	          }}
 	        >
