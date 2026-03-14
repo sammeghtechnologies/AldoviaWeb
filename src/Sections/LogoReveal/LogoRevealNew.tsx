@@ -723,6 +723,7 @@ export const SwanModel = ({
         child.material.depthWrite = true;
         child.material.depthTest = true;
         child.material.alphaTest = 0.5;
+        child.renderOrder = isReflection ? 80 : 2000;
       }
 
       if (child.isMesh && child.material) {
@@ -1274,8 +1275,9 @@ shader.fragmentShader = shader.fragmentShader.replace(
   blurSum += texture2DProj(tDiffuse, vec4(vUv.xy + (distortion * vUv.w) + vec2(blurSize, -blurSize) * vUv.w, vUv.zw));
   blurSum += texture2DProj(tDiffuse, vec4(vUv.xy + (distortion * vUv.w) + vec2(-blurSize, -blurSize) * vUv.w, vUv.zw));
   
-  vec4 base = blurSum / 5.0;
+  vec4 base = blurSum / 1.0;
 
+<<<<<<< HEAD
   // 4. GRAY MIRROR LOOK (closer to ref image) but keep slight chroma (beak stays orange-ish)
   vec3 origColor = base.rgb;
   float brightness = dot(origColor, vec3(0.299, 0.587, 0.114));
@@ -1311,6 +1313,16 @@ shader.fragmentShader = shader.fragmentShader.replace(
   // 5. EXTENDED NECK VISIBILITY
   // Lowered the start of the fade (0.3 -> 0.15) so the neck shows more
   float verticalFade = smoothstep(0.135, 0.62, projectedY);
+=======
+  // 4. LOWERED BRIGHTNESS
+  // Changed from 1.1/1.3 down to 0.7 to prevent the 'blown out' look
+  float brightness = dot(base.rgb, vec3(0.299, 0.587, 0.114));
+  base.rgb = vec3(brightness * .8); 
+
+  // 5. EXTENDED NECK VISIBILITY
+  // Lowered the start of the fade (0.3 -> 0.15) so the neck shows more
+  float verticalFade = smoothstep(0.1, 0.6, projectedY);
+>>>>>>> 3519f17 (gifed)
   base.a *= verticalFade;
   `
 );
@@ -1339,15 +1351,9 @@ shader.fragmentShader = shader.fragmentShader.replace(
     // Visible ripple rings around the swan position (swan sits near [0, -14, 0]).
     const time = state.clock.elapsedTime;
     const ringCenterY = -14.98;
-    // Hide ripples during "flying" part of the animation.
-    const flyFade = 1.0 - THREE.MathUtils.smoothstep(scrollProgress, 0.55, 0.72);
-
-    // Hide ripples during the splash burst.
-    const splashFade = 1.0 - THREE.MathUtils.smoothstep(splashProgress, 0.02, 0.12);
-
     const intensity = THREE.MathUtils.smoothstep(splashProgress, 0.0, 0.12) * opacity;
     const base = 0.12 * opacity;
-    const alphaScale = (base + intensity * 0.55) * flyFade * splashFade;
+    const alphaScale = base + intensity * 0.55;
 
     ringRefs.current.forEach((ring, i) => {
       if (!ring) return;
