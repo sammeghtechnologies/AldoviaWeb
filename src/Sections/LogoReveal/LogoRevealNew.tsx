@@ -1275,7 +1275,7 @@ export const WaterPlane = ({
 	  // Convert reflection to mostly-gray (keeps brightness variation) and keep it slightly darker than the swan above water.
 		  float depthT = smoothstep(0.60, 0.20, projectedY); // 0 near waterline, 1 deeper down
 		  // Brighter reflection overall (still slightly darker than the real swan)
-		  float depthDark = mix(0.78, 0.66, depthT);
+		  float depthDark = mix(0.98, 0.96, depthT);
 		  float lum = dot(base.rgb, vec3(0.299, 0.587, 0.114));
 		  float lumBoost = pow(lum, 0.85);
 		  vec3 grayRefl = clamp((vec3(lumBoost) * depthDark) * 1.12 + vec3(0.02), 0.0, 1.0);
