@@ -11,6 +11,8 @@ import { SwanModel, WaterPlane, SplashDroplets,SplashWalls } from "./Sections/Lo
 import NaturalFeather from "./components/NaturalFeather/NaturalFeather";
 import CameraFocusController from "./components/CameraFocusController/CameraFocusController";
 import WaterSurface from "./components/WaterSurface/WaterSurface";
+import MenuFrame from "./components/MenuFrame/v2/MenuFrame";
+import { lockScroll } from "./utils/scrollLock";
 
 // UI Components
 import RoomDetailsPanel from "./components/pages/home/RoomDetailsPanel";
@@ -275,21 +277,8 @@ const MainCanvas = () => {
 
   // --- SCROLL LOCK LOGIC ---
   useEffect(() => {
-    if (activeId !== null) {
-      // Disable scrolling when a bubble is clicked
-      document.body.style.overflow = "hidden";
-      document.body.style.touchAction = "none"; // Extra safety for mobile touch scrolling
-    } else {
-      // Re-enable scrolling when panel is closed
-      document.body.style.overflow = "";
-      document.body.style.touchAction = "";
-    }
-
-    // Cleanup function: ensures scrolling is restored if the component unmounts
-    return () => {
-      document.body.style.overflow = "";
-      document.body.style.touchAction = "";
-    };
+    if (activeId === null) return;
+    return lockScroll();
   }, [activeId]);
 
   useEffect(() => {
@@ -467,30 +456,58 @@ const MainCanvas = () => {
 
   return (
     <div ref={containerRef} className="relative w-full h-screen bg-black overflow-hidden">
-      <div
-        className={`fixed !top-10 right-4 md:top-12 md:right-6 z-[2147483647] flex items-center gap-3 md:gap-5 transition-all duration-700 ease-out ${
-          showCornerActions ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
-        }`}
-      >
-        <button
-          type="button"
-          onClick={() => navigate("/home")}
-          className="group pointer-events-auto relative inline-flex items-center justify-center min-w-[140px] md:min-w-[180px] h-9 md:h-10 px- md:px-8 rounded-full bg-[#07090d] text-white text-[0.9em] md:text-[1em] font-lust tracking-[0.05em] md:tracking-[0.06em] uppercase border-[2px] border-[var(--color-secondary)] shadow-[0_0_0_2px_#07090d] transition-all duration-300 overflow-hidden"
-        >
-          <span className="absolute inset-y-0 left-0 w-0 bg-[var(--color-secondary)] transition-all duration-500 ease-out group-hover:w-full" />
-          <span className="relative z-10 !text-white transition-colors duration-300 group-hover:!text-[var(--color-primary)]">Book Now</span>
-        </button>
-      </div>
+      {showCornerActions && (
+	        <MenuFrame
+	          showBookNow={showCornerActions}
+	          showTopLogo={false}
+	          disableTopBarBackground
+	          disableBackdropBlur
+	          hamburgerWrapperClassName="!pr-0"
+	          hamburgerColorOverride="var(--color-secondary)"
+	        />
+	      )}
 
       <canvas ref={frameCanvasRef} className="absolute inset-0 z-10 w-full h-full object-cover" />
 
       <div ref={canvasWrapperRef} className="absolute inset-0 z-20 overflow-hidden">
-        <Canvas gl={{ antialias: true, toneMapping: THREE.LinearToneMapping, toneMappingExposure: 0.7 , powerPreference: "high-performance", localClippingEnabled: true }}>
-          <color attach="background" args={["#000000"]} />
+        <Canvas
+          shadows
+          dpr={[1, 2]}
+          gl={{
+            antialias: true,
+            toneMapping: THREE.ACESFilmicToneMapping,
+            toneMappingExposure: 0.85,
+            outputColorSpace: THREE.SRGBColorSpace,
+            powerPreference: "high-performance",
+            localClippingEnabled: true,
+          }}
+          onCreated={({ gl }) => {
+            gl.useLegacyLights = false;
+          }}
+        >
+          <color attach="background" args={["#141518"]} />
           <Suspense fallback={null}>
             <PerspectiveCamera makeDefault position={[0, 0, 70]} fov={isMobile ? 65 : 40} />
-            <ambientLight intensity={0.5} />
-            <Environment preset="city" />
+            {/* Cinematic 3-point lighting (key / rim / fill) */}
+            <ambientLight intensity={0.18} color="#ffffff" />
+            <directionalLight
+              position={[10, 18, 14]}
+              intensity={3.2}
+              color="#ffffff"
+              castShadow
+              shadow-mapSize-width={2048}
+              shadow-mapSize-height={2048}
+              shadow-bias={-0.00015}
+              shadow-camera-near={1}
+              shadow-camera-far={120}
+              shadow-camera-left={-40}
+              shadow-camera-right={40}
+              shadow-camera-top={40}
+              shadow-camera-bottom={-40}
+            />
+            <directionalLight position={[-14, 12, -18]} intensity={1.6} color="#dbe8ff" />
+            <pointLight position={[-10, 6, 14]} intensity={1.1} distance={180} decay={2} color="#fff2e2" />
+            <Environment preset="studio" />
 
             <CameraZoomController mountFeathers={mountFeathers} activeId={activeId} startOffset={11680} />
              <CameraDiveController diveProgress={diveProgress} activeId={activeId} />

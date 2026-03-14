@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { useAssets } from "../../../app/hooks/useAssets";
 import { useLocation, useNavigate } from "react-router";
+import { lockScroll } from "../../../utils/scrollLock";
 
 // --- LOGO COMPONENT ---
 // ✅ FIX 1: Added introFinished prop to resolve 'isVisible' name error
@@ -117,6 +118,8 @@ const MenuFrame = ({
   forcePrimaryTopBarIcons = false,
   disableTopBarBackground = false,
   disableBackdropBlur = false,
+  hamburgerWrapperClassName = "",
+  hamburgerColorOverride,
 }: {
   masterTl?: any;
   introFinished?: boolean;
@@ -126,6 +129,8 @@ const MenuFrame = ({
   forcePrimaryTopBarIcons?: boolean;
   disableTopBarBackground?: boolean;
   disableBackdropBlur?: boolean;
+  hamburgerWrapperClassName?: string;
+  hamburgerColorOverride?: string;
 }) => {
   const { icons } = useAssets();
   const navigate = useNavigate();
@@ -175,6 +180,7 @@ const MenuFrame = ({
   const hamburgerColor = useLightHamburgerIcon
     ? "var(--color-secondary)"
     : "var(--color-primary)";
+  const resolvedHamburgerColor = hamburgerColorOverride ?? hamburgerColor;
 
   // Logo animation
   useLayoutEffect(() => {
@@ -405,23 +411,8 @@ const MenuFrame = ({
 
   // Prevent page scroll when menu is open.
   useEffect(() => {
-    const body = document.body;
-    const html = document.documentElement;
-    const prevBodyOverflow = body.style.overflow;
-    const prevHtmlOverflow = html.style.overflow;
-
-    if (isOpen) {
-      body.style.overflow = "hidden";
-      html.style.overflow = "hidden";
-    } else {
-      body.style.overflow = prevBodyOverflow;
-      html.style.overflow = prevHtmlOverflow;
-    }
-
-    return () => {
-      body.style.overflow = prevBodyOverflow;
-      html.style.overflow = prevHtmlOverflow;
-    };
+    if (!isOpen) return;
+    return lockScroll();
   }, [isOpen]);
 
   return (
@@ -435,12 +426,14 @@ const MenuFrame = ({
           }`}
       >
         <div className="relative flex h-full items-center justify-end px-3 py-2">
-        <Logo_top
-          isVisible={showTopLogo}
-          hideOnMobile={isOpen}
-          logoSrc={topLogoSrc}
-          onClick={() => navigate("/")}
-        />
+        {showTopLogo && (
+          <Logo_top
+            isVisible
+            hideOnMobile={isOpen}
+            logoSrc={topLogoSrc}
+            onClick={() => navigate("/")}
+          />
+        )}
 
         <div className="flex items-center gap-10">
           {/* BOOK NOW BUTTON */}
@@ -457,7 +450,7 @@ const MenuFrame = ({
           <div
             id="hamburger"
             className={`!pr-8 cursor-pointer translate-x-2 transition-transform duration-300 active:scale-90 ${isOpen ? "rotate-90" : "rotate-0"
-              }`}
+              } ${hamburgerWrapperClassName}`}
             onClick={() => setIsOpen((prev) => !prev)}
           >
             <div
@@ -468,19 +461,19 @@ const MenuFrame = ({
                 className={`absolute h-[2px] w-7 rounded-full transition-all duration-300 ${
                   isOpen ? "translate-y-0 rotate-45" : "-translate-y-2.5"
                 }`}
-                style={{ backgroundColor: hamburgerColor }}
+                style={{ backgroundColor: resolvedHamburgerColor }}
               />
               <span
                 className={`absolute h-[2px] w-7 rounded-full transition-all duration-300 ${
                   isOpen ? "opacity-0" : "opacity-100"
                 }`}
-                style={{ backgroundColor: hamburgerColor }}
+                style={{ backgroundColor: resolvedHamburgerColor }}
               />
               <span
                 className={`absolute h-[2px] w-7 rounded-full transition-all duration-300 ${
                   isOpen ? "translate-y-0 -rotate-45" : "translate-y-2.5"
                 }`}
-                style={{ backgroundColor: hamburgerColor }}
+                style={{ backgroundColor: resolvedHamburgerColor }}
               />
             </div>
           </div>

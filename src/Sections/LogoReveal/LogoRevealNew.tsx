@@ -2,6 +2,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import {
   PerspectiveCamera,
   Environment,
+  ContactShadows,
   useGLTF,
   useAnimations,
 } from "@react-three/drei";
@@ -542,7 +543,7 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
 //           mat.envMapIntensity = isReflection ? 0.55 : 1.6;
 
 //           // smoother feather shading
-       
+
 
 //           // ambient occlusion for feather depth
 
@@ -554,7 +555,7 @@ export const SplashWalls = ({ splashProgress, opacity = 1 }: { splashProgress: n
 //         } else {
 //          }
 
-      
+
 
 //         // 🚀 3. APPLY BLADE SAFELY
 //         if (clipPlaneRef.current) {
@@ -698,8 +699,8 @@ export const SwanModel = ({
 
   const isDragging = useRef(false);
   const previousX = useRef(0);
-  const previousY = useRef(0); 
-  const targetCamY = useRef(0); 
+  const previousY = useRef(0);
+  const targetCamY = useRef(0);
   const [targetRotY, setTargetRotY] = useState(-Math.PI / 160);
 
   // 🚀 1. SAFELY CREATE CLIP PLANE REF (Does not trigger re-renders)
@@ -711,74 +712,75 @@ export const SwanModel = ({
   const materialsRef = useRef<THREE.Material[]>([]);
 
   useLayoutEffect(() => {
-    materialsRef.current = []; 
+    materialsRef.current = [];
     const originalMaterials = new Map(); // 🚀 2. PROTECT THE GLOBAL CACHE
 
     scene.traverse((child: any) => {
-      if (child.isMesh) {
-        child.geometry.computeVertexNormals(); 
-        child.material.flatShading = false;
-        child.material.needsUpdate = true;
-        child.material.side = THREE.DoubleSide;
-        child.material.depthWrite = true;
-        child.material.depthTest = true;
-        child.material.alphaTest = 0.5;
-      }
-
       if (child.isMesh && child.material) {
         child.castShadow = true;
         child.receiveShadow = true;
+
+        if (child.geometry?.computeVertexNormals) {
+          child.geometry.computeVertexNormals();
+          if (child.geometry.attributes?.normal) {
+            child.geometry.attributes.normal.needsUpdate = true;
+          }
+        }
 
         // Save pristine material
         if (!originalMaterials.has(child.uuid)) {
           originalMaterials.set(child.uuid, child.material);
         }
 
-        const mat = child.material.clone();
+        const sourceMaterials = Array.isArray(child.material) ? child.material : [child.material];
+        const clonedMaterials = sourceMaterials.map((m: THREE.Material) => m.clone());
 
-        mat.side = THREE.DoubleSide;
-        mat.alphaTest = isReflection ? 0.01 : 0.5;
-        mat.depthWrite = true;
-        mat.depthTest = true;
-        mat.transparent = true;
+        clonedMaterials.forEach((mat: any, i: number) => {
+          const sourceMat: any = sourceMaterials[i];
+          const originalColor = sourceMat?.color?.clone?.() ?? new THREE.Color("#ffffff");
+          const luminance = originalColor.r * 0.2126 + originalColor.g * 0.7152 + originalColor.b * 0.0722;
+          const isFeatherMaterial = luminance > 0.6;
 
-        const originalColor = child.material.color?.clone?.() ?? new THREE.Color("#ffffff");
-        const luminance = originalColor.r * 0.2126 + originalColor.g * 0.7152 + originalColor.b * 0.0722;
-        const isFeatherMaterial = luminance > 0.6;
-// Inside SwanModel component, within the useLayoutEffect loop:
-if (isFeatherMaterial) {
-  mat.color = new THREE.Color(isReflection ? "#a0a0a0" : "#f7f7f4"); // 🚀 Darker base for reflection
-  mat.roughness = isReflection ? 0.8 : 0.34;        // 🚀 Higher roughness blurs highlights
-  mat.metalness = 0.0;         
-  mat.envMapIntensity = isReflection ? 0.2 : 1.45;  // 🚀 Dropped intensity significantly
-  
-  // Soften the sheen for the reflection
-  mat.sheen = isReflection ? 0.2 : 0.95;
-  mat.sheenColor = new THREE.Color(isReflection ? "#999999" : "#ffffff");
-}else {
-  // Trust the glTF's baked environment map impact
-  mat.envMapIntensity = 1; 
-  
-  // 🚀 Increase roughness to 0.6 or 0.7. 
-  // This makes the light spread out and shows the feather textures better.
-  mat.roughness = 0.65; 
-}
+          mat.side = THREE.DoubleSide;
+          mat.alphaTest = isReflection ? 0.01 : 0.5;
+          mat.depthWrite = true;
+          mat.depthTest = true;
+          mat.flatShading = false;
 
-        mat.flatShading = false;
-        mat.transparent = opacity < 1;
-        mat.depthWrite = true;
-        mat.depthTest = true;
+          // Base PBR tuning (reveals existing glTF textures without adding any)
+          mat.metalness = 0.0;
+          mat.roughness = isReflection ? 0.78 : 0.55;
+          mat.envMapIntensity = isReflection ? 0.22 : 1.4;
 
-        // 🚀 3. APPLY BLADE SAFELY
-        if (clipPlaneRef.current) {
-          mat.clippingPlanes = [clipPlaneRef.current];
-        } else {
-          mat.clippingPlanes = null; // Destroys inherited blades from cache
-        }
+          if (isFeatherMaterial) {
+            mat.color = new THREE.Color(isReflection ? "#a8a8a8" : "#ffffff");
+          }
 
-        mat.needsUpdate = true;
-        child.material = mat; 
-        materialsRef.current.push(mat);
+          // If the glTF provides a normal map, slightly boost it for feather bump detail.
+          if (mat.normalMap && mat.normalScale?.set) {
+            mat.normalScale.set(1.2, 1.2);
+          }
+
+          // Sharpen existing texture sampling a bit (no new textures).
+          const maps = [mat.map, mat.normalMap, mat.roughnessMap, mat.metalnessMap, mat.aoMap].filter(Boolean);
+          maps.forEach((tex: any) => {
+            if (typeof tex.anisotropy === "number") tex.anisotropy = Math.max(tex.anisotropy ?? 1, 8);
+          });
+
+          mat.transparent = opacity < 1;
+
+          // 🚀 APPLY BLADE SAFELY
+          if (clipPlaneRef.current) {
+            mat.clippingPlanes = [clipPlaneRef.current];
+          } else {
+            mat.clippingPlanes = null; // Destroys inherited blades from cache
+          }
+
+          mat.needsUpdate = true;
+        });
+
+        child.material = Array.isArray(child.material) ? clonedMaterials : clonedMaterials[0];
+        materialsRef.current.push(...clonedMaterials);
       }
     });
 
@@ -821,7 +823,7 @@ if (isFeatherMaterial) {
     }
 
     materialsRef.current.forEach((mat) => {
-mat.opacity = isReflection ? opacity * 0.85 : opacity;
+      mat.opacity = isReflection ? opacity * 0.85 : opacity;
       const needsTransparent = (isReflection ? opacity * 0.42 : opacity) < 1;
       if (mat.transparent !== needsTransparent) {
         mat.transparent = needsTransparent;
@@ -875,7 +877,7 @@ mat.opacity = isReflection ? opacity * 0.85 : opacity;
           e.stopPropagation();
           isDragging.current = true;
           previousX.current = e.clientX;
-          previousY.current = e.clientY; 
+          previousY.current = e.clientY;
           document.body.style.cursor = "grabbing";
         }}
         onPointerOver={() => {
@@ -885,25 +887,6 @@ mat.opacity = isReflection ? opacity * 0.85 : opacity;
           if (!isDragging.current) document.body.style.cursor = "auto";
         }}
       />
-     {!isReflection && (
-  <>
-    {/* Ambient light provides the base visibility in shadows */}
-    <ambientLight intensity={0.4} color="#ffffff" />
-    
-    {/* 🚀 Lower the intensity. 2.5 is too much for a white swan. 
-        Start with 1.2 and adjust slowly. */}
-    <directionalLight 
-      intensity={1.2} 
-      color="#ffffff" 
-      position={[10, 20, 10]} 
-      castShadow 
-    />
-    
-    {/* 'city' is good, but 'warehouse' or 'apartment' often provides 
-        better 'Neutral' shading for white models. */}
-    <Environment preset="warehouse" /> 
-  </>
-)}
     </>
   );
 };
@@ -1060,7 +1043,7 @@ export const SplashDroplets = ({ splashProgress, opacity = 1 }: { splashProgress
 //     });
 //     refl.rotation.x = -Math.PI / 2;
 //     refl.position.y = -15.1; // Physical placement
-    
+
 //     const material = refl.material as THREE.ShaderMaterial;
 //     material.transparent = true;
 //     material.opacity = opacity;
@@ -1075,7 +1058,7 @@ export const SplashDroplets = ({ splashProgress, opacity = 1 }: { splashProgress
 //         `
 //         float projectedY = vUv.y / vUv.w;
 //         vec2 baseUV = vUv.xy / vUv.w;
-        
+
 //         // 1. SIMPLE WATER JITTER (For that "Reference Photo" look)
 //         // This breaks up the belly shape into soft horizontal streaks
 //         float ripple = sin(baseUV.x * 150.0 + uTime * 2.0) * 0.002;
@@ -1090,14 +1073,14 @@ export const SplashDroplets = ({ splashProgress, opacity = 1 }: { splashProgress
 //         // This creates a clean 0.5cm black gap right under the swan
 //         // Adjustment: Increase 0.47 to 0.49 for a LARGER gap.
 //         float gap = smoothstep(0.47, 0.51, projectedY);
-        
+
 //         // 🚀 4. DEPTH FADE (The "Single Reflection" Fix)
 //         // This kills the reflection of the neck/head so you only see the body
 //         float depthFade = smoothstep(0.35, 0.55, projectedY);
 
 //         // Dampen the white just enough to not "bloom"
 //         base.rgb *= 0.8; 
-        
+
 //         // Apply the gap and the fade
 //         base.a *= (gap * depthFade);
 //         `
@@ -1249,9 +1232,9 @@ export const WaterPlane = ({
       shader.uniforms.uTakeoff = { value: 0 };
       shader.fragmentShader = `uniform float uTime; uniform float uTakeoff;\n` + shader.fragmentShader;
 
-shader.fragmentShader = shader.fragmentShader.replace(
-  `vec4 base = texture2DProj( tDiffuse, vUv );`,
-  `
+      shader.fragmentShader = shader.fragmentShader.replace(
+        `vec4 base = texture2DProj( tDiffuse, vUv );`,
+        `
   float projectedY = vUv.y / vUv.w;
   
   // 1. We keep a very small mask just to keep the water contact point clean
@@ -1280,14 +1263,47 @@ shader.fragmentShader = shader.fragmentShader.replace(
   vec3 origColor = base.rgb;
   float brightness = dot(origColor, vec3(0.299, 0.587, 0.114));
   float gray = clamp(pow(brightness, 0.88) * 1.25 + 0.04, 0.0, 1.0);
-  float saturationKeep = 0.28;
+  // More gray on the body edges (near wings) while keeping some chroma elsewhere.
+  float wingX = abs(baseUV.x - 0.5); // 0 center, 0.5 edges
+  float wingMaskX = smoothstep(0.12, 0.46, wingX);
+  float wingMaskY = smoothstep(0.70, 0.80, projectedY) * (1.8 - smoothstep(0.62, 0.74, projectedY));
+  float wingMask = wingMaskX * wingMaskY;
+  float saturationKeep = mix(0.78, 0.85, wingMask);
   base.rgb = mix(vec3(gray), origColor, saturationKeep);
 
-  // 4.1 THIN RIPPLE LINE HIGHLIGHTS
-  float linePhase = (baseUV.y + uTime * 0.02) * 92.0 + ripple * 3.0;
-  float lines = smoothstep(0.94, 1.0, abs(sin(linePhase)));
-  base.rgb += vec3(1.0) * lines * 0.14 * (1.0 - surfaceMask);
+	  // 4.05 GRAYSCALE WATER REFLECTION LOOK
+	  // Convert reflection to mostly-gray (keeps brightness variation) and keep it slightly darker than the swan above water.
+		  float depthT = smoothstep(0.60, 0.20, projectedY); // 0 near waterline, 1 deeper down
+		  // Brighter reflection overall (still slightly darker than the real swan)
+		  float depthDark = mix(0.78, 0.66, depthT);
+		  float lum = dot(base.rgb, vec3(0.299, 0.587, 0.114));
+		  float lumBoost = pow(lum, 0.85);
+		  vec3 grayRefl = clamp((vec3(lumBoost) * depthDark) * 1.12 + vec3(0.02), 0.0, 1.0);
 
+	  // Preserve beak color (orange) while keeping the rest mostly grayscale.
+	  float beakR = smoothstep(0.35, 0.75, origColor.r);
+	  float beakWarm = smoothstep(0.08, 0.28, origColor.r - origColor.g);
+	  float beakLowB = 1.0 - smoothstep(0.22, 0.48, origColor.b);
+	  float beakMask = clamp(beakR * beakWarm * beakLowB, 0.0, 1.0);
+		  vec3 beakRefl = origColor * depthDark;
+
+		  base.rgb = mix(grayRefl, beakRefl, beakMask);
+		  // Lift the non-beak areas a touch more to read "whiter" without shifting the beak hue.
+		  vec3 reflLift = clamp(base.rgb * 1.10 + vec3(0.015), 0.0, 1.0);
+		  base.rgb = mix(reflLift, base.rgb, beakMask);
+
+		  // Slightly brighten the neck area in the reflection (keeps beak color intact).
+		  // Neck sits higher (near waterline) and towards the left side in screen-space.
+		  float neckY = smoothstep(0.56, 0.63, projectedY);
+		  float neckX = 1.0 - smoothstep(0.34, 0.56, baseUV.x);
+		  float neckMask = clamp(neckY * neckX, 0.0, 1.0) * (1.0 - beakMask);
+		  base.rgb = mix(base.rgb, clamp(base.rgb * 1.55 + vec3(0.05), 0.0, 1.0), neckMask);
+	
+	  // 4.1 THIN RIPPLE LINE HIGHLIGHTS
+	  float linePhase = (baseUV.y + uTime * 0.02) * 92.0 + ripple * 3.0;
+	  float lines = smoothstep(0.94, 1.0, abs(sin(linePhase)));
+	  base.rgb += vec3(1.0) * lines * 0.14 * (1.0 - surfaceMask);
+  
   // 4.15 PRE-REFLECTION SHADOW (dark band before reflection starts)
   // Creates that black waterline shade under the swan body like the reference.
   float preShadow = smoothstep(0.505, 0.635, projectedY) * (1.0 - smoothstep(0.635, 0.865, projectedY));
@@ -1304,6 +1320,17 @@ shader.fragmentShader = shader.fragmentShader.replace(
   float underShadowStart = smoothstep(0.545, 0.565, projectedY) * (1.0 - smoothstep(0.565, 0.610, projectedY));
   base.rgb *= 1.0 - underShadowStart * 0.42;
 
+  // 4.24 BODY DARK PATCH (kills the bright white reflection near the wings/belly)
+  // Uses the same Y band as the body area, and a wider X coverage (wings + belly).
+  float bellyMask = (1.0 - smoothstep(0.06, 0.30, wingX)) * wingMaskY;
+  float bodyBlackMask = clamp(max(wingMask, bellyMask), 0.0, 1.0);
+  // Only crush the *bright* parts (the white patch), leaving darker details intact.
+  float whiteKill = smoothstep(0.34, 0.62, brightness);
+  float killAmt = clamp(bodyBlackMask * pow(whiteKill, 0.50) * 6.50, 0.0, 1.0);
+  base.rgb = mix(base.rgb, vec3(0.0), killAmt);
+  // Extra overall darkening in the masked body area (keeps it from reading "white" even when not fully crushed).
+  base.rgb *= 1.0 - bodyBlackMask * 0.35;
+
   // 4.3 SMALL AIR-GAP (adds separation between swan and reflection)
   float gap = smoothstep(0.505, 0.540, projectedY) * (1.0 - smoothstep(0.540, 0.575, projectedY));
   base.a *= 1.0 - gap;
@@ -1313,7 +1340,7 @@ shader.fragmentShader = shader.fragmentShader.replace(
   float verticalFade = smoothstep(0.135, 0.62, projectedY);
   base.a *= verticalFade;
   `
-);
+      );
       reflectorRef.current = { userData: { shader } };
     };
     return refl;
@@ -1607,7 +1634,7 @@ const LogoRevealNew = ({
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     }
   }, [isReady, images.length, onLogoCornerReached, onBookNowVisibilityChange]);
-  
+
 
   return (
     <section ref={containerRef} className="relative w-full h-screen overflow-hidden bg-black">
@@ -1625,51 +1652,55 @@ const LogoRevealNew = ({
         className="absolute inset-0 z-20"
         style={{ opacity: 0, visibility: "hidden" }}
       >
-        <Canvas
-          shadows
-          gl={{
-            antialias: true,
-            toneMappingExposure: 0.44,
-            toneMapping: THREE.LinearToneMapping,
-            outputColorSpace: THREE.SRGBColorSpace,
-            powerPreference: "high-performance"
-          }}
-          onCreated={() => setIsReady(true)}
-        >
-          <color attach="background" args={["#000000"]} />
-          <ambientLight
-            intensity={1.51}
-            color="#ffffff"
-          />
-          <directionalLight
-            position={[10, 20, 10]}
-            intensity={2.2}
-          />
-
-<directionalLight
-  position={[5, 10, 5]}
-  intensity={1.5}
-  color="#ffffff"
-/>
-          <spotLight
-            position={[0, 16, 11]}
-            intensity={2.35}
-            angle={0.34}
-            penumbra={0.9}
-            color="#ffffff"
-          />
-          <pointLight position={[10, 10, 10]} intensity={0.95} color="#f4f7ff" />
-          <spotLight position={[-10, 20, 10]} angle={0.24} penumbra={1} intensity={1.7} color="#d9ecff" />
+	        <Canvas
+	          shadows
+	          dpr={[1, 2]}
+	          gl={{
+	            antialias: true,
+	            toneMappingExposure: 0.85,
+	            toneMapping: THREE.ACESFilmicToneMapping,
+	            outputColorSpace: THREE.SRGBColorSpace,
+	            powerPreference: "high-performance"
+	          }}
+	          onCreated={({ gl }) => {
+	            gl.useLegacyLights = false;
+	            setIsReady(true);
+	          }}
+	        >
+	          <color attach="background" args={["#141518"]} />
+	
+	          {/* Cinematic 3-point lighting (key / rim / fill) */}
+	          <ambientLight intensity={0.18} color="#ffffff" />
+	
+	          <directionalLight
+	            position={[10, 18, 14]}
+	            intensity={3.2}
+	            color="#ffffff"
+	            castShadow
+	            shadow-mapSize-width={2048}
+	            shadow-mapSize-height={2048}
+	            shadow-bias={-0.00015}
+	            shadow-camera-near={1}
+	            shadow-camera-far={120}
+	            shadow-camera-left={-40}
+	            shadow-camera-right={40}
+	            shadow-camera-top={40}
+	            shadow-camera-bottom={-40}
+	          />
+	
+	          <directionalLight position={[-14, 12, -18]} intensity={1.6} color="#dbe8ff" />
+	          <pointLight position={[-10, 6, 14]} intensity={1.1} distance={180} decay={2} color="#fff2e2" />
           {/* Base position is [0,0,70], interaction takes over Y via useFrame */}
           <PerspectiveCamera makeDefault position={[0, 0, 70]} fov={isMobile ? 65 : 40} />
 
-          <Suspense fallback={null}>
-            <SwanModel scrollProgress={scrollProgress} transformProgress={transformProgress} />
-            <WaterPlane splashProgress={splashProgress} />
-            <SplashDroplets splashProgress={splashProgress} />
-            <SplashWalls splashProgress={splashProgress} />
-            <Environment  background={false} />
-          </Suspense>
+	          <Suspense fallback={null}>
+	            <SwanModel scrollProgress={scrollProgress} transformProgress={transformProgress} />
+	            <WaterPlane splashProgress={splashProgress} />
+	            <SplashDroplets splashProgress={splashProgress} />
+	            <SplashWalls splashProgress={splashProgress} />
+	            <Environment preset="studio" background={false} />
+	            <ContactShadows position={[0, -15.08, 0]} opacity={0.22} blur={2.6} scale={48} far={8} resolution={1024} />
+	          </Suspense>
         </Canvas>
       </div>
 
