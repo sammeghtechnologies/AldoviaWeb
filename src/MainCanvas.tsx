@@ -496,7 +496,7 @@ const MainCanvas = () => {
           //   gl.useLegacyLights = false;
           // }}
         >
-          <color attach="background" args={["#141518"]} />
+          <color attach="background" args={["#000000"]} />
           <Suspense fallback={null}>
             <PerspectiveCamera makeDefault position={[0, 0, 70]} fov={isMobile ? 65 : 40} />
             {/* Cinematic 3-point lighting (key / rim / fill) */}
