@@ -4,13 +4,15 @@ import { PerspectiveCamera, Environment} from "@react-three/drei";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import ScrollTrigger from "gsap/ScrollTrigger";
-import { useNavigate } from "react-router";
+// import { useNavigate } from "react-router";
 import * as THREE from "three";
 import { useMemo } from "react";
 import { SwanModel, WaterPlane, SplashDroplets,SplashWalls } from "./Sections/LogoReveal/LogoRevealNew";
 import NaturalFeather from "./components/NaturalFeather/NaturalFeather";
 import CameraFocusController from "./components/CameraFocusController/CameraFocusController";
 import WaterSurface from "./components/WaterSurface/WaterSurface";
+import MenuFrame from "./components/MenuFrame/v2/MenuFrame";
+import { lockScroll } from "./utils/scrollLock";
 
 // UI Components
 import RoomDetailsPanel from "./components/pages/home/RoomDetailsPanel";
@@ -30,11 +32,12 @@ const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 const CameraZoomController = ({ mountFeathers, activeId, startOffset }: { mountFeathers: boolean, activeId: number | null, startOffset: number }) => {
   const { camera } = useThree();
   const scrollProxy = useRef({ x: 0, y: 0, z: 70 });
-  const activeIdRef = useRef(activeId);
+  const activeIdRef = useRef<number | null>(null);
   const isReturning = useRef(false);
   const hasOpened = useRef(false);
-
-  useEffect(() => { activeIdRef.current = activeId; }, [activeId]);
+  
+  // 🚀 NEW: Store the original camera tilt
+  const baseRotation = useRef(new THREE.Euler());
 
   // Handle Scroll Zoom
   useGSAP(() => {
@@ -54,7 +57,6 @@ const CameraZoomController = ({ mountFeathers, activeId, startOffset }: { mountF
         scrub: 1.5,
       },
       onUpdate: () => {
-        // Only move camera with scroll if NO feather is selected and we aren't currently gliding back
         if (activeIdRef.current === null && !isReturning.current) {
           camera.position.set(scrollProxy.current.x, scrollProxy.current.y, scrollProxy.current.z);
         }
@@ -65,31 +67,42 @@ const CameraZoomController = ({ mountFeathers, activeId, startOffset }: { mountF
   // Handle Return from Click-Zoom
   useEffect(() => {
     if (activeId !== null) {
+      // 🚀 Capture the exact camera tilt right before zooming in
+      if (activeIdRef.current === null) {
+        baseRotation.current.copy(camera.rotation);
+      }
       hasOpened.current = true;
       isReturning.current = false;
     } else if (activeId === null && hasOpened.current && mountFeathers) {
       isReturning.current = true;
+      
       gsap.to(camera.position, {
         x: scrollProxy.current.x,
         y: scrollProxy.current.y,
         z: scrollProxy.current.z,
         duration: 1.5,
-        ease: "expo.inOut",
+        ease: "power3.inOut",
         overwrite: "auto",
         onComplete: () => { isReturning.current = false; }
       });
+      
+      // 🚀 Return to the EXACT tilt it had before, instead of [0,0,0]
       gsap.to(camera.rotation, {
-        x: 0, y: 0, z: 0,
+        x: baseRotation.current.x,
+        y: baseRotation.current.y,
+        z: baseRotation.current.z,
         duration: 1.5,
-        ease: "expo.inOut",
+        ease: "power3.inOut",
         overwrite: "auto"
       });
     }
+    
+    // Update ref after evaluating
+    activeIdRef.current = activeId;
   }, [activeId, mountFeathers, camera]);
 
   return null;
 };
-
 
 // --- THE INFINITE LOOP CAMERA CONTROLLER ---
 
@@ -290,7 +303,7 @@ const SwanRippleRings = ({
 
 
 const MainCanvas = () => {
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const frameCanvasRef = useRef<HTMLCanvasElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
@@ -347,21 +360,8 @@ const MainCanvas = () => {
 
   // --- SCROLL LOCK LOGIC ---
   useEffect(() => {
-    if (activeId !== null) {
-      // Disable scrolling when a bubble is clicked
-      document.body.style.overflow = "hidden";
-      document.body.style.touchAction = "none"; // Extra safety for mobile touch scrolling
-    } else {
-      // Re-enable scrolling when panel is closed
-      document.body.style.overflow = "";
-      document.body.style.touchAction = "";
-    }
-
-    // Cleanup function: ensures scrolling is restored if the component unmounts
-    return () => {
-      document.body.style.overflow = "";
-      document.body.style.touchAction = "";
-    };
+    if (activeId === null) return;
+    return lockScroll();
   }, [activeId]);
 
   useEffect(() => {
@@ -539,30 +539,58 @@ const MainCanvas = () => {
 
   return (
     <div ref={containerRef} className="relative w-full h-screen bg-black overflow-hidden">
-      <div
-        className={`fixed !top-10 right-4 md:top-12 md:right-6 z-[2147483647] flex items-center gap-3 md:gap-5 transition-all duration-700 ease-out ${
-          showCornerActions ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
-        }`}
-      >
-        <button
-          type="button"
-          onClick={() => navigate("/home")}
-          className="group pointer-events-auto relative inline-flex items-center justify-center min-w-[140px] md:min-w-[180px] h-9 md:h-10 px- md:px-8 rounded-full bg-[#07090d] text-white text-[0.9em] md:text-[1em] font-lust tracking-[0.05em] md:tracking-[0.06em] uppercase border-[2px] border-[var(--color-secondary)] shadow-[0_0_0_2px_#07090d] transition-all duration-300 overflow-hidden"
-        >
-          <span className="absolute inset-y-0 left-0 w-0 bg-[var(--color-secondary)] transition-all duration-500 ease-out group-hover:w-full" />
-          <span className="relative z-10 !text-white transition-colors duration-300 group-hover:!text-[var(--color-primary)]">Book Now</span>
-        </button>
-      </div>
+      {showCornerActions && (
+	        <MenuFrame
+	          showBookNow={showCornerActions}
+	          showTopLogo={false}
+	          disableTopBarBackground
+	          disableBackdropBlur
+	          hamburgerWrapperClassName="!pr-0"
+	          hamburgerColorOverride="var(--color-secondary)"
+	        />
+	      )}
 
       <canvas ref={frameCanvasRef} className="absolute inset-0 z-10 w-full h-full object-cover" />
 
       <div ref={canvasWrapperRef} className="absolute inset-0 z-20 overflow-hidden">
-        <Canvas gl={{ antialias: true, toneMapping: THREE.LinearToneMapping, toneMappingExposure: 0.7 , powerPreference: "high-performance", localClippingEnabled: true }}>
+        <Canvas
+          shadows
+          dpr={[1, 2]}
+          gl={{
+            antialias: true,
+            toneMapping: THREE.ACESFilmicToneMapping,
+            toneMappingExposure: 0.85,
+            outputColorSpace: THREE.SRGBColorSpace,
+            powerPreference: "high-performance",
+            localClippingEnabled: true,
+          }}
+          // onCreated={({ gl }) => {
+          //   gl.useLegacyLights = false;
+          // }}
+        >
           <color attach="background" args={["#000000"]} />
           <Suspense fallback={null}>
             <PerspectiveCamera makeDefault position={[0, 0, 70]} fov={isMobile ? 65 : 40} />
-            <ambientLight intensity={0.5} />
-            <Environment preset="city" />
+            {/* Cinematic 3-point lighting (key / rim / fill) */}
+            <ambientLight intensity={0.18} color="#ffffff" />
+            <directionalLight
+              position={[10, 18, 14]}
+              intensity={3.2}
+              color="#ffffff"
+              castShadow
+              shadow-mapSize-width={2048}
+              shadow-mapSize-height={2048}
+              shadow-bias={-0.00015}
+              shadow-camera-near={1}
+              shadow-camera-far={120}
+              shadow-camera-left={-40}
+              shadow-camera-right={40}
+              shadow-camera-top={40}
+              shadow-camera-bottom={-40}
+            />
+            <directionalLight position={[-14, 12, -18]} intensity={1.6} color="#dbe8ff" />
+            <pointLight position={[-10, 6, 14]} intensity={1.1} distance={180} decay={2} color="#fff2e2" />
+            <Environment preset="studio" />
 
             <CameraZoomController mountFeathers={mountFeathers} activeId={activeId} startOffset={11680} />
              <CameraDiveController diveProgress={diveProgress} activeId={activeId} />
@@ -570,9 +598,7 @@ const MainCanvas = () => {
               <group>
                 <SwanModel scrollProgress={scrollProgress} transformProgress={transformProgress} />
                 <WaterPlane splashProgress={splashProgress} opacity={swanOpacity} />
-                                 <SplashWalls splashProgress={splashProgress} opacity={swanOpacity} />
-
-               
+                <SplashWalls splashProgress={splashProgress} opacity={swanOpacity} />
               </group>
             )}
 
@@ -589,12 +615,13 @@ const MainCanvas = () => {
             {mountFeathers && (
               <group>
                 <CameraFocusController target={focusTarget} enabled={!!focusTarget} />
-                <NaturalFeather id={5} variant="mid-drift" startPos={[-11.0, 12, 1]} targetPos={[-17.0, 2.5, 1]} started={true} delay={0.8} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
-                <NaturalFeather id={2} variant="small-drag" startPos={[-6.5, 14, -2]} targetPos={[-16.5, -19.0, -2]} started={true} delay={0.6} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
-                <NaturalFeather ref={feather3Ref} id={3} variant="upper-pendulum" startPos={[0.0, 10, -3]} targetPos={[9.0, 5.0, -3]} started={true} delay={0.3} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
-                <NaturalFeather id={1} variant="main" startPos={[2.5, 16, 0]} targetPos={[2.5, -10.0, 0]} started={true} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
-                <NaturalFeather id={4} variant="side-roll-upper" startPos={[7.0, 12, -1]} targetPos={[30.0, -4.0, -1]} started={true} delay={0.5} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
-                <NaturalFeather id={6} variant="high-drag-zig" startPos={[11.5, 18, 0]} targetPos={[17.5, -20.0, 0]} started={true} delay={0.2} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
+                <NaturalFeather id={5} label="CONVENTION CENTER" variant="mid-drift" startPos={[-11.0, 12, 1]} targetPos={[-17.0, 2.5, 1]} started={true} delay={0.8} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
+                <NaturalFeather id={2} label="EVENTS" variant="small-drag" startPos={[-6.5, 14, -2]} targetPos={[-16.5, -19.0, -2]} started={true} delay={0.6} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
+                <NaturalFeather ref={feather3Ref} id={3} label="EXPERIENCE & PACKAGES" variant="upper-pendulum" startPos={[0.0, 10, -3]} targetPos={[9.0, 5.0, -3]} started={true} delay={0.3} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
+                <NaturalFeather id={1} label="ROOMS" variant="main" startPos={[2.5, 16, 0]} targetPos={[2.5, -10.0, 0]} started={true} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
+                <NaturalFeather id={4} label="ACTIVITIES" variant="side-roll-upper" startPos={[7.0, 12, -1]} targetPos={[30.0, -4.0, -1]} started={true} delay={0.5} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
+                <NaturalFeather id={6} label="DINING" variant="high-drag-zig" startPos={[11.5, 18, 0]} targetPos={[17.5, -20.0, 0]} started={true} delay={0.2} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
+                <NaturalFeather id={7} label="VIRTUAL TOUR" variant="spiral-dive" startPos={[-32.0, 9.0, -1]} targetPos={[-32.0, -6.0, -1]} started={true} delay={0.7} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} startOffset={11680} opacity={globalFade}/>
               </group>
             )}
             <SwanRippleRings

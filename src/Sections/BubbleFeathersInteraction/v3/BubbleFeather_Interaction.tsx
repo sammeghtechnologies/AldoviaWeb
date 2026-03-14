@@ -143,7 +143,7 @@ const BubbleFeather_Interaction = ({ }: any) => {
             <NaturalFeather id={6} variant="high-drag-zig" startPos={[4, 5, 0]} targetPos={[7.5, -4.5, -0.5]} started={started} delay={0.2} activeId={activeId} burstAll={burstAll} onBubbleClick={handleBubbleClick} allBubblesReady={allBubblesReady} />
           </group>
         </Canvas>
-      </div>
+      </div>      
       <RoomDetailsPanel activeId={activeId} content={activeId ? roomData[activeId] : null} onClose={() => { setActiveId(null); setFocusTarget(null); }} />
     </>
   );

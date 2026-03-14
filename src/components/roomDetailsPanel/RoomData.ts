@@ -48,5 +48,12 @@ export const roomData: Record<number, RoomContent> = {
     desc: "Savor multi-cuisine menus, chef-led specials, and refined ambience across our restaurants, lounge spaces, and curated dining events.",
     img1: "/assets/pages/dining/ambrosia.jpg",
     img2: "/assets/pages/dining/Buvette.jpg"
+  },
+  7: {
+    title: "VIRTUAL TOUR",
+    subtitle: "Explore Aldovia from Anywhere",
+    desc: "Interactive 360° experiences and virtual walkthroughs of our premium suites, convention halls, and resort amenities. (Content coming soon)",
+    img1: "/assets/pages/rooms/room1.webp",       // Placeholder image
+    img2: "/assets/pages/hall/corporate1.jpg"     // Placeholder image
   }
 };

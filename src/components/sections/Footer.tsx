@@ -90,9 +90,8 @@ const Footer: React.FC = () => {
               <li className="flex items-start gap-2">
                 <Phone size={16} className="mt-[2px] shrink-0" />
                 <div className="leading-relaxed">
-                  <div>+08 3507 7000</div>
-                  <div>For Bookings, Please Contact</div>
-                  <div>+08 3101 3831 (09 am to 06 pm)</div>
+                  <div>+08 3507 7000 (Hotel)</div>
+                  <div>+08 3101 3831 (Sales)</div>
                 </div>
               </li>
               <li className="!pt-3 flex items-center gap-2">
